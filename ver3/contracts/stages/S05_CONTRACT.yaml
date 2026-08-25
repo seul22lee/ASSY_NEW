@@ -77,6 +77,14 @@ authority_status:
       (`assy_v3/downstream/ir.py`), read at the write boundary; this section
       explains that and defines nothing.
     authoritative_for_canonical_semantics: false
+  placement_rule:
+    class: "OPERATIONAL"
+    note: >
+      Unit G. Where a feature is and which way it points, in its body's frame;
+      which feature realizes which joint on which body; what "complete" means
+      once CAD must be built from it. Defined in `downstream/ir.Placement` and
+      `downstream/embodiment`; explained here.
+    authoritative_for_canonical_semantics: false
   post_selection_handoff:
     class: "OPERATIONAL"
     note: >
@@ -342,6 +350,30 @@ ir_authority:
     The parameters a feature envelope or a construction statement references
     are premises of that record: a revised declaration stales what named it;
     the settlement of a value does not (the boundary's owner rule).
+
+placement_rule:
+  placement: >
+    A feature that is somewhere carries `placement`: `origin`, three expressions
+    in the body frame in the kernel length unit, and `axis`, its own axis as a
+    signed body axis. Every body frame is parallel to the arrangement frame at
+    zero joint coordinates, so the axis a feature names and the axis_direction
+    s03 declared for a joint are the same words for the same direction. The
+    feature frame has Z along the axis, X along the canonical perpendicular; s07
+    builds the primitives that realize the feature in that frame. No world
+    coordinate is ever asked of the model; no pose is ever authored.
+  joint_realization: >
+    Every axis-bearing joint is realized on EACH body it relates by exactly one
+    placed feature naming it in `joint`, along the joint's declared axis. Those
+    two placements and s04's joint coordinates are what the pose law is derived
+    from (`downstream/kinematics`), which is the derivation the S04 and S07
+    contracts always said existed.
+  complete_means_constructible: >
+    An embodiment is complete when CAD can be built from it: every body has a
+    program with one terminal; every axis-bearing joint is realized on both
+    sides; every placed feature is built by a statement naming it; every mating
+    side s04 stated is of the stated kind. S05-C11..C14 ask this of the
+    response; s06's entry gate asks the same of what stands. Neither names a
+    mechanism class.
 
 allowed_unresolved:
   - "embodiment alternatives"

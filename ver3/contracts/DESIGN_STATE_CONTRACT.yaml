@@ -181,7 +181,7 @@ multi_owner_exceptions:
 #     family is evidence concluded from other records and a premise-less
 #     record could never go stale.
 family_declarations_read_by_the_boundary:
-  ir_validation: [parameter, constraint, statement, envelope]
+  ir_validation: [parameter, constraint, statement, feature]
   requires_premises: [true]
 
 semantic_role_vocabulary:
@@ -864,12 +864,35 @@ entity_families:
     # nothing infers it from prose or from the body alone, S05-C1 demands one
     # per participating body per interface, and the interface is a premise of
     # the feature so a revised interface stales the geometry that realized it.
-    optional_fields: [envelope, interface]
-    ir_validation: envelope
+    optional_fields: [envelope, interface, placement, joint]
+    # UNIT G. `feature` covers the envelope AND the placement: both are read by
+    # the one grammar in downstream/ir before a Feature stands.
+    ir_validation: feature
     field_semantics:
       envelope:
         kind: spatial
         frame: ReferenceScale
+      # UNIT G. THE ONE PLACEMENT REPRESENTATION. Where the feature is and which
+      # way it points, in the OWNING BODY'S frame: `origin` three expressions in
+      # the kernel length unit, `axis` a signed body axis (+X..-Z). The body
+      # frame is parallel to the arrangement frame at zero joint coordinates,
+      # so this axis and a Joint.axis_direction name the same direction. s07
+      # builds the primitives realizing this feature in this frame; poses are
+      # derived from placements (downstream.kinematics), never authored.
+      placement:
+        kind: spatial
+        frame: Body
+      # UNIT G. The joint whose axis this feature realizes on its body - the
+      # bore, the pin, the rail, the guide. One feature per (joint, body); the
+      # feature's placement axis must equal the joint's axis_direction, and its
+      # origin locates the joint frame in that body (the located frame the Joint
+      # rules say s05's feature dimensions determine).
+      joint:
+        kind: reference
+        target: Joint
+        cardinality: one
+        resolvable: false
+        referent_population: COMMITTED_BRANCH
       body:
         kind: reference
         target: Body
@@ -883,6 +906,12 @@ entity_families:
         referent_population: COMMITTED_BRANCH
       feature_kind:
         kind: enum
+        # UNIT G. ONE vocabulary of physical feature kinds, declared here and
+        # read by s05 (it was a code tuple) - a superset of the mating kinds
+        # Interface.mating_geometry names, so an interface's inner/outer feature
+        # is checkable against the feature that realizes it, by the same words.
+        values: [BOSS, LUG, PIN, SHAFT, DOWEL, BORE, HOLE, BEARING, GUIDE, SLOT,
+                 RAIL, FACE, RIB, SHOULDER, STOP, CLEARANCE_POCKET, SNAP_ARM, KEEPER]
     owned_by: s05
     purpose: "A named geometric feature on a body that participates in an interaction."
     required_fields: [entity_id, body, feature_kind, geometry]
@@ -1879,6 +1908,13 @@ geometric_authority:
           Authoring it makes motion an s05/s07 concern and contradicts s04's
           ownership of State and Transition. Deriving it removes the s07 input
           contradiction entirely.
+        derived_by: >
+          downstream/kinematics (Unit G): the joint frame in each body is the
+          placement of the feature that realizes the joint there
+          (Feature.joint + Feature.placement, s05); the relative pose across a
+          joint is parent-frame . motion(q) . child-frame^-1 with q from
+          State.joint_coordinates (s04); the base body is the root of the
+          joint tree. Nothing is stored; every pose is recomputed from these.
       - what: "support"
         derived_from: "an Interface of contact kind appearing in a LoadPath"
       - what: "reaction"
@@ -2429,7 +2465,9 @@ assurance_families:
     # `downstream.ir.OPCODE_SEMANTICS`; s07 executes them and decides nothing.
     ir_validation: statement
     purpose: "One step of the ConstructionProgram that Stage 07 compiles."
-    required_fields: [entity_id, operation, operands, parameters]
+    # UNIT G: `body` is REQUIRED. The reader always refused a statement with
+    # no owning body; the contract listed it optional and the two disagreed.
+    required_fields: [entity_id, body, operation, operands, parameters]
     # Declared so state can hold them. `body` is what the construction frame rule
     # implies - a statement is expressed in the OWNING body's own frame, so there
     # is an owning body - and s07 refuses a statement it cannot attribute to one.
@@ -2437,7 +2475,7 @@ assurance_families:
     # are left as authored rather than widened to suit an implementation.
     # `axis` is required by ROTATE and by nothing else; `feature` links the step
     # to the Feature it realizes, which is what makes geometry traceable upstream.
-    optional_fields: [body, axis, feature]
+    optional_fields: [axis, feature]
     rules:
       - "Stage 07 compiles these or fails, preserving the originating statement (INV-006)."
       - "Expressed in the owning body's own frame. World placement never appears in a construction program."

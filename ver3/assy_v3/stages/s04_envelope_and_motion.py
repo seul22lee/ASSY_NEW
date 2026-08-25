@@ -40,6 +40,7 @@ import os
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 from ..state.authority import thaw as _thaw
+from ..downstream import ir as _ir
 from ..state.patch import Op
 from .base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY, Stage,
                    branch_records, carry_invocation_premises,
@@ -49,7 +50,7 @@ from .base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY, Stage,
 #: closed set is how they drift apart.
 from .s03_topology_and_mobility import DOF_NAMES, joint_free_dof
 
-AXIS_INDEX = {"X": 0, "Y": 1, "Z": 2}
+AXIS_INDEX = dict(_ir.AXIS_INDEX)          # Unit G: the IR's one axis table
 
 #: The frozen motion-evidence vocabulary. The level records WHAT WAS COMPUTED.
 MOTION_EVIDENCE = ("ENDPOINTS_ONLY", "SAMPLED", "SWEPT", "CONTINUOUS")
@@ -2112,9 +2113,7 @@ def sweep_hull(box, joint: Dict[str, Any], origin: Sequence[float],
 
 
 #: The unit vector pointing OUT of the arrangement towards each named side.
-AXIS_VECTORS = {"+X": (1.0, 0.0, 0.0), "-X": (-1.0, 0.0, 0.0),
-                "+Y": (0.0, 1.0, 0.0), "-Y": (0.0, -1.0, 0.0),
-                "+Z": (0.0, 0.0, 1.0), "-Z": (0.0, 0.0, -1.0)}
+AXIS_VECTORS = dict(_ir.AXIS_VECTORS)      # Unit G: the IR's one axis table
 
 
 def motion_from_side(access_side):

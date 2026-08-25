@@ -101,6 +101,14 @@ authority_status:
       is told apart from an empty system. Enforced in
       `assy_v3/downstream/canonical_io.settlement_readiness`; explained here.
     authoritative_for_canonical_semantics: false
+  physical_closure:
+    class: "OPERATIONAL"
+    note: >
+      Unit G. A settlement is usable only if it builds something: primitive
+      dimensions positive, placements resolved, clearances with the right sign.
+      Enforced in `downstream/settled_geometry.construction_problems` and
+      `clearance_problems`; explained here.
+    authoritative_for_canonical_semantics: false
   post_settlement_checks:
     class: "OPERATIONAL"
     note: >
@@ -176,6 +184,16 @@ settlement_entry:
     in another unit is refused at compilation entry and never converted -
     nothing in this repository is an authority on what one unit is worth in
     another.
+
+physical_closure:
+  principle: >
+    The solver settles numbers; whether the numbers build anything is asked
+    deterministically afterwards, and before the kernel. A primitive whose
+    settled dimension is not positive, a placement whose origin does not
+    resolve, a CLEARANCE constraint whose settled margin is negative: each is
+    named with the statement and the number, and compilation is not entered.
+    Nothing is clamped, defaulted or re-solved here - an underdetermined or
+    contradictory system stays what the solver said it is.
 
 post_settlement_checks:
   principle: >

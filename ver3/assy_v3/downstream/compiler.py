@@ -38,8 +38,9 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .ir import (ConstructionProgram, Expr, IRError, Statement,
-                 dependency_cone)
+from .ir import (AXIS_VECTORS, ConstructionProgram, Expr, IRError, Placement,
+                 Statement, dependency_cone)
+from .kinematics import Frame
 
 #: S07-C3. Absolute, in mm3, and declared by the contract rather than tuned.
 BREP_VOLUME_TOLERANCE = 1e-6
@@ -70,6 +71,10 @@ def kernel():
                                      BRepPrimAPI_MakeCylinder,
                                      BRepPrimAPI_MakeSphere)
         from OCP.BRepTools import BRepTools
+        from OCP.BRepExtrema import BRepExtrema_DistShapeShape
+        from OCP.BRepMesh import BRepMesh_IncrementalMesh
+        from OCP.StlAPI import StlAPI_Writer
+        from OCP.TopoDS import TopoDS_Compound
         from OCP.Bnd import Bnd_Box
         from OCP.BRepBndLib import BRepBndLib
         from OCP.GProp import GProp_GProps
@@ -115,6 +120,9 @@ class CompileResult:
     signature: Optional[Dict[str, Any]] = None
     exports: Dict[str, Any] = field(default_factory=dict)
     roundtrip: Dict[str, Any] = field(default_factory=dict)
+    #: UNIT G. What the artifact validator concluded about the assembled,
+    #: posed, moved solids - filled by `downstream.artifact`, never here.
+    artifact: Optional[Dict[str, Any]] = None
 
     def as_record(self) -> Dict[str, Any]:
         return {"ok": self.ok,
@@ -123,7 +131,7 @@ class CompileResult:
                 "failed_statement": self.failed_statement,
                 "dependency_cone": list(self.dependency_cone),
                 "signature": self.signature, "exports": dict(self.exports),
-                "roundtrip": dict(self.roundtrip)}
+                "roundtrip": dict(self.roundtrip), "artifact": self.artifact}
 
 
 def resolve(expr: Expr, values: Dict[str, float]) -> float:
@@ -142,6 +150,8 @@ def resolve(expr: Expr, values: Dict[str, float]) -> float:
     if expr.op == "+":
         return sum(args)
     if expr.op == "-":
+        if len(args) == 1:
+            return -args[0]                      # unary minus: negation (Unit G)
         out = args[0]
         for a in args[1:]:
             out -= a
@@ -161,31 +171,56 @@ def resolve(expr: Expr, values: Dict[str, float]) -> float:
     raise IRError("unknown operator %r" % expr.op)
 
 
+def trsf_of(K, frame: Frame):
+    """A derived Frame as the kernel's rigid transform. Nothing is re-decided."""
+    trsf = K["gp_Trsf"]()
+    r, t = frame.r, frame.t
+    trsf.SetValues(r[0][0], r[0][1], r[0][2], t[0],
+                   r[1][0], r[1][1], r[1][2], t[1],
+                   r[2][0], r[2][1], r[2][2], t[2])
+    return trsf
+
+
+def placed(K, shape, frame: Optional[Frame]):
+    if frame is None:
+        return shape
+    return K["BRepBuilderAPI_Transform"](shape, trsf_of(K, frame), True).Shape()
+
+
 def _build_statement(K, stmt: Statement, values: Dict[str, float],
-                     built: Dict[str, Any]):
-    """One opcode to one shape. No opcode consults anything but its own inputs."""
+                     built: Dict[str, Any], frames: Dict[str, Frame]):
+    """One opcode to one shape. No opcode consults anything but its own inputs.
+
+    UNIT G. A PRIMITIVE THAT REALIZES A PLACED FEATURE IS BUILT IN THAT
+    FEATURE'S FRAME (`frames`, derived from Feature.placement with the settled
+    values): its canonical Z is the placement axis, its origin the placement
+    origin. That is the whole of placement - one transform, from one declared
+    frame, applied by the kernel. TRANSLATE and ROTATE stay moves in the body
+    frame.
+    """
     p = {k: resolve(v, values) for k, v in stmt.parameters.items()}
     op = stmt.operation
+    frame = frames.get(stmt.feature) if stmt.feature else None
     if op == "BOX":
         if min(p["dx"], p["dy"], p["dz"]) <= 0:
             raise IRError("BOX %s has a non-positive dimension" % stmt.entity_id)
-        return K["BRepPrimAPI_MakeBox"](
-            K["gp_Pnt"](0, 0, 0), p["dx"], p["dy"], p["dz"]).Shape()
+        return placed(K, K["BRepPrimAPI_MakeBox"](
+            K["gp_Pnt"](0, 0, 0), p["dx"], p["dy"], p["dz"]).Shape(), frame)
     if op == "CYLINDER":
         if p["radius"] <= 0 or p["height"] <= 0:
             raise IRError("CYLINDER %s has a non-positive dimension" % stmt.entity_id)
-        return K["BRepPrimAPI_MakeCylinder"](p["radius"], p["height"]).Shape()
+        return placed(K, K["BRepPrimAPI_MakeCylinder"](p["radius"], p["height"]).Shape(), frame)
     if op == "SPHERE":
         if p["radius"] <= 0:
             raise IRError("SPHERE %s has a non-positive radius" % stmt.entity_id)
-        return K["BRepPrimAPI_MakeSphere"](p["radius"]).Shape()
+        return placed(K, K["BRepPrimAPI_MakeSphere"](p["radius"]).Shape(), frame)
     if op == "TRANSLATE":
         trsf = K["gp_Trsf"]()
         trsf.SetTranslation(K["gp_Vec"](p["dx"], p["dy"], p["dz"]))
         return K["BRepBuilderAPI_Transform"](built[stmt.operands[0]], trsf, True).Shape()
     if op == "ROTATE":
         import math
-        d = {"X": (1, 0, 0), "Y": (0, 1, 0), "Z": (0, 0, 1)}[stmt.axis]
+        d = AXIS_VECTORS["+" + stmt.axis]
         trsf = K["gp_Trsf"]()
         trsf.SetRotation(K["gp_Ax1"](K["gp_Pnt"](0, 0, 0), K["gp_Dir"](*d)),
                          math.radians(p["angle"]))
@@ -220,13 +255,36 @@ def _measure(K, shape) -> Tuple[float, int, bool, Tuple[float, ...]]:
     return props.Mass(), n, bool(valid), tuple(box.Get())
 
 
+def feature_frames(placements: Dict[str, Any], values: Dict[str, float]
+                   ) -> Dict[str, Frame]:
+    """Feature id -> its frame, from the placement grammar and settled values.
+
+    A placement that does not resolve raises with the parameter it is missing:
+    a feature whose frame nobody settled is not built at the origin instead.
+    """
+    out: Dict[str, Frame] = {}
+    for fid, node in sorted((placements or {}).items()):
+        if node is None:
+            continue
+        placement = node if isinstance(node, Placement) else \
+            Placement.parse(node, "feature %s placement" % fid)
+        origin = tuple(resolve(e, values) for e in placement.origin)
+        out[fid] = Frame.from_axis(origin, placement.axis)
+    return out
+
+
 def compile_program(program: ConstructionProgram, values: Dict[str, float],
-                    out_dir: Optional[str] = None) -> CompileResult:
+                    out_dir: Optional[str] = None,
+                    placements: Optional[Dict[str, Any]] = None) -> CompileResult:
     """Build every body, measure it, export it, and check the round trips.
 
     On the first statement that cannot be compiled this returns immediately with
     the statement and its dependency cone, and with NO geometry emitted - which
     is S07-C6 stated as control flow rather than as a promise.
+
+    `placements`: Feature id -> placement node (Feature.placement) for the
+    features the program's statements realize; a primitive is built in its
+    feature's frame (Unit G).
     """
     ordering = program.ordering_problems()
     if ordering:
@@ -240,6 +298,10 @@ def compile_program(program: ConstructionProgram, values: Dict[str, float],
 
     result = CompileResult(ok=True)
     built: Dict[str, Any] = {}
+    try:
+        frames = feature_frames(placements or {}, values)
+    except IRError as exc:
+        return CompileResult(ok=False, problems=["placement: %s" % exc])
     for body in program.bodies():
         stmts = program.for_body(body)
         terminal = program.terminal_of(body)
@@ -252,7 +314,7 @@ def compile_program(program: ConstructionProgram, values: Dict[str, float],
         smap: Dict[str, str] = {}
         for stmt in stmts:
             try:
-                shape = _build_statement(K, stmt, values, built)
+                shape = _build_statement(K, stmt, values, built, frames)
             except (IRError, KeyError, RuntimeError) as exc:
                 result.ok = False
                 result.failed_statement = stmt.entity_id
@@ -356,3 +418,59 @@ def independent_rebuild_matches(program: ConstructionProgram,
     sa = (a.signature or {}).get("signature_sha256", "")
     sb = (b.signature or {}).get("signature_sha256", "")
     return (bool(sa) and sa == sb), sa, sb
+
+
+# ==========================================================================
+# UNIT G. THE ARTIFACT AS AN ASSEMBLY: posed solids, their interference, and
+# the exchange files of the whole. These are kernel operations on DERIVED
+# poses; nothing here chooses where a body goes.
+# ==========================================================================
+#: Two solids sharing more than this volume (mm3) interfere. Absolute, like
+#: BREP_VOLUME_TOLERANCE, and declared rather than tuned.
+INTERFERENCE_VOLUME_TOLERANCE = 1e-6
+#: Two solids closer than this (mm) touch.
+CONTACT_DISTANCE_TOLERANCE = 1e-6
+
+
+def posed_shapes(K, bodies: Sequence[CompiledBody], poses: Dict[str, Frame]) -> Dict[str, Any]:
+    """Each compiled body moved into its derived pose. Bodies with no pose are
+    left out - a body nobody could place is not drawn at the origin."""
+    out = {}
+    for b in bodies:
+        if b.body_id in poses:
+            out[b.body_id] = placed(K, b.shape, poses[b.body_id])
+    return out
+
+
+def pair_geometry(K, a, b) -> Dict[str, float]:
+    """The shared volume and the minimum distance of two posed solids."""
+    common = K["BRepAlgoAPI_Common"](a, b)
+    shared = 0.0
+    if common.IsDone():
+        props = K["GProp_GProps"]()
+        K["BRepGProp"].VolumeProperties_s(common.Shape(), props)
+        shared = max(props.Mass(), 0.0)
+    dist = K["BRepExtrema_DistShapeShape"](a, b)
+    distance = dist.Value() if dist.IsDone() else float("nan")
+    return {"shared_volume": shared, "distance": distance}
+
+
+def export_assembly(K, posed: Dict[str, Any], path: str) -> str:
+    """One STEP file of every posed body, as a compound."""
+    compound = K["TopoDS_Compound"]()
+    builder = K["BRep_Builder"]()
+    builder.MakeCompound(compound)
+    for _bid, shape in sorted(posed.items()):
+        builder.Add(compound, shape)
+    writer = K["STEPControl_Writer"]()
+    writer.Transfer(compound, K["STEPControl_AsIs"])
+    writer.Write(path)
+    return path
+
+
+def export_stl(K, shape, path: str, deflection: float = 0.05) -> str:
+    """A triangulated derivative for viewing; authoritative for nothing."""
+    K["BRepMesh_IncrementalMesh"](shape, deflection, False, 0.5, True)
+    writer = K["StlAPI_Writer"]()
+    writer.Write(shape, path)
+    return path

@@ -39,10 +39,23 @@ from ..state.patch import Op
 from ..view import DISCHARGE, PRESERVE, applicable_obligation_ids, obligation_duties
 from .base import Stage
 
+def _feature_kind_vocabulary() -> Tuple[str, ...]:
+    """Feature.feature_kind's declared values - read from the canonical contract.
+
+    UNIT G. The vocabulary used to be this module's own tuple, unvalidated, and
+    the mating kinds s04 states on an interface (SHAFT, PIN, BORE, GUIDE ...)
+    were a second vocabulary nothing compared. One list now, declared where the
+    family is declared, enforced by the write boundary, and a superset of the
+    mating kinds so a realized side is checkable by the same word.
+    """
+    from ..state.design_state import Contracts
+    spec = (Contracts().families.get("Feature") or {}).get("field_semantics") or {}
+    return tuple((spec.get("feature_kind") or {}).get("values") or ())
+
+
 #: The feature vocabulary. Closed, because a feature kind the compiler cannot
 #: build is a proposal nothing downstream can honour.
-FEATURE_KINDS = ("BOSS", "BORE", "FACE", "SLOT", "RIB", "SHOULDER", "STOP",
-                 "CLEARANCE_POCKET", "SNAP_ARM", "KEEPER")
+FEATURE_KINDS = _feature_kind_vocabulary()
 
 #: Constraint kinds s05 authors. ENVELOPE is the "a feature implies a minimum
 #: envelope" rule; CLEARANCE is the one S05-C9 counts.
@@ -64,15 +77,29 @@ RULES
    names none. Never name an interface that is not in the input: interactions
    are decided upstream and you may not add, remove or reinterpret one.
    A feature names the body it is on, its kind, and a short geometry
-   description. Give each feature an `envelope` -
+   description.
+   PLACEMENT. Every feature that is somewhere - a bore, a pin, a slot, a
+   rail, a stop face, a boss - carries a `placement`: where it is and which
+   way its own axis points, IN THE FRAME OF THE BODY IT IS ON (see FRAMES
+   below). The construction statements that realize a placed feature are
+   built in that frame.
+   JOINTS. Every joint below that is not FIXED or COMPLIANT relates two
+   bodies about an axis. On EACH of those two bodies, exactly one feature
+   realizes that joint's axis - the bore and the pin, the rail and the
+   guide - and names the joint in `joint`. Its placement axis IS the joint's
+   `axis_direction`, and its origin is where the joint axis passes through
+   that body. Poses are derived from these two placements and the joint
+   coordinates; you never state a pose.
+   MATING. Where an interface below carries `mating_geometry`, the feature
+   on its `inner_body` is of the `inner_feature` kind and the feature on its
+   `outer_body` of the `outer_feature` kind.
+   Optionally give a feature an `envelope` -
    {{"centre": [x,y,z], "half_extent": [x,y,z]}} in the same frame as the
    functional regions and envelopes below - where EVERY component is an <expr>
-   (rule 4): a declared parameter, a unit-bearing constant, or arithmetic over
-   them. NEVER a bare number. The envelope says where the feature's material
-   may be, in the dimensions you declare; it is not a dimension. Its occupancy
-   against the reserved regions is evaluated where it resolves, and again after
-   the dimensions are settled. A feature with no envelope cannot be evaluated
-   and is reported as incomplete, not as passing.
+   (rule 4). NEVER a bare number. The envelope says where the feature's
+   material may be, in the dimensions you declare; it is not a dimension. It
+   is evaluated against the reserved regions where it resolves; the built
+   geometry is evaluated against them again after settlement.
 2. THE OBLIGATIONS BELOW ARE SPLIT INTO TWO DUTIES. For every obligation under
    DISCHARGE emit a REALIZATION citing the obligation ids it discharges, the
    features that do the discharging, and a verification predicate - a sentence a
@@ -96,14 +123,8 @@ RULES
    A CLEARANCE or INTERFERENCE_FREE constraint must also name the interface it
    governs, as `governs_interface`. A declared clearance with no constraint
    naming it is a clearance the settlement loop was never given.
-   A constraint is a typed relation, not prose:
-     {{"relation": "==" | "<=" | ">=", "lhs": <expr>, "rhs": <expr>}}
-   where <expr> is one of
-     {{"ref": "<parameter id>"}}
-     {{"const": <number>, "unit": "<unit>"}}
-     {{"op": "+"|"-"|"*"|"/", "args": [<expr>, <expr>, ...]}}
-   Multiplying two lengths gives an AREA, not a length. A scale factor is written
-   with unit "1".
+   A constraint is a typed relation, not prose (GRAMMAR below). Multiplying two
+   lengths gives an AREA, not a length. A scale factor is written with unit "1".
 5. Where a degree of freedom below is dispositioned BLOCKED_BY a constraint
    relation, the geometry must PRODUCE that limit: a pair of features that
    actually stops the motion, one on each side of the relation. A clearance
@@ -120,17 +141,17 @@ RULES
    size or region into a constant and present it as a dimension. A constant in
    a constraint is a bound the design actually states - a hard requirement, or a
    rule you can name; every other size is a parameter.
-7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds each
-   body IN ITS OWN FRAME. Never place a body in the world; assembly poses are
-   derived elsewhere. Operations are exactly, and mean exactly:
-{opcodes}
-   Lengths are in mm and angles in deg - state every constant in those units,
-   never in another. A coordinate at the body frame origin is the typed zero
-   {{"const": 0, "unit": "mm"}}: a coordinate definition, not a dimension.
-   Each statement names the body it builds, its operation, its operands (ids of
-   EARLIER statements, for the combining and transforming operations only) and
-   its parameters, each of which is an <expr> as above. Exactly one statement per
-   body must be consumed by nothing: that final result IS the body.
+7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds
+   EVERY body below IN ITS OWN FRAME. Never place a body in the world; assembly
+   poses are derived from the joint placements. Operations are exactly, and mean
+   exactly, what the GRAMMAR below says. A statement that builds a placed
+   feature's material names that feature in `feature`, and its primitive is
+   built in the feature's frame; every placed feature must be built by at
+   least one statement. Each statement names the body it builds, its
+   operation, its operands (ids of EARLIER statements, for the combining and
+   transforming operations only) and its parameters, an OBJECT of named
+   <expr>s. Exactly one statement per body must be consumed by nothing: that
+   final result IS the body. A body with no statements cannot be built.
 8. Never invent a dimension to make something buildable. If a value is unknown,
    declare a parameter and constrain it.
 9. HARD REQUIREMENTS. Every requirement listed under HONOUR applies to this
@@ -150,6 +171,10 @@ HARD REQUIREMENTS
 -----------------
 {hard_requirements}
 
+GRAMMAR
+-------
+{grammar}
+
 DECIDED MECHANISM AND SPATIAL CONTEXT
 -------------------------------------
 {projection}
@@ -167,7 +192,8 @@ PERMITTED VALUES
   feature_kind   {feature_kinds}
   constraint kind {constraint_kinds}
   operation      {opcode_names}
-  axis           X | Y | Z   (required by ROTATE, and by nothing else)
+  placement axis {signed_axes}
+  ROTATE axis    {rotate_axes}   (required by ROTATE, and by nothing else)
 """
 
 
@@ -190,7 +216,8 @@ class S05Embodiment(Stage):
     #: `addresses_obligations`, and no ROI family at all.
     RESPONSE_ENVELOPE = (
         ("features", "Feature", "FEA-",
-         ("body", "feature_kind", "geometry", "interface", "envelope"), ()),
+         ("body", "feature_kind", "geometry", "interface", "joint", "placement",
+          "envelope"), ()),
         ("realizations", "Realization", "RLZ-",
          ("addresses_obligations", "participating_features",
           "verification_predicate"), ()),
@@ -281,20 +308,79 @@ class S05Embodiment(Stage):
         return "\n".join(lines)
 
     # ------------------------------------------------------------ prompt
+    @staticmethod
+    def render_grammar() -> str:
+        """The embodiment language, RENDERED FROM THE IR (Unit G).
+
+        Expression forms, relations, arithmetic, units, the typed zero, the
+        signed axes, the placement grammar and its frame convention, and every
+        opcode with its semantics - each read from `downstream.ir`, so the
+        language the model is shown is the language the boundary enforces and
+        the kernel executes. Nothing here is a second copy.
+        """
+        zero = '{"const": 0, "unit": "%s"}' % ir.KERNEL_LENGTH_UNIT
+        parameter_prefix = next(prefix for _c, family, prefix, _f, _s in S05Embodiment.RESPONSE_ENVELOPE
+                                if family == "Parameter")
+        lines = [
+            "<expr> is exactly one of",
+            '  {"ref": "<parameter id>"}   - the id "%s%s" of a parameter you declare, '
+            'never its symbol' % (parameter_prefix, S05Embodiment.ID_EXAMPLE_DIGITS),
+            '  {"const": <number>, "unit": "<unit>"}',
+            '  {"op": %s, "args": [<expr>, <expr>, ...]}'
+            % " | ".join('"%s"' % o for o in ir.ARITHMETIC),
+            '  {"op": "-", "args": [<expr>]}   - negation',
+            "A constraint expression is",
+            '  {"relation": %s, "lhs": <expr>, "rhs": <expr>}'
+            % " | ".join('"%s"' % r for r in ir.RELATIONS),
+            "Units: lengths in %s, angles in %s - every constant in those units, never "
+            "another; a dimensionless factor has unit \"1\"." % (ir.KERNEL_LENGTH_UNIT,
+                                                                 ir.KERNEL_ANGLE_UNIT),
+            "A coordinate at a frame origin is the typed zero %s - a coordinate "
+            "definition, not a dimension." % zero,
+            "",
+            "FRAMES. Every body has its own frame. All body frames are PARALLEL to the "
+            "arrangement frame the envelopes, regions and joint origins below are "
+            "stated in, in the pose where every joint coordinate is zero; so a body "
+            "axis and a joint's axis_direction name the same direction.",
+            "A placement is",
+            '  {"origin": [<expr>, <expr>, <expr>], "axis": %s}'
+            % " | ".join('"%s"' % a for a in ir.SIGNED_AXES),
+            "  origin: where the feature is, in its body's frame, in %s;"
+            % ir.KERNEL_LENGTH_UNIT,
+            "  axis: the feature's own axis (a bore's, a pin's, a slide's, a face's "
+            "normal) as a signed body axis.",
+            "The feature frame has Z along `axis`, origin at `origin`, and X along the "
+            "canonical perpendicular (Z->X, X->Y, Y->Z, positive); primitives that "
+            "realize the feature are built in it.",
+            "",
+            "Operations (parameters are an object of named <expr>s; operands are ids of "
+            "EARLIER statements of the same body):",
+        ]
+        for op, params in sorted(ir.OPCODES.items()):
+            if op in ir.COMBINING:
+                shape = "operands: two or more; parameters: none"
+            elif op in ir.TRANSFORMING:
+                shape = "operands: exactly one; takes " + ", ".join(params)
+            else:
+                shape = "operands: none; takes " + ", ".join(params)
+            lines.append("  %-10s %-44s %s" % (op, shape, ir.OPCODE_SEMANTICS.get(op, "")))
+        lines.append("  ROTATE also names `axis`, one of %s." % " | ".join(ir.AXES))
+        lines.append("  A combining operation has no parameters of its own: the material it "
+                     "adds or removes is an earlier primitive statement, named as an operand.")
+        return "\n".join(lines)
+
     def prompt(self, inputs: Dict[str, Any]) -> str:
         proj = inputs["consumer_view"]
-        opcodes = "\n".join(
-            "     %-10s %s - %s" % (op, ("takes " + ", ".join(p)) if p else "combines operands",
-                                    ir.OPCODE_SEMANTICS.get(op, ""))
-            for op, p in sorted(ir.OPCODES.items()))
         return PROMPT.format(
             projection=_render(proj),
             duties=render_duties(proj),
             hard_requirements=render_hard_requirements(proj),
-            opcodes=opcodes,
+            grammar=self.render_grammar(),
             opcode_names=" | ".join(sorted(ir.OPCODES)),
             feature_kinds=" | ".join(FEATURE_KINDS),
             constraint_kinds=" | ".join(CONSTRAINT_KINDS),
+            signed_axes=" | ".join(ir.SIGNED_AXES),
+            rotate_axes=" | ".join(ir.AXES),
             collections=len(self.RESPONSE_ENVELOPE),
             response_schema=self.render_response_schema())
 
@@ -335,6 +421,20 @@ class S05Embodiment(Stage):
                 # realized it. Never inferred from prose or from the body.
                 fields["interface"] = f["interface"]
                 premises.append(f["interface"])
+            if f.get("joint"):
+                # THE JOINT THIS FEATURE REALIZES A SIDE OF (Unit G): a typed
+                # reference the boundary resolves, and a premise - a withdrawn
+                # or re-axised joint stales the bore that was bored for it.
+                fields["joint"] = f["joint"]
+                premises.append(f["joint"])
+            if f.get("placement") is not None:
+                # WHERE IT IS (Unit G). The grammar is the IR's and the boundary
+                # refuses a malformed one by name; the parameters it names are
+                # premises exactly as an envelope's are.
+                fields["placement"] = f["placement"]
+                node = f["placement"]
+                for component in (node.get("origin") or []) if isinstance(node, dict) else []:
+                    premises += sorted(_expr_refs(component))
             if f.get("envelope") is not None:
                 fields["envelope"] = f["envelope"]
                 # ONLY when there is an envelope. A feature with no coordinates
@@ -437,6 +537,10 @@ class S05Embodiment(Stage):
         out.extend(check_c8_region_intrusion(parsed, view))
         out.extend(check_c9_clearance_constraints(parsed, view))
         out.extend(check_c10_no_unsolved_values(parsed))
+        out.extend(check_c11_joints_realized(parsed, view))
+        out.extend(check_c12_bodies_built(parsed, view))
+        out.extend(check_c13_placed_features_built(parsed, view))
+        out.extend(check_c14_mating_kinds(parsed, view))
         return out
 
 
@@ -783,29 +887,29 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
     return out
 
 
-def check_c5_program_totality(parsed) -> List[str]:
-    """S05-C5: every symbol the construction program references is declared.
+def _as_record(item: Dict[str, Any]) -> Dict[str, Any]:
+    rec = dict(item)
+    rec["entity_id"] = rec.get("entity_id") or rec.get("id")
+    return rec
 
-    The check s07 depends on: a statement referencing an undeclared parameter can
-    never be compiled, and finding that out at the kernel is finding out too late.
+
+def check_c5_program_totality(parsed) -> List[str]:
+    """S05-C5: every construction statement reads as the IR reads it - opcode,
+    arguments, operands, and every symbol it references declared.
+
+    UNIT G: THE IR'S OWN VALIDATOR, not a second walk over the same grammar.
+    The boundary refuses what this reports; this reports it under the check's
+    name before the write, with every other finding beside it.
     """
-    declared = {p.get("id") for p in parsed.get("parameters") or []}
+    declared = {p.get("id") for p in parsed.get("parameters") or [] if isinstance(p, dict)}
+    statements = {s.get("id") for s in parsed.get("construction_statements") or []
+                  if isinstance(s, dict)}
     out = []
     for s in parsed.get("construction_statements") or []:
-        params = s.get("parameters")
-        if params is not None and not isinstance(params, dict):
-            # Observed live (Unit F): parameters written positionally. The IR
-            # names the defect and the boundary refuses it; this check reports
-            # it rather than dying on it and taking every other finding along.
-            out.append("S05-C5: statement %s parameters is not an object of named "
-                       "expressions; a positional list names nothing" % s.get("id"))
+        if not isinstance(s, dict):
             continue
-        for name, expr in (params or {}).items():
-            for ref in _expr_refs(expr):
-                if ref not in declared:
-                    out.append("S05-C5: statement %s parameter %s references %s, "
-                               "which no Parameter declares"
-                               % (s.get("id"), name, ref))
+        for problem in ir.statement_record_problems(_as_record(s), declared, statements):
+            out.append("S05-C5: " + problem[len("IR: "):] if problem.startswith("IR: ") else problem)
     return out
 
 
@@ -824,11 +928,54 @@ def _envelope_refs(envelope: Any) -> Set[str]:
             for node in (envelope.get(axis) or []) for r in _expr_refs(node)}
 
 
+def check_c11_joints_realized(parsed, view) -> List[str]:
+    """S05-C11: every axis-bearing joint is realized by ONE placed feature on
+    each body it relates, along the joint's declared axis (Unit G)."""
+    from ..downstream import embodiment
+    return ["S05-C11: " + p[len("EMBODIMENT: "):] for p in
+            embodiment.joint_realization_problems(embodiment.rows_from_response(parsed, view))]
+
+
+def check_c12_bodies_built(parsed, view) -> List[str]:
+    """S05-C12: every body of the branch has a construction program with one
+    terminal statement (Unit G)."""
+    from ..downstream import embodiment
+    return ["S05-C12: " + p[len("EMBODIMENT: "):] for p in
+            embodiment.body_program_problems(embodiment.rows_from_response(parsed, view))]
+
+
+def check_c13_placed_features_built(parsed, view) -> List[str]:
+    """S05-C13: every placed feature is built by a statement naming it (Unit G)."""
+    from ..downstream import embodiment
+    return ["S05-C13: " + p[len("EMBODIMENT: "):] for p in
+            embodiment.placed_feature_problems(embodiment.rows_from_response(parsed, view))]
+
+
+def check_c14_mating_kinds(parsed, view) -> List[str]:
+    """S05-C14: a stated mating side is realized by a feature of the stated
+    kind on the stated body (Unit G)."""
+    from ..downstream import embodiment
+    return ["S05-C14: " + p[len("EMBODIMENT: "):] for p in
+            embodiment.mating_kind_problems(embodiment.rows_from_response(parsed, view))]
+
+
+def _parameter_problems(parsed, created: bool) -> List[str]:
+    """The IR's parameter validator over the response's declarations (Unit G:
+    one implementation for C6, C10 and the boundary)."""
+    out = []
+    for p in parsed.get("parameters") or []:
+        if not isinstance(p, dict):
+            continue
+        rec = _as_record(p)
+        rec.setdefault("status", ir.DECLARED)
+        out += ir.parameter_record_problems(rec, created=created)
+    return out
+
+
 def check_c6_units(parsed) -> List[str]:
     """S05-C6: no Parameter has a null unit. INV-004 / R-21."""
-    return ["S05-C6: parameter %s declares no unit (INV-004)" % p.get("id")
-            for p in parsed.get("parameters") or []
-            if not str(p.get("unit") or "").strip()]
+    return ["S05-C6: " + p[len("IR: "):] for p in _parameter_problems(parsed, created=False)
+            if "declares no unit" in p]
 
 
 def check_c7_no_parameter_cycle(parsed) -> List[str]:
@@ -1041,9 +1188,5 @@ def check_c10_no_unsolved_values(parsed) -> List[str]:
     s05 authors declarations; a number here would be a guess wearing a solved
     answer's clothes.
     """
-    out = []
-    for p in parsed.get("parameters") or []:
-        if p.get("value") is not None and not p.get("solved_by"):
-            out.append("S05-C10: parameter %s carries a value with no cited solver "
-                       "artifact; dimensions are settled by s06 (R-23)" % p.get("id"))
-    return out
+    return ["S05-C10: " + p[len("IR: "):] for p in _parameter_problems(parsed, created=True)
+            if "solver artifact" in p]

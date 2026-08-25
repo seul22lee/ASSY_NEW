@@ -73,6 +73,60 @@ def _resolve_component(expr: ir.Expr, values: Dict[str, float], units: Dict[str,
     return total, unit, None
 
 
+def construction_problems(state, branch: Optional[str] = None) -> List[str]:
+    """UNIT G (G5). The settled numbers, asked whether they build anything.
+
+    A primitive with a non-positive dimension, a settlement that leaves a
+    construction-critical parameter without a value, a placement origin that
+    does not resolve: each is a finding here, before the kernel is asked,
+    naming the statement and the number. Nothing is clamped or substituted.
+    """
+    from .compiler import resolve
+
+    values = canonical_io.resolved_values(state, branch)
+    out: List[str] = []
+    for stmt in canonical_io.read_program(state, branch).statements:
+        kinds = ir.OPCODE_PARAMETER_KINDS.get(stmt.operation) or {}
+        for name, expr in sorted(stmt.parameters.items()):
+            try:
+                number = resolve(expr, values)
+            except ir.IRError as exc:
+                out.append("CONSTRUCTION_INVALID: %s.%s: %s" % (stmt.entity_id, name, exc))
+                continue
+            if kinds.get(name) == "length" and stmt.operation in ("BOX", "CYLINDER", "SPHERE") \
+                    and number <= 0:
+                out.append("CONSTRUCTION_INVALID: %s %s.%s settles to %g; a primitive "
+                           "dimension must be positive" % (stmt.operation, stmt.entity_id,
+                                                           name, number))
+    for fid, node in sorted(canonical_io.read_placements(state, branch).items()):
+        try:
+            placement = ir.Placement.parse(node, "feature %s placement" % fid)
+            for e in placement.origin:
+                resolve(e, values)
+        except ir.IRError as exc:
+            out.append("CONSTRUCTION_INVALID: feature %s placement: %s" % (fid, exc))
+    return out
+
+
+def clearance_problems(state, branch: Optional[str] = None) -> List[str]:
+    """UNIT G (G5). A CLEARANCE constraint whose settled margin has the wrong
+    sign: the solver reports margins on inequalities; a feasible system with a
+    negative clearance margin is a clearance stated as `<=`/`>=` the wrong way
+    round, and a fit that will not go together."""
+    out: List[str] = []
+    for rec in sorted(state.standing("Constraint"), key=lambda r: r["entity_id"]):
+        if branch and not canonical_io._in_branch(rec, branch):
+            continue
+        if str(rec.get("kind", "")).upper() not in ("CLEARANCE", "INTERFERENCE_FREE"):
+            continue
+        settlement = rec.get("settlement") or {}
+        margin = settlement.get("margin")
+        if isinstance(margin, (int, float)) and not isinstance(margin, bool) and margin < 0:
+            out.append("CLEARANCE_NEGATIVE: constraint %s settles with margin %g"
+                       % (rec["entity_id"], margin))
+    return out
+
+
 def evaluate(state, branch: Optional[str] = None) -> SettledGeometryReport:
     """Every standing feature of the branch against every excluding region."""
     from ..stages.s04_envelope_and_motion import (aabb, excludes_occupancy,

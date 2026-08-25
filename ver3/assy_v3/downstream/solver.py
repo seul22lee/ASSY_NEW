@@ -179,6 +179,8 @@ def reduce_expr(expr: Expr, units: Dict[str, str]) -> Linear:
             out = out + p
         return out
     if expr.op == "-":
+        if len(parts) == 1:
+            return parts[0].scaled(-1.0, ())          # unary minus: negation (Unit G)
         out = parts[0]
         for p in parts[1:]:
             out = out - p

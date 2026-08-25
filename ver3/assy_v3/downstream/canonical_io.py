@@ -141,7 +141,7 @@ def embodiment_basis(state, branch: Optional[str] = None) -> Dict[str, Any]:
     known_params = declared("Parameter")
     known_statements = declared("ConstructionStatement")
     for family, kind in (("Parameter", "parameter"), ("Constraint", "constraint"),
-                         ("ConstructionStatement", "statement"), ("Feature", "envelope")):
+                         ("ConstructionStatement", "statement"), ("Feature", "feature")):
         for rec in mine(family):
             basis["problems"] += ir.record_problems(kind, rec, known_params, known_statements)
     return basis
@@ -162,6 +162,13 @@ def settlement_readiness(state, branch: Optional[str] = None) -> Tuple[bool, Lis
     if not basis["statements"]:
         problems.append("no current construction program stands for %s; there is "
                         "no embodiment to settle for" % (branch or "the design"))
+        return False, problems
+    # UNIT G. AND IT MUST BE CAD-CONSTRUCTIBLE: every body built, every
+    # axis-bearing joint placed on each body it relates, every placed feature
+    # realized, every stated mating side of its stated kind. The same checks
+    # s05 runs on its response, over what actually stands.
+    from . import embodiment
+    problems += embodiment.structural_problems(embodiment.rows_from_state(state, branch))
     return (not problems), problems
 
 
@@ -228,6 +235,8 @@ def compilation_readiness(state, branch: Optional[str] = None) -> Tuple[bool, Li
                             "system was not settled feasible"
                             % (rec["entity_id"], settlement.get("solver_status") or "none"))
     problems += program_unit_problems(state, branch)
+    problems += settled_geometry.construction_problems(state, branch)
+    problems += settled_geometry.clearance_problems(state, branch)
     report = settled_geometry.evaluate(state, branch)
     problems += ["post-settlement: %s" % f for f in report.findings]
     return (not problems), problems
@@ -315,12 +324,20 @@ def resolved_values(state, branch: Optional[str] = None) -> Dict[str, float]:
     return out
 
 
+def read_placements(state, branch: Optional[str] = None) -> Dict[str, Any]:
+    """Feature id -> placement node, for every placed standing feature of the branch."""
+    return {f["entity_id"]: f["placement"]
+            for f in sorted(state.standing("Feature"), key=lambda r: r["entity_id"])
+            if f.get("placement") is not None and (not branch or _in_branch(f, branch))}
+
+
 def compile_from_state(state, out_dir: Optional[str] = None,
                        branch: Optional[str] = None) -> _compiler.CompileResult:
-    """Read the program and the settled values, and compile. No writes."""
+    """Read the program, the settled values and the placements, and compile. No writes."""
     return _compiler.compile_program(read_program(state, branch),
                                      resolved_values(state, branch),
-                                     out_dir=out_dir)
+                                     out_dir=out_dir,
+                                     placements=read_placements(state, branch))
 
 
 def compilation_operations(result: _compiler.CompileResult,

@@ -118,8 +118,16 @@ class Expr:
             raise IRError("operator %r is not one of %s"
                           % (node["op"], list(ARITHMETIC)))
         args = node.get("args")
-        if not isinstance(args, list) or len(args) < 2:
-            raise IRError("operator %r needs at least two arguments" % node["op"])
+        # UNIT G. `-` with ONE argument is negation - a placement below the
+        # frame origin, an offset the other way. A language of placements that
+        # cannot say "minus this" makes the model spell it as 0 - x or -1 * x,
+        # and a live response wrote the natural form instead. Every other
+        # operator, and `-` as subtraction, still needs two.
+        minimum = 1 if node["op"] == "-" else 2
+        if not isinstance(args, list) or len(args) < minimum:
+            raise IRError("operator %r needs at least %s argument%s"
+                          % (node["op"], "one" if minimum == 1 else "two",
+                             "" if minimum == 1 else "s"))
         return Expr(op=node["op"], args=tuple(Expr.parse(a) for a in args))
 
     def refs(self) -> Set[str]:
@@ -230,10 +238,14 @@ TRANSFORMING = ("TRANSLATE", "ROTATE")
 #: `{"const": 0, "unit": "mm"}`, and never as a bare number.
 KERNEL_LENGTH_UNIT = "mm"
 KERNEL_ANGLE_UNIT = "deg"
+#: A PRIMITIVE IS BUILT IN THE FRAME OF THE FEATURE IT REALIZES (Unit G): the
+#: frame's Z is the feature's placement axis, its X the reference, its origin
+#: the placement origin. A primitive naming no placed feature is built in the
+#: body frame itself. Either way "the frame origin" below means that frame's.
 OPCODE_SEMANTICS = {
-    "BOX": "the solid [0,dx] x [0,dy] x [0,dz] from the body frame origin",
-    "CYLINDER": "the solid of radius r, axis +Z from z=0 to z=height, centred "
-                "on the frame origin in X and Y",
+    "BOX": "the solid [0,dx] x [0,dy] x [0,dz] from the frame origin",
+    "CYLINDER": "the solid of radius r, axis +Z of the frame from z=0 to z=height, "
+                "centred on the frame origin in X and Y",
     "SPHERE": "the solid of radius r centred on the frame origin",
     "TRANSLATE": "the operand moved by (dx, dy, dz) in the body frame",
     "ROTATE": "the operand rotated by angle (degrees) about the named body axis "
@@ -253,9 +265,110 @@ OPCODE_PARAMETER_KINDS = {
     "UNION": {}, "CUT": {}, "INTERSECT": {},
 }
 
+#: UNIT G. THE ONE TABLE OF NAMED AXES. s03 declares a joint's axis as one of
+#: these, s04 rotates about it, an Interface's mating geometry names it, a
+#: feature's placement is stated in it, and s07 maps a primitive onto it. It
+#: used to be written four times (s03.AXIS_DIRECTIONS, s04.AXIS_INDEX +
+#: AXIS_VECTORS, the mating-geometry enum, and the unsigned list below); the
+#: stage modules now re-export this one.
+AXIS_VECTORS = {"+X": (1.0, 0.0, 0.0), "-X": (-1.0, 0.0, 0.0),
+                "+Y": (0.0, 1.0, 0.0), "-Y": (0.0, -1.0, 0.0),
+                "+Z": (0.0, 0.0, 1.0), "-Z": (0.0, 0.0, -1.0)}
+SIGNED_AXES = tuple(AXIS_VECTORS)
+AXIS_INDEX = {"X": 0, "Y": 1, "Z": 2}
 #: ROTATE needs an axis; it is the one transform with a direction, and naming it
 #: in the statement rather than inferring it is what keeps s07 from choosing one.
-AXES = ("X", "Y", "Z")
+#: Unsigned: the sign of a rotation is the sign of its angle.
+AXES = tuple(AXIS_INDEX)
+
+
+def axis_vector(axis: Any) -> Optional[Tuple[float, float, float]]:
+    """The unit vector a signed axis name denotes, or None. None is an answer:
+    a missing or unrecognised axis is never read as Z."""
+    if not isinstance(axis, str):
+        return None
+    return AXIS_VECTORS.get(axis.strip().upper())
+
+
+# ==========================================================================
+# UNIT G. PLACEMENT - a feature's own frame, stated in its body's frame.
+#
+# THE ONE PLACEMENT REPRESENTATION. A feature that realizes a joint side, an
+# interface side or any located geometry says WHERE it is and WHICH WAY it
+# points: `origin` - three expressions in the body frame, in the kernel length
+# unit - and `axis`, the feature's own axis (a bore's, a pin's, a slide's, a
+# stop face's normal) as a signed body axis. Nothing here is a number invented
+# in a world frame, and nothing is a pose: poses are DERIVED from placements
+# and s04's joint coordinates by `downstream.kinematics`, exactly as the
+# contracts say the pose law is derived and never authored.
+#
+# THE FRAME CONVENTION, stated once and consumed by s05's prompt, s06's checks
+# and s07's kernel calls alike:
+#   - every body frame is PARALLEL to the arrangement (world) frame in the pose
+#     where every joint coordinate is zero - s04's arrangement itself - so a
+#     body axis token and the joint axis token s03 declared name the same
+#     direction, and the two are comparable by name;
+#   - a feature frame has Z along `axis`, origin at `origin`, and X along the
+#     CANONICAL PERPENDICULAR of the axis (`frame_axes`): a rule, so that no
+#     second orientation choice is asked of anyone;
+#   - s07 builds a primitive that realizes a placed feature IN THAT FRAME;
+#     TRANSLATE and ROTATE remain moves within the body frame.
+# ==========================================================================
+def frame_axes(axis: str) -> Tuple[Tuple[float, float, float], Tuple[float, float, float],
+                                   Tuple[float, float, float]]:
+    """(x, y, z) unit vectors of the frame whose Z is the named axis.
+
+    X is the canonical perpendicular - the next body axis in cyclic order
+    (Z->X, X->Y, Y->Z), positive - and Y completes a right-handed frame. One
+    rule, so the orientation of a placed primitive is never a decision.
+    """
+    z = axis_vector(axis)
+    if z is None:
+        raise IRError("axis %r is not one of %s" % (axis, list(SIGNED_AXES)))
+    letter = axis.strip().upper()[-1]
+    x = AXIS_VECTORS["+" + {"Z": "X", "X": "Y", "Y": "Z"}[letter]]
+    y = (z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0])
+    return x, y, z
+
+
+@dataclass(frozen=True)
+class Placement:
+    origin: Tuple[Expr, Expr, Expr]
+    axis: str
+
+    @staticmethod
+    def parse(node: Any, where: str = "placement") -> "Placement":
+        if not isinstance(node, dict):
+            raise IRError("%s is not an object" % where)
+        origin = node.get("origin")
+        if not isinstance(origin, list) or len(origin) != 3:
+            raise IRError("%s origin is not three expressions" % where)
+        exprs = []
+        for index, component in enumerate(origin):
+            if isinstance(component, bool) or isinstance(component, (int, float)):
+                raise IRError("%s origin[%d] is a bare number (%r); a coordinate is a "
+                              "declared parameter or a unit-bearing constant"
+                              % (where, index, component))
+            exprs.append(Expr.parse(component))
+        axis = node.get("axis")
+        if axis_vector(axis) is None:
+            raise IRError("%s axis %r is not one of %s" % (where, axis, list(SIGNED_AXES)))
+        unknown = sorted(set(node) - {"origin", "axis"})
+        if unknown:
+            raise IRError("%s carries %s, which a placement does not have" % (where, unknown))
+        return Placement(origin=(exprs[0], exprs[1], exprs[2]), axis=axis.strip().upper())
+
+    def refs(self) -> Set[str]:
+        return {r for e in self.origin for r in e.refs()}
+
+
+def placement_problems(where: str, node: Any, known_parameters: Set[str]) -> List[str]:
+    try:
+        placement = Placement.parse(node, where)
+    except IRError as exc:
+        return ["IR: %s" % exc]
+    return ["IR: %s references %s, which no standing Parameter declares" % (where, ref)
+            for ref in sorted(placement.refs()) if ref not in known_parameters]
 
 
 @dataclass(frozen=True)
@@ -396,7 +509,7 @@ def dependency_cone(program: ConstructionProgram, entity_id: str) -> List[str]:
 # expression uses. ONE grammar, two surfaces; nothing below re-decides what a
 # node means.
 # ==========================================================================
-IR_VALIDATION_KINDS = ("parameter", "constraint", "statement", "envelope")
+IR_VALIDATION_KINDS = ("parameter", "constraint", "statement", "feature")
 
 
 def parameter_record_problems(record: Dict[str, Any], created: bool = False) -> List[str]:
@@ -543,11 +656,15 @@ def record_problems(kind: str, record: Dict[str, Any], known_parameters: Set[str
         return constraint_record_problems(record, known_parameters)
     if kind == "statement":
         return statement_record_problems(record, known_parameters, known_statements)
-    if kind == "envelope":
-        if record.get("envelope") is None:
-            return []
-        _exprs, problems = envelope_problems(record.get("entity_id"),
-                                             record.get("envelope"), known_parameters)
+    if kind == "feature":
+        problems: List[str] = []
+        if record.get("envelope") is not None:
+            _exprs, envelope = envelope_problems(record.get("entity_id"),
+                                                 record.get("envelope"), known_parameters)
+            problems += envelope
+        if record.get("placement") is not None:
+            problems += placement_problems("feature %s placement" % record.get("entity_id"),
+                                           record.get("placement"), known_parameters)
         return problems
     raise IRError("unknown ir_validation kind %r; the vocabulary is %s"
                   % (kind, list(IR_VALIDATION_KINDS)))

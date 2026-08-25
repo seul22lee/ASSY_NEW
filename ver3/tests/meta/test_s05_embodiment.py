@@ -785,8 +785,8 @@ class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
 
     def test_the_audit_found_the_checks(self):
         """Otherwise the loop below iterates over nothing and proves nothing."""
-        self.assertEqual(10, len(self.reads),
-                         "expected ten checks; the AST scan found %d"
+        self.assertEqual(14, len(self.reads),
+                         "expected fourteen checks; the AST scan found %d"
                          % len(self.reads))
 
     def test_every_family_a_check_reads_is_granted_to_s05(self):
@@ -833,6 +833,11 @@ class TestTheStageIsJudgedOnWhatItWasAsked(unittest.TestCase):
         "check_c8_region_intrusion": ("functional region", "envelope"),
         "check_c9_clearance_constraints": ("clearance", "governs_interface"),
         "check_c10_no_unsolved_values": ("value",),
+        # Unit G: CAD-constructibility
+        "check_c11_joints_realized": ("joint", "placement"),
+        "check_c12_bodies_built": ("every body", "construction program"),
+        "check_c13_placed_features_built": ("placed feature",),
+        "check_c14_mating_kinds": ("mating",),
     }
 
     @classmethod

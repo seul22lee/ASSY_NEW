@@ -139,6 +139,18 @@ def execute_compilation(state, progression: Progression, *,
         return result, execution
     result = canonical_io.compile_from_state(state, out_dir=out_dir, branch=branch)
     signature = canonical_io.signature_identity(result) if result.ok else None
+    # UNIT G. THE ARTIFACT IS VALIDATED AS A MECHANISM. Expected bodies,
+    # feature correspondence, derived poses in every state, solid interference
+    # under s04's contact policy, motion along every transition on s04's
+    # sampling, reserved regions, exchange files. Findings are typed and owned;
+    # a compile whose solids contradict the design is a compile with findings,
+    # never a success by another name - and never a failure invented here.
+    findings: tuple = ()
+    if result.ok:
+        from . import artifact
+        report = artifact.validate(state, branch, result, out_dir=out_dir)
+        result.artifact = report.as_record()
+        findings = tuple(f.as_record() for f in report.findings)
     # The settled parameters the compiler actually consumed become premises of
     # the signature, so a re-solve stales the geometry it produced.
     ops = (canonical_io.compilation_operations(
@@ -161,13 +173,15 @@ def execute_compilation(state, progression: Progression, *,
                          {"problems": result.problems,
                           "failed_statement": result.failed_statement,
                           "dependency_cone": result.dependency_cone})
+    contradicted = any(f.get("evaluable") and f.get("kind") != "NOT_EVALUABLE" for f in findings)
     execution = progression.record_deterministic(DeterministicExecution(
         responsibility_id="s07", stage_id="s07",
-        outcome="compiled" if result.ok else "compile_failed",
+        outcome=("compiled_with_findings" if contradicted else "compiled") if result.ok
+        else "compile_failed",
         input_digest=_digest([s.entity_id for s in
                               canonical_io.read_program(state, branch).statements]),
         patch_applied=applied, problems=tuple(problems),
-        evidence_id=signature if applied else None))
+        evidence_id=signature if applied else None, findings=findings))
     return result, execution
 
 

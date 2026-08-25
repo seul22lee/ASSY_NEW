@@ -211,6 +211,11 @@ class DeterministicExecution:
     #: a GeometrySignature id. It is how a settled value or a compiled body is
     #: traced back to the run that produced it.
     evidence_id: Optional[str] = None
+    #: UNIT G. Typed engineering findings (downstream.findings.Finding records):
+    #: what the artifact contradicted and whose decision it is. Kept beside the
+    #: run because they are evidence about THIS execution; a later bounded
+    #: revision reads them here.
+    findings: Tuple[Dict[str, Any], ...] = ()
 
     def as_record(self) -> Dict[str, Any]:
         return {"responsibility_id": self.responsibility_id,
@@ -220,6 +225,7 @@ class DeterministicExecution:
                 "input_digest": self.input_digest,
                 "patch_applied": self.patch_applied,
                 "evidence_id": self.evidence_id,
+                "findings": [dict(f) for f in self.findings],
                 "problems": list(self.problems)}
 
 

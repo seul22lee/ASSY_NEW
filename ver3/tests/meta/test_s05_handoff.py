@@ -122,12 +122,45 @@ def embodiment_from(view, *, cite=(), envelope=None, feature_kind="FACE",
                                 "governs_interface": iface["entity_id"],
                                 "expression": {"relation": ">=", "lhs": ref(prm),
                                                "rhs": mm(0.1)}})
+    # UNIT G. A CAD-CONSTRUCTIBLE embodiment: every axis-bearing joint is
+    # realized on each body it relates by ONE placed feature naming it, along
+    # the joint's declared axis, and every placed feature is built by a
+    # statement naming it; every body ends in a single terminal. Derived from
+    # the view's joints and groups, so it embodies whatever branch is shown.
+    joint_features = {}
+    for joint in view.get("Joint") or []:
+        if str(joint.get("joint_type", "")).upper() in ("FIXED", "COMPLIANT"):
+            continue
+        axis = str(joint.get("axis_direction") or "").strip().upper()
+        if axis not in s05.ir.SIGNED_AXES:
+            continue
+        for body in sorted({group_body.get(joint.get("parent_group")),
+                            group_body.get(joint.get("child_group"))} - {None}):
+            n = free("FEA-", "Feature", n + 1)
+            fid = "FEA-%04d" % n
+            features.append({"id": fid, "body": body, "feature_kind": "BORE",
+                             "geometry": "the bore that carries the joint axis",
+                             "joint": joint["entity_id"],
+                             "placement": {"origin": [mm(0), mm(0), mm(0)], "axis": axis},
+                             "envelope": envelope or symbolic})
+            joint_features.setdefault(body, []).append(fid)
     statements, c = [], 0
     for body in bodies:
         c = free("CST-", "ConstructionStatement", c + 1)
-        statements.append({"id": "CST-%04d" % c, "body": body, "operation": "BOX",
+        base = "CST-%04d" % c
+        statements.append({"id": base, "body": body, "operation": "BOX",
                            "operands": [],
                            "parameters": {"dx": ref(prm), "dy": mm(10), "dz": mm(4)}})
+        for fid in joint_features.get(body, []):
+            c = free("CST-", "ConstructionStatement", c + 1)
+            bore = "CST-%04d" % c
+            statements.append({"id": bore, "body": body, "operation": "CYLINDER",
+                               "operands": [], "feature": fid,
+                               "parameters": {"radius": ref(prm), "height": mm(4)}})
+            c = free("CST-", "ConstructionStatement", c + 1)
+            statements.append({"id": "CST-%04d" % c, "body": body, "operation": "UNION",
+                               "operands": [base, bore], "parameters": {}})
+            base = "CST-%04d" % c
     r = free("RLZ-", "Realization", 1)
     realizations = [{"id": "RLZ-%04d" % r, "addresses_obligations": list(cite),
                      "participating_features": [features[0]["id"]],

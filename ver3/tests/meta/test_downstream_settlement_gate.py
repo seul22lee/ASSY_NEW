@@ -113,7 +113,7 @@ class TestOneGrammarAtTheBoundary(_Embodied):
     def test_01_the_ir_is_the_single_grammar_authority(self):
         fams = Contracts().families
         for family, kind in (("Parameter", "parameter"), ("Constraint", "constraint"),
-                             ("ConstructionStatement", "statement"), ("Feature", "envelope")):
+                             ("ConstructionStatement", "statement"), ("Feature", "feature")):
             with self.subTest(family=family):
                 self.assertEqual(kind, fams[family].get("ir_validation"))
                 self.assertIn(kind, ir.IR_VALIDATION_KINDS)

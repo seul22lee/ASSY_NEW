@@ -109,6 +109,14 @@ authority_status:
       `assy_v3/downstream/canonical_io.compilation_readiness` and by the
       GeometrySignature family's `requires_premises`; explained here.
     authoritative_for_canonical_semantics: false
+  artifact_validation:
+    class: "OPERATIONAL"
+    note: >
+      Unit G. What a compile must show before it is called an artifact:
+      expected bodies, derived poses, interference under s04's contact policy,
+      motion along s04's transitions, reserved regions, exchange files.
+      Enforced in `downstream/artifact`; explained here.
+    authoritative_for_canonical_semantics: false
   execution_semantics:
     class: "OPERATIONAL"
     note: >
@@ -202,6 +210,34 @@ compilation_entry:
     design. A GeometrySignature carries the statements, bodies and settled
     values it was compiled from as premises, so ordinary currentness stales it
     when any of them moves; the write boundary refuses one with no premise.
+
+artifact_validation:
+  principle: >
+    "The kernel returned a shape" is not an artifact. After a compile the solids
+    are validated as a mechanism: every body the design names is built and is
+    a valid single solid; every placed feature's construction exists; bodies
+    are posed by the DERIVED pose law (placements + joint coordinates) in every
+    s04 State; pairs are judged by s04's own contact policy - shared volume
+    where the interface is CLEAR or a CONTACT is interference, distance where
+    it must TOUCH is a mating not realized, an INTERFERENCE_FIT may share
+    volume; every Transition is sampled exactly as s04 samples it and judged at
+    every sample; reserved regions are checked when an ABSOLUTE scale in the
+    kernel unit exists and reported NOT_EVALUABLE otherwise; an assembly STEP
+    per state and an STL per body are written beside the per-body files.
+  findings: >
+    Every contradiction is a typed, owned Finding (`downstream/findings`) on
+    the deterministic execution record - construction invalid, mating axes
+    inconsistent, body interference, mating not realized, travel blocked,
+    feature outside region, pose not derivable, unsupported operation, not
+    evaluable. A compile with evaluable findings registers its signature (the
+    geometry exists) and is recorded `compiled_with_findings`; it is never a
+    success by another name and never a mechanism infeasibility. A finding is
+    evidence for the owner named on it.
+  placement_execution: >
+    A primitive that realizes a placed feature is built in the feature's frame
+    - one rigid transform from one declared frame. s07 poses bodies only by the
+    derived law and chooses no base, no axis and no offset: the base body is the
+    root of the joint tree, deterministically.
 
 execution_semantics:
   principle: >

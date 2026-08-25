@@ -25,6 +25,7 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
 
 from ..state.patch import Op
+from ..downstream import ir as _ir
 from .base import (CAUSE_FINDINGS, CAUSE_UPSTREAM_REVISION, REPAIR_KEY, Stage,
                    StageError, authored_families, branch_records,
                    carry_invocation_premises, revise_standing_operations)
@@ -238,7 +239,9 @@ REGION_ROLES = ("ACCESS", "SUPPORT", "KEEP_OUT", "APERTURE")
 #: genuinely has no axis, and a permitted-value set with no way to say that
 #: forces the model to choose between inventing an axis and dropping a required
 #: field. Live evidence: it dropped the field.
-AXIS_DIRECTIONS = ("+X", "-X", "+Y", "-Y", "+Z", "-Z", "NONE")
+# UNIT G: the six directions are the IR's one axis table; NONE is s03's own
+# "points nowhere" member for a FIXED joint.
+AXIS_DIRECTIONS = tuple(_ir.SIGNED_AXES) + ("NONE",)
 
 #: Tokens that would be a metric magnitude leaking into a stage that has none.
 _MAGNITUDE = re.compile(r"\b\d+(?:\.\d+)?\s*(mm|cm|m|deg|degrees|rad|kg|g|n|nm)\b",

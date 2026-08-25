@@ -503,6 +503,7 @@ class DesignState:
                 continue                      # already reported as unknown
             record = _prospective_record(prospective, eid)
             problems.extend(_conditional_problems(self.c, family, eid, record))
+            problems.extend(_enum_problems(self.c, family, eid, record))
             problems.extend(_relational_problems(prospective, self.c, family,
                                                  eid, record))
             # UNIT F. IR WELL-FORMEDNESS AT THE DOOR. A family that declares
@@ -1574,6 +1575,26 @@ def _relational_problems(prospective, contracts, family, eid, record) -> List[st
                        "no implementation is registered" % (family, name))
             continue
         out.extend(fn(prospective, contracts, family, eid, record, rule))
+    return out
+
+
+def _enum_problems(contracts, family, eid, fields) -> List[str]:
+    """UNIT G. A closed vocabulary declared on a top-level field is enforced
+    where it is declared. Nested record subfields already had this rule
+    (`RECORD_VALUE`); a top-level `kind: enum` with `values` was documentation
+    only, so a feature kind or an axis outside the vocabulary reached standing
+    state and was refused by whichever consumer read it first. A field
+    declaring no `values` is unconstrained, which is what every existing
+    declaration says."""
+    out: List[str] = []
+    for name, spec in (contracts.field_semantics(family) or {}).items():
+        if not isinstance(spec, dict) or spec.get("kind") != "enum":
+            continue
+        permitted = spec.get("values")
+        value = fields.get(name)
+        if permitted and value is not None and value not in permitted:
+            out.append("ENUM_VALUE: %s.%s holds %r, which is not one of %s"
+                       % (eid, name, value, list(permitted)))
     return out
 
 
