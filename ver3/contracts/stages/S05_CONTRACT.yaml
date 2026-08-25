@@ -61,11 +61,25 @@ authority_status:
       which is exactly what this note was protecting. That contract, not
       this file, remains the authority on canonical semantics.
   structured_outputs:
-    class: "LEGACY_PRODUCER"
-    describes: "the s05 response shape, which still uses the pre-canonical obligation reference name"
-    canonical_replacement: "Realization.addresses_obligations"
-    canonical_source: "ver3/contracts/DESIGN_STATE_CONTRACT.yaml"
-    migration_step: "the step that brings s05 into scope; outside S01-S04"
+    class: "OPERATIONAL"
+    note: >
+      Unit E. Restated in the canonical field names DESIGN_STATE_CONTRACT
+      declares (Feature.body, Realization.addresses_obligations, no ROI
+      family). It EXPLAINS what the producer emits; the families, their fields
+      and their owners are DESIGN_STATE_CONTRACT's, and the responsibility is
+      STAGE_RESPONSIBILITY_CONTRACT's. Not authoritative.
+    authoritative_for_canonical_semantics: false
+  post_selection_handoff:
+    class: "OPERATIONAL"
+    note: >
+      Unit E. How the committed design reaches this stage - the branch
+      authority, the currentness premises, the obligation duties, the
+      interaction trace, the s04-to-s05 spatial bridge, the hard-requirement
+      debt and the provider projection. Every rule here is declared
+      canonically in STAGE_RESPONSIBILITY_CONTRACT (the s05 responsibility)
+      and DESIGN_STATE_CONTRACT (Feature, Obligation, HardRequirementCompliance)
+      and enforced by the view builder and the stage's deterministic checks;
+      this section explains and is subordinate to them.
     authoritative_for_canonical_semantics: false
   required_inputs:
     class: "OPERATIONAL"
@@ -92,8 +106,13 @@ authority_status:
     note: "non-semantic detail; defines no canonical meaning"
     authoritative_for_canonical_semantics: false
   roi_rule:
-    class: "OPERATIONAL"
-    note: "non-semantic detail; defines no canonical meaning"
+    class: "RETIRED"
+    note: >
+      Unit E. No ROI family exists in DESIGN_STATE_CONTRACT and nothing
+      produces one. The region an interaction is measured in is carried by the
+      Interface (its mating geometry, s04a) and by the s04 regions and sweeps
+      the branch committed; a second region record would be a second author of
+      one fact. Kept as a retired statement so a reader finds where it went.
     authoritative_for_canonical_semantics: false
   allowed_unresolved:
     class: "OPERATIONAL"
@@ -133,8 +152,15 @@ engineering_responsibility: >
   that geometry imposes back onto the layout.
 
 required_inputs:
-  from_s03: [Interface, blocking_relations, compliant Joints, AssemblyStep, MobilityExpectation]
-  from_s04b: [located Joint frames, State, Transition, SweptVolume, FunctionalRegion volumes, confirmed LoadPath]
+  # Unit E. THE COMMITTED DESIGN, and nothing a caller names. Canonically
+  # declared as the s05 required_reasoning_premise_classes; listed here by
+  # family for a reader.
+  from_selection: [SelectionDecision - the standing human commitment; its selected_candidate names the branch]
+  from_s02: [Candidate (the selected one, with its principle), Obligation (applicable to it), AcceptanceContract (its own), PhysicalEffectObligation]
+  from_s01: [DesignConstraint (every hard requirement the design states)]
+  from_feasibility: [HardRequirementCompliance - only the records NOT_YET_EVALUABLE at a DOWNSTREAM point that name s05 as evidence owner]
+  from_s03: [Body, RigidGroup, Joint (compliant ones included), Interface, PhysicalInteraction, ConstraintRelation, MobilityExpectation, LoadPath, AssemblyStep, FunctionalRegion, Configuration]
+  from_s04: [ReferenceScale, Envelope, FunctionalRegion.volume, State, Transition, SweptVolume, Interface.mating_geometry]
 
 required_discoveries:
   - "the feature that realizes EACH SIDE of each interaction"
@@ -171,8 +197,12 @@ clearance_constraint_rule:
     s06's settlement against it is what makes the fit established or not.
 
 owned_decisions:
-  creates: [Feature, Realization, Constraint, Parameter declarations, ConstructionStatement, ROI definitions]
-  extends: [Body, RigidGroup, Joint, Interface, compliant Joint geometry]
+  creates: [Feature, Realization, Constraint, Parameter, ConstructionStatement, UnresolvedDecision]
+  # Unit E. Nothing today. Body, Joint and Interface list s05 among their
+  # extendable_by, and none declares an s05-writable field in
+  # extendable_fields, which is what the write boundary enforces; the producer
+  # emits no EXTEND. A future extension is a DESIGN_STATE_CONTRACT change first.
+  extends: []
   also_owns: ["feature-level defeat specifications", "embodiment alternatives"]
 
 prohibited_decisions:
@@ -203,24 +233,95 @@ construction_frame_rule:
     downstream from located joint frames and joint coordinates.
 
 structured_outputs:
-  Feature: [entity_id, rigid_group, feature_kind, geometry, maturity]
-  Realization: [entity_id, discharges_obligations, participating_features, verification_predicate]
-  Constraint: [entity_id, expression, parameters, kind, provenance]
-  Parameter: [entity_id, symbol, unit, status, maturity]
-  ConstructionStatement: [entity_id, operation, operands, parameters]
-  ROI: [entity_id, interaction, region, follows_frame]
+  # Canonical names (DESIGN_STATE_CONTRACT). `interface` is the typed trace to
+  # the s03 Interface a feature realizes; `envelope` is symbolic (Unit E).
+  Feature: [entity_id, body, feature_kind, geometry, interface, envelope]
+  Realization: [entity_id, addresses_obligations, participating_features, verification_predicate]
+  Constraint: [entity_id, expression, parameters, kind, governs_interface]
+  Parameter: [entity_id, symbol, unit, status]
+  ConstructionStatement: [entity_id, body, operation, operands, parameters, feature, axis]
+  UnresolvedDecision: [entity_id, decision, why_open, alternatives, alternatives_kind, kept_open_by, blocks]
 
 roi_rule: >
-  Each interaction declares the region in which it is measured, so a clearance
-  cannot be masked by a contact elsewhere on the same body pair. Where the
-  interaction moves, the ROI FOLLOWS ITS FRAME rather than being a fixed box the
-  joint orbits out of.
+  RETIRED (Unit E). No ROI family exists and none is produced. The region an
+  interaction is measured in is the Interface's own mating geometry and the
+  s04 regions and sweeps the branch committed.
+
+post_selection_handoff:
+  branch_authority: >
+    The branch s05 embodies is the standing SelectionDecision's
+    `selected_candidate`, read by the generic view builder because the
+    responsibility declares `branch_authority: SELECTION_DECISION`. Every
+    branch-local premise of s05 is declared COMMITTED_BRANCH; a caller cannot
+    name a branch, and an invocation naming a candidate other than the
+    committed one is recorded as a contradiction that leaves the view
+    UPSTREAM_INSUFFICIENT, so the provider is never called for it. With no
+    standing decision there is no branch and s05 does not run.
+  currentness_premises: >
+    Every fact s05 authors carries the selected Candidate and the standing
+    SelectionDecision as premises (`invocation_premises`), unioned with its
+    local premises. A reopened or revised selection invalidates the decision
+    record, and ordinary propagation withdraws standing from every s05 fact
+    that rested on it; nothing is deleted and no special case exists.
+  obligation_duties: >
+    Applicability - whose an obligation is - is `Obligation.scope` with the
+    selected candidate's AcceptanceContract (`applicable_obligation_ids`).
+    Duty - what kind - is `Obligation.satisfiable_at` (`obligation_duties`):
+    DISCHARGE where the obligation becomes satisfiable at s05, and a
+    Realization with a predicate must cite it (S05-C4); PRESERVE where it was
+    satisfiable at s02, s03 or s04 and the selected branch's own records
+    discharged it - embodiment realizes those records and may not cite the
+    obligation as its own discharge. An obligation the candidate does not owe
+    is refused whether or not it is visible.
+  interaction_trace: >
+    A Feature names in `interface` the s03 Interface whose side it realizes;
+    S05-C1 demands, per interface per participating body, a feature naming
+    that interface, refuses an interface the selected branch does not carry
+    or that does not involve the feature's body, and the interface is a
+    premise of the feature. The effect the interaction transmits reaches s05
+    with it (PhysicalInteraction.discharges_effect, a typed reference), and
+    a Realization cites the Obligation it discharges by typed reference. No
+    prose, no CAD id, and no second source of interaction truth.
+  spatial_bridge: >
+    WHAT STAYS s04's: the ReferenceScale basis; the Envelopes (a provisional
+    extent per body, in that basis), the FunctionalRegion volumes, the States,
+    Transitions and SweptVolumes, the Interface mating geometry with its
+    REPRESENTATIVE sizes. They say where things sit relative to each other and
+    what is reserved; none is an authoritative dimension, and s05 never copies
+    one into a constant. WHAT IS s05's: feature identity and kind, the
+    construction program in each body's own frame, symbolic Parameter
+    declarations with no value, and symbolic Constraints. A Feature's envelope
+    is an expression over declared parameters and unit-bearing constants,
+    never a bare number (S05-C8 refuses one); occupancy against a reserved
+    region is evaluated only where the envelope resolves to constants in the
+    region's ABSOLUTE basis, and is otherwise re-evaluated after settlement
+    (a later unit). WHAT IS s06's: every number. A RELATIVE s04 basis stays
+    relative; nothing here scales it.
+  hard_requirement_debt: >
+    s05 receives every DesignConstraint the design states (`hard_requirement_
+    to_honour`) and, from the selected candidate's compliance records, exactly
+    those NOT_YET_EVALUABLE at a DOWNSTREAM evaluation point whose evidence
+    owner is s05 (`hard_requirement_debt_to_carry`, applicability
+    DEFERRED_TO_INVOKING_RESPONSIBILITY - typed fields, never a kind or a
+    sentence). It may not write, assert or imply their compliance; each stays a
+    standing NOT_YET_EVALUABLE record until the evidence exists. A VIOLATED
+    record is not deferred and never reaches s05 as debt.
+  provider_projection: >
+    The recorded view holds the declared premises and their representational
+    closure - everything the SelectionDecision cites as evidence of the
+    decision included - so the record is auditable and currentness walks it.
+    The provider is rendered the declared minimum only (`provider_projection:
+    DECLARED_ONLY`): the closure stays on the record as audit_only. Other
+    alternatives, their assessments, comparisons, preferences and a person's
+    rationale are lineage of the decision, not context for embodying it.
 
 allowed_unresolved:
   - "embodiment alternatives"
   - "every dimension, until s06 solves it"
   - "underdetermined parameter directions, recorded as UnresolvedDecision"
   - "allowable_travel on every compliant joint"
+  - "the occupancy of a symbolic envelope, until settlement resolves it (Unit E)"
+  - "every hard-requirement compliance record owed to s05, until its evidence exists (Unit E)"
 
 maturity_expectations:
   geometry: [FEATURE_LEVEL_EMBODIMENT, PARAMETERIZED_CONSTRUCTION_INTENT]
@@ -228,13 +329,13 @@ maturity_expectations:
 
 deterministic_exit_checks:
   - id: S05-C1
-    check: "every Interface has a Feature on EACH participant, or a declared compliant Joint"
+    check: "every Interface has, on EACH participating body, a Feature naming it in `interface`; a feature may not name an interface the branch does not carry or that does not involve its body; a COMPLIANT joint spanning two bodies is malformed and excuses nothing"
   - id: S05-C2
     check: "every blocking relation has a feature pair"
   - id: S05-C3
     check: "every declared limit has a PRODUCING feature pair"
   - id: S05-C4
-    check: "every Obligation is cited by some Realization carrying a verification predicate"
+    check: "every applicable obligation satisfiable at s05 (DISCHARGE) is cited by a Realization carrying a verification predicate; a preserved obligation (satisfiable upstream) or a non-applicable one may not be cited"
   - id: S05-C5
     check: "construction program totality: every referenced symbol is declared"
   - id: S05-C6
@@ -242,7 +343,7 @@ deterministic_exit_checks:
   - id: S05-C7
     check: "no parameter dependency cycle"
   - id: S05-C8
-    check: "no Feature occupies a FunctionalRegion whose role_policy excludes occupancy (re-run of s04b occupancy against the new geometry)"
+    check: "every Feature envelope is symbolic - expressions over declared parameters and unit-bearing constants, never a bare number; where an envelope resolves to constants in the region's ABSOLUTE basis, no Feature occupies a FunctionalRegion whose role_policy excludes occupancy (the same arithmetic as s04b); a symbolic or non-comparable envelope is re-evaluated after settlement, and is neither a finding nor a pass"
   - id: S05-C9
     check: "every declared clearance and interference-free pair has a Constraint"
   - id: S05-C10

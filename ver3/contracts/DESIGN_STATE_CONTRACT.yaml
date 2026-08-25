@@ -257,6 +257,14 @@ semantic_role_vocabulary:
     satisfy the hard requirements. Candidate-local and blind to what anyone
     wants; it decides the population a choice may act on and never which member
     of that population wins.
+  hard_requirement_compliance: >
+    Whether ONE candidate satisfies ONE hard requirement at the maturity the
+    evidence has now, with the declared point at which it can be answered and
+    the responsibility that owes the evidence while it cannot. Asked for by a
+    consumer that must know the hard-requirement debt it carries into its own
+    work, as distinct from eligibility evidence, which answers whether a
+    candidate may be chosen at all and is never re-read to decide that again.
+    (Unit E)
   selection_preference: >
     What the user WANTS among designs that already work, ranked and versioned. It
     can never make a candidate ineligible, and it is withheld from every
@@ -401,6 +409,16 @@ entity_families:
         Without this field, coverage flags every such obligation as unaddressed
         and the real omissions are invisible among them. Found by the regression
         run of the first s01+s02 revision.
+      - >
+        THE SAME FIELD SAYS WHOSE REALIZATION DISCHARGES IT (Unit E). An
+        obligation is discharged by the records of the stage it becomes
+        satisfiable at; every later stage PRESERVES what those records
+        established and may not re-claim it. For embodiment: an applicable
+        obligation satisfiable at s05 is discharged by a Realization there; one
+        satisfiable at s02, s03 or s04 was discharged by the selected branch's
+        own upstream records, which embodiment realizes and does not cite as
+        its own discharge (`obligation_duties`). Applicability - whose - is
+        `scope` and the AcceptanceContract; duty - what kind - is this field.
 
   Candidate:
     semantic_roles: [candidate]
@@ -805,7 +823,26 @@ entity_families:
     # Same shape as FunctionalRegion.volume and the same frame, so the two are
     # comparable by declaration rather than by an assumed convention, and the
     # same aabb/overlaps helpers judge both.
-    optional_fields: [envelope]
+    #
+    # UNIT E. THE ENVELOPE IS SYMBOLIC. Its `centre` and `half_extent`
+    # components are expressions in the constraint grammar - a declared
+    # Parameter (`{ref}`), a unit-bearing constant (`{const, unit}`), or
+    # arithmetic over them - and never a bare number. Embodiment states WHERE a
+    # feature's material may be in terms of the dimensions it declares; it does
+    # not know those dimensions, s06 settles them, and a bare number here was
+    # the model being asked to invent a solved dimension to make a record
+    # complete. Occupancy against a reserved region is evaluated where the
+    # expression resolves to constants comparable with the region's basis, and
+    # re-evaluated after settlement otherwise; neither is a claim of clearance.
+    # The referenced parameters are NOT premises of the feature: the envelope
+    # names them symbolically, exactly as a construction statement does.
+    #
+    # `interface` is the typed trace from a feature to the s03 Interface whose
+    # side it realizes. A feature that realizes an interaction names it;
+    # nothing infers it from prose or from the body alone, S05-C1 demands one
+    # per participating body per interface, and the interface is a premise of
+    # the feature so a revised interface stales the geometry that realized it.
+    optional_fields: [envelope, interface]
     field_semantics:
       envelope:
         kind: spatial
@@ -815,6 +852,12 @@ entity_families:
         target: Body
         cardinality: one
         resolvable: false
+      interface:
+        kind: reference
+        target: Interface
+        cardinality: one
+        resolvable: false
+        referent_population: COMMITTED_BRANCH
       feature_kind:
         kind: enum
     owned_by: s05
@@ -822,6 +865,15 @@ entity_families:
     required_fields: [entity_id, body, feature_kind, geometry]
     rules:
       - "OCCT/CAD face indices are never a persistent identity."
+      - >
+        A feature realizes one side of ONE interface, named by `interface`, or
+        realizes an obligation and names none. It never names an interface the
+        selected branch does not carry, and it never creates one: an interaction
+        is s03's to declare (Unit E).
+      - >
+        An envelope component is an expression, never a bare number. What a
+        feature's material occupies is stated in the dimensions embodiment
+        declares; the numbers are settlement's (Unit E).
 
   Realization:
     field_semantics:
@@ -2634,7 +2686,10 @@ assurance_families:
         value is one anything can act on. (S7-B closure)
 
   HardRequirementCompliance:
-    semantic_roles: [eligibility_evidence]
+    # UNIT E. A second role, so a downstream responsibility can ask for the
+    # compliance records themselves - the debt it owes - without asking for
+    # every piece of eligibility evidence.
+    semantic_roles: [eligibility_evidence, hard_requirement_compliance]
     field_semantics:
       candidate:
         kind: reference

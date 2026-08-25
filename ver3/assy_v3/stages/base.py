@@ -513,7 +513,9 @@ class Stage:
                             if a["verdict"] != "SATISFIED"],
                 consumer_view=record)
         payload = dict(inputs or {})
-        payload[self.context_key] = view.payload()
+        # THE PROVIDER PROJECTION (Unit E): everything under FULL, the declared
+        # minimum alone under DECLARED_ONLY. The recorded view keeps all of it.
+        payload[self.context_key] = view.provider_payload()
         # From the VIEW, not from state. Prompt code never queries DesignState:
         # the view is what was recorded, what carries provenance and what a
         # reviewer can read back, and a second path to the same facts would be a

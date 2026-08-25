@@ -36,8 +36,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from ..downstream import ir
 from ..state.patch import Op
-from ..view import (Source, Sufficiency, ViewStatus,
-                    applicable_obligation_ids)
+from ..view import DISCHARGE, PRESERVE, applicable_obligation_ids, obligation_duties
 from .base import Stage
 
 #: The feature vocabulary. Closed, because a feature kind the compiler cannot
@@ -58,22 +57,32 @@ realizes each declared relation, and what that geometry demands of the layout.
 
 RULES
 1. For EVERY physical interaction below, propose a FEATURE ON EACH PARTICIPATING
-   BODY that realizes that side of it. A feature names the body it is on, its
-   kind, and a short geometry description. Two bodies that touch need two
-   features, one on each.
-   Give each feature an `envelope` - {{"centre": [x,y,z], "half_extent": [x,y,z]}}
-   in the same frame as the functional regions below - so its occupancy can be
-   checked against the regions the design reserved. A feature with no envelope
-   cannot be checked and is reported as incomplete, not as passing.
-2. The obligations below are the ones THIS design must discharge - the ones
-   every candidate owes, plus the ones the selected candidate took on. For each
-   of them emit a REALIZATION citing the obligation ids it discharges, the
+   BODY that realizes that side of it, and name in `interface` the Interface it
+   realizes - the interaction's `at_interface`, an Interface id from the input.
+   Two bodies that touch need two features, one on each, both naming that same
+   interface. A feature that realizes an obligation rather than an interface
+   names none. Never name an interface that is not in the input: interactions
+   are decided upstream and you may not add, remove or reinterpret one.
+   A feature names the body it is on, its kind, and a short geometry
+   description. Give each feature an `envelope` -
+   {{"centre": [x,y,z], "half_extent": [x,y,z]}} in the same frame as the
+   functional regions and envelopes below - where EVERY component is an <expr>
+   (rule 4): a declared parameter, a unit-bearing constant, or arithmetic over
+   them. NEVER a bare number. The envelope says where the feature's material
+   may be, in the dimensions you declare; it is not a dimension. Its occupancy
+   against the reserved regions is evaluated where it resolves, and again after
+   the dimensions are settled. A feature with no envelope cannot be evaluated
+   and is reported as incomplete, not as passing.
+2. THE OBLIGATIONS BELOW ARE SPLIT INTO TWO DUTIES. For every obligation under
+   DISCHARGE emit a REALIZATION citing the obligation ids it discharges, the
    features that do the discharging, and a verification predicate - a sentence a
    later check could test. A realization with no predicate discharges nothing.
-   Do not cite an obligation that is not listed below. Obligations belonging to
-   an alternative that was not selected are not shown and are not yours to
-   discharge; claiming one would be asserting something about a mechanism this
-   design does not use.
+   Every obligation under PRESERVE was already discharged by the selected
+   mechanism's own upstream records - its interactions, routes and motions -
+   and your geometry realizes those records; do NOT cite a preserved obligation
+   as discharged, and do not cite an obligation that is not listed at all.
+   Obligations belonging to an alternative that was not selected are not shown
+   and are not yours.
 3. Declare a PARAMETER for every dimension your geometry depends on. Give it a
    symbol and a UNIT. Never give it a value: dimensions are solved later from the
    constraints you write, and a number here would be a guess wearing a solved
@@ -105,6 +114,12 @@ RULES
    clear turns a moving design into one that binds, and material cut from a
    member on a load route removes what carries the load. If your geometry cannot
    respect one of them, say so in `unresolved` rather than quietly overriding it.
+   The envelopes, regions, scale and mating sizes below are the PROVISIONAL
+   arrangement s04 committed, in s04's own basis: respect where things sit
+   relative to each other, and never copy a provisional extent, representative
+   size or region into a constant and present it as a dimension. A constant in
+   a constraint is a bound the design actually states - a hard requirement, or a
+   rule you can name; every other size is a parameter.
 7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds each
    body IN ITS OWN FRAME. Never place a body in the world; assembly poses are
    derived elsewhere. Operations are exactly:
@@ -115,6 +130,22 @@ RULES
    body must be consumed by nothing: that final result IS the body.
 8. Never invent a dimension to make something buildable. If a value is unknown,
    declare a parameter and constrain it.
+9. HARD REQUIREMENTS. Every requirement listed under HONOUR applies to this
+   design and your geometry must be compatible with it. Every compliance record
+   listed under OWED is a hard requirement THIS embodiment stage owes evidence
+   for and cannot yet establish: it stays NOT_YET_EVALUABLE until that evidence
+   exists. Do not assert or imply that any of them is satisfied, and do not cite
+   one as an obligation. Where your geometry turns on something such a
+   requirement bears on, declare the parameter it turns on and record what is
+   still open in `unresolved`.
+
+OBLIGATION DUTIES OF THIS EMBODIMENT
+------------------------------------
+{duties}
+
+HARD REQUIREMENTS
+-----------------
+{hard_requirements}
 
 DECIDED MECHANISM AND SPATIAL CONTEXT
 -------------------------------------
@@ -156,7 +187,7 @@ class S05Embodiment(Stage):
     #: `addresses_obligations`, and no ROI family at all.
     RESPONSE_ENVELOPE = (
         ("features", "Feature", "FEA-",
-         ("body", "feature_kind", "geometry", "envelope"), ()),
+         ("body", "feature_kind", "geometry", "interface", "envelope"), ()),
         ("realizations", "Realization", "RLZ-",
          ("addresses_obligations", "participating_features",
           "verification_predicate"), ()),
@@ -216,41 +247,14 @@ class S05Embodiment(Stage):
         return [e for e in (self.selected_candidate(view),
                             self.selection_decision(view)) if e]
 
-    def consumer_view(self, state, invocation=None, budget_chars=None):
-        """The committed selection decides the branch. A caller may not overrule it.
-
-        `build_consumer_view` lets a caller name an invocation branch, which is
-        right for s03/s04 - they run once per alternative, before anything is
-        chosen. s05 runs AFTER selection, once, on the alternative that was
-        chosen. So an invocation naming a different candidate is not a scoping
-        choice; it is a request to embody a design nobody selected.
-
-        Refused by returning a view that is not READY rather than by raising:
-        `invoke` already declines to call a provider on an unready view and
-        records why, so the refusal arrives as evidence instead of a traceback.
-        """
-        view = super().consumer_view(state, invocation, budget_chars)
-        asked = getattr(invocation, "branch", None)
-        committed = self.selected_candidate(view.payload())
-        if asked and committed and asked != committed:
-            view.status = ViewStatus.UPSTREAM_INSUFFICIENCY
-            detail = ("this invocation asks s05 to embody %s, but the standing "
-                      "selection commits to %s; embodiment may not be routed to "
-                      "a candidate nobody chose" % (asked, committed))
-            # The SHAPE the rest of the system reads. `_unmet` formats an
-            # assessment by its `requirement` and `coverage` keys, so an entry
-            # invented with different keys would crash the very reporting path
-            # that exists to explain the refusal.
-            view.assessment = list(view.assessment) + [{
-                "requirement": "selection_commitment",
-                "source": Source.REASONING_PREMISE.value,
-                "verdict": Sufficiency.MISSING_UPSTREAM.value,
-                "coverage": [{"obligation": "selection_decision",
-                              "verdict": Sufficiency.MISSING_UPSTREAM.value,
-                              "expected_count": 1, "selected_count": 0}],
-                "families": ["SelectionDecision"], "selected": 0,
-                "detail": detail, "trace": {"contradiction": detail}}]
-        return view
+    # THE BRANCH IS THE SELECTION'S, NOT A CALLER'S. This class used to carry
+    # its own override refusing an invocation that named a candidate other than
+    # the committed one. That rule is now the generic builder's, declared by
+    # `branch_authority: SELECTION_DECISION` on the s05 responsibility (Unit E):
+    # the view is built on the committed branch whatever a caller passes, and a
+    # contradicting invocation is recorded and leaves the view UPSTREAM_
+    # INSUFFICIENT, which `invoke` refuses to call a provider on. Nothing here
+    # keeps a second copy of that rule.
 
     @classmethod
     def render_response_schema(cls) -> str:
@@ -281,6 +285,8 @@ class S05Embodiment(Stage):
             for op, p in sorted(ir.OPCODES.items()))
         return PROMPT.format(
             projection=_render(proj),
+            duties=render_duties(proj),
+            hard_requirements=render_hard_requirements(proj),
             opcodes=opcodes,
             opcode_names=" | ".join(sorted(ir.OPCODES)),
             feature_kinds=" | ".join(FEATURE_KINDS),
@@ -318,6 +324,13 @@ class S05Embodiment(Stage):
             fields = {"body": f["body"], "feature_kind": f["feature_kind"],
                       "geometry": f["geometry"]}
             premises = [f["body"]]
+            if f.get("interface"):
+                # THE TYPED TRACE (Unit E): which s03 interface this feature
+                # realizes a side of. A reference the boundary resolves, and a
+                # premise, so a revised interface stales the geometry that
+                # realized it. Never inferred from prose or from the body.
+                fields["interface"] = f["interface"]
+                premises.append(f["interface"])
             if f.get("envelope") is not None:
                 fields["envelope"] = f["envelope"]
                 # ONLY when there is an envelope. A feature with no coordinates
@@ -433,6 +446,74 @@ def _features_by_body(parsed: Dict[str, Any]) -> Dict[str, Set[str]]:
     return out
 
 
+def embodiment_duties(view: Dict[str, Any]) -> Dict[str, Set[str]]:
+    """{DISCHARGE, PRESERVE} for the selected candidate, from the one rule.
+
+    DELEGATES to `obligation_duties` exactly as `applicable_obligations_for_
+    embodiment` delegates to `applicable_obligation_ids`: the prompt lists the
+    two duties from the recorded payload and S05-C4 judges against the same
+    payload by the same function, so the stage cannot be asked one thing and
+    marked against another (Unit E).
+    """
+    return obligation_duties(_rows(view, "Obligation"),
+                             _rows(view, "AcceptanceContract"), "s05")
+
+
+def owed_hard_requirements(view: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """The compliance records in the view. THE VIEW ALREADY NARROWED THEM: the
+    `hard_requirement_debt_to_carry` premise admits only records that are
+    NOT_YET_EVALUABLE at a DOWNSTREAM point and name s05 as evidence owner, so
+    what is here is exactly the debt this embodiment owes and nothing is
+    re-decided from a status or a kind."""
+    return sorted(_rows(view, "HardRequirementCompliance"),
+                  key=lambda r: str(r.get("entity_id")))
+
+
+def render_duties(view: Dict[str, Any]) -> str:
+    duties = embodiment_duties(view)
+    statements = {r.get("entity_id"): r for r in _rows(view, "Obligation")}
+
+    def block(title, ids):
+        lines = [title]
+        if not ids:
+            lines.append("  (none)")
+        for oid in sorted(ids):
+            rec = statements.get(oid) or {}
+            lines.append("  - %s (satisfiable at %s): %s"
+                         % (oid, rec.get("satisfiable_at"), rec.get("statement")))
+        return lines
+    return "\n".join(
+        block("DISCHARGE - cite each of these in a realization with a predicate:",
+              duties[DISCHARGE])
+        + block("PRESERVE - already discharged by the selected mechanism's upstream "
+                "records; realize those records, never cite these as discharged:",
+                duties[PRESERVE]))
+
+
+def render_hard_requirements(view: Dict[str, Any]) -> str:
+    constraints = {r.get("entity_id"): r for r in _rows(view, "DesignConstraint")}
+    lines = ["HONOUR - every hard requirement the design states:"]
+    if not constraints:
+        lines.append("  (none stated)")
+    for cid, rec in sorted(constraints.items()):
+        lines.append("  - %s [%s]: %s%s"
+                     % (cid, rec.get("kind"), rec.get("statement"),
+                        " parameters=%s" % _render(rec.get("parameters"))
+                        .replace("\n", " ") if rec.get("parameters") else ""))
+    lines.append("OWED - compliance records this embodiment stage owes evidence for; "
+                 "each stays NOT_YET_EVALUABLE here and none may be asserted satisfied:")
+    owed = owed_hard_requirements(view)
+    if not owed:
+        lines.append("  (none)")
+    for rec in owed:
+        cid = rec.get("constraint")
+        lines.append("  - %s owes %s [%s]: %s"
+                     % (rec.get("entity_id"), cid,
+                        (constraints.get(cid) or {}).get("kind"),
+                        (constraints.get(cid) or {}).get("statement")))
+    return "\n".join(lines)
+
+
 #: Required of every Joint by DESIGN_STATE_CONTRACT. A record missing one of
 #: these is not a joint the contract recognises, whatever its label says.
 JOINT_REQUIRED = ("joint_type", "parent_group", "child_group", "dof",
@@ -496,7 +577,6 @@ def check_c1_interface_features(parsed, view) -> List[str]:
     sentence as a structural fact. That claim is NOT automatically verified and
     is not asserted anywhere below.
     """
-    by_body = _features_by_body(parsed)
     groups = _body_of_group(view)
     out = []
 
@@ -511,11 +591,34 @@ def check_c1_interface_features(parsed, view) -> List[str]:
                        "relation between rigid groups of ONE body"
                        % (joint.get("entity_id"), parent, child))
 
-    for iface in _rows(view, "Interface"):
+    # THE TYPED TRACE (Unit E). A feature says which interface it realizes a
+    # side of; a body merely having SOME feature proves nothing about an
+    # interface. An interface the branch does not carry may not be named - an
+    # interaction is s03's to declare - and a body the interface does not
+    # involve cannot realize a side of it.
+    interfaces = {i.get("entity_id"): i for i in _rows(view, "Interface")}
+    realized: Dict[str, Set[str]] = {}
+    for f in parsed.get("features") or []:
+        named = f.get("interface")
+        if not named:
+            continue
+        iface = interfaces.get(named)
+        if iface is None:
+            out.append("S05-C1: feature %s names interface %s, which the selected "
+                       "branch does not carry; an interaction is s03's to declare "
+                       "and none may be invented here" % (f.get("id"), named))
+            continue
+        if f.get("body") not in (iface.get("bodies") or []):
+            out.append("S05-C1: feature %s on %s names interface %s, which does "
+                       "not involve that body" % (f.get("id"), f.get("body"), named))
+            continue
+        realized.setdefault(named, set()).add(f.get("body"))
+
+    for iid, iface in sorted(interfaces.items()):
         bodies = [b for b in (iface.get("bodies") or []) if b]
-        for body in [b for b in bodies if not by_body.get(b)]:
+        for body in [b for b in bodies if b not in realized.get(iid, set())]:
             out.append("S05-C1: interface %s involves body %s and no feature "
-                       "realizes that side" % (iface.get("entity_id"), body))
+                       "naming that interface realizes that side" % (iid, body))
     return out
 
 
@@ -621,8 +724,10 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
     the selected candidate answerable for obligations that exist only because a
     rejected alternative worked differently.
     """
-    applicable = applicable_obligations_for_embodiment(view)
+    duties = embodiment_duties(view)
+    applicable = duties[DISCHARGE] | duties[PRESERVE]
     visible = _ids(view, "Obligation")
+    dated = {r.get("entity_id"): r.get("satisfiable_at") for r in _rows(view, "Obligation")}
 
     cited: Set[str] = set()
     out = []
@@ -643,10 +748,21 @@ def check_c4_obligations_realized(parsed, view) -> List[str]:
                 "apply to the selected candidate%s"
                 % (r.get("id"), oid,
                    "" if oid in visible else " and is not in this view at all"))
-    for oid in sorted(applicable):
+        # A VISIBLE OBLIGATION IS NOT A DUTY TO DISCHARGE (Unit E). One the
+        # selected branch's upstream records already discharged is preserved by
+        # realizing those records; citing it as this geometry's discharge is a
+        # claim over work another stage established.
+        for oid in sorted(set(claimed) & duties[PRESERVE]):
+            out.append(
+                "S05-C4: realization %s cites %s as discharged, but the selected "
+                "branch's upstream records already discharged it (satisfiable at "
+                "%s); embodiment preserves it and may not claim it"
+                % (r.get("id"), oid, dated.get(oid)))
+    for oid in sorted(duties[DISCHARGE]):
         if oid not in cited:
-            out.append("S05-C4: obligation %s applies to the selected candidate "
-                       "and is cited by no realization" % oid)
+            out.append("S05-C4: obligation %s applies to the selected candidate, "
+                       "is embodiment's to discharge (satisfiable at %s), and is "
+                       "cited by no realization" % (oid, dated.get(oid)))
     return out
 
 
@@ -733,7 +849,23 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
     from .s04_envelope_and_motion import (aabb, excludes_occupancy,
                                           overlaps, unknown_region_role)
 
-    out_unknown: List[str] = []
+    # THE GRAMMAR, every feature, regions or none (Unit E). An envelope
+    # component is an expression over declared parameters and unit-bearing
+    # constants; a bare number is a dimension nobody solved, and is refused
+    # whether or not there is a region to compare it with.
+    declared = {p.get("id") for p in parsed.get("parameters") or []}
+    boxes: Dict[str, Any] = {}
+    out_grammar: List[str] = []
+    scale = _rows(view, "ReferenceScale")
+    for f in parsed.get("features") or []:
+        if f.get("envelope") is None:
+            continue
+        exprs, problems = envelope_expressions(f.get("id"), f.get("envelope"), declared)
+        out_grammar.extend(problems)
+        if exprs is not None:
+            boxes[f.get("id")] = envelope_box(exprs, scale[0] if len(scale) == 1 else None)
+
+    out_unknown: List[str] = list(out_grammar)
     regions = []
     for r in _rows(view, "FunctionalRegion"):
         if unknown_region_role(r.get("role")):
@@ -764,7 +896,14 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
                        "occupancy against %d declared region(s) cannot be "
                        "evaluated" % (f.get("id"), len(regions)))
             continue
-        box = aabb(centre, half)
+        box = boxes.get(f.get("id"))
+        if box is None:
+            # SYMBOLIC, OR NOT COMPARABLE WITH THE REGION'S BASIS. The
+            # envelope rests on dimensions settlement has not decided, or on a
+            # unit the s04 basis cannot convert; occupancy is re-evaluated
+            # after settlement (Unit E). Not a finding and not a pass: nothing
+            # here claims clearance.
+            continue
         for region, region_box in regions:
             # WHICH ROLES EXCLUDE OCCUPANCY is the contract's to say, not this
             # check's. `excludes_occupancy` reads FunctionalRegion.role_policy,
@@ -778,6 +917,85 @@ def check_c8_region_intrusion(parsed, view) -> List[str]:
                            % (f.get("id"), region.get("role"),
                               region.get("entity_id")))
     return out
+
+
+def envelope_expressions(feature_id: Any, envelope: Any, declared: Set[str]
+                         ) -> Tuple[Optional[Dict[str, List[Any]]], List[str]]:
+    """Parse a symbolic envelope: (expressions by axis list, problems).
+
+    The constraint grammar, at the leaves of a spatial claim: `{ref}` naming a
+    declared parameter, `{const, unit}`, or arithmetic. A bare number is the
+    contradiction Unit E removed - a solved dimension demanded of the stage
+    that is told never to invent one - and is refused by name. A reference to
+    an undeclared parameter is refused as C5 refuses it in a statement.
+    """
+    if not isinstance(envelope, dict):
+        return None, ["S05-C8: feature %s declares an envelope that is not an object"
+                      % feature_id]
+    out: Dict[str, List[Any]] = {}
+    problems: List[str] = []
+    for axis_list in ("centre", "half_extent"):
+        components = envelope.get(axis_list)
+        if not isinstance(components, list) or len(components) != 3:
+            problems.append("S05-C8: feature %s envelope %s is not three components"
+                            % (feature_id, axis_list))
+            continue
+        parsed_components = []
+        for index, node in enumerate(components):
+            if isinstance(node, bool) or isinstance(node, (int, float)):
+                problems.append(
+                    "S05-C8: feature %s envelope %s[%d] is a bare number (%r); a "
+                    "dimension is a declared parameter or a unit-bearing constant, "
+                    "never a value invented here" % (feature_id, axis_list, index, node))
+                continue
+            try:
+                expr = ir.Expr.parse(node)
+            except ir.IRError as exc:
+                problems.append("S05-C8: feature %s envelope %s[%d]: %s"
+                                % (feature_id, axis_list, index, exc))
+                continue
+            for ref in sorted(expr.refs()):
+                if ref not in declared:
+                    problems.append("S05-C8: feature %s envelope references %s, which "
+                                    "no Parameter declares" % (feature_id, ref))
+            parsed_components.append(expr)
+        if len(parsed_components) == 3:
+            out[axis_list] = parsed_components
+    if problems or len(out) != 2:
+        return None, problems
+    return out, []
+
+
+def _constant_in_basis(expr: Any, scale: Optional[Dict[str, Any]]) -> Optional[float]:
+    """A constant expression as a coordinate in the s04 basis, or None.
+
+    Comparable only when the basis is ABSOLUTE and states the constant's unit:
+    one coordinate is then `per_unit` of that unit. A symbolic expression, a
+    RELATIVE basis, or a unit the basis does not state gives None - the
+    occupancy question is deferred, never answered by a conversion nobody
+    declared (the ReferenceScale rule, and Unit D's dimensional-requirement rule).
+    """
+    if expr is None or expr.const is None:
+        return None
+    if not scale or scale.get("basis") != "ABSOLUTE":
+        return None
+    absolute = scale.get("absolute") or {}
+    per_unit = absolute.get("per_unit")
+    if absolute.get("unit") != expr.unit or not isinstance(per_unit, (int, float)) \
+            or isinstance(per_unit, bool) or per_unit <= 0:
+        return None
+    return float(expr.const) / float(per_unit)
+
+
+def envelope_box(exprs: Dict[str, List[Any]], scale: Optional[Dict[str, Any]]):
+    """The numeric aabb of a fully constant, comparable envelope, else None."""
+    from .s04_envelope_and_motion import aabb
+
+    centre = [_constant_in_basis(e, scale) for e in exprs["centre"]]
+    half = [_constant_in_basis(e, scale) for e in exprs["half_extent"]]
+    if any(v is None for v in centre + half):
+        return None
+    return aabb(centre, half)
 
 
 #: The interaction kind that IS a declared clearance. From s03's own vocabulary:

@@ -4,6 +4,7 @@ from .consumer_view import (ConsumerView, InvocationContext, RequiredMinimum, Re
                             Sufficiency, ViewStatus, build_consumer_view,
                             AmbiguousSelection,
                             applicable_obligation_ids, committed_branch,
+                            obligation_duties, DISCHARGE, PRESERVE,
                             derive_required_minimum,
                             derive_source_a, derive_source_b, render,
                             select_instances)
@@ -11,7 +12,7 @@ from .boundary import consumer_view_for, responsibility_contract
 
 __all__ = ["ConsumerView", "InvocationContext", "RequiredMinimum", "Requirement", "Source",
            "AmbiguousSelection", "Sufficiency", "ViewStatus",
-           "applicable_obligation_ids",
+           "applicable_obligation_ids", "obligation_duties", "DISCHARGE", "PRESERVE",
            "build_consumer_view", "committed_branch",
            "derive_required_minimum", "derive_source_a", "derive_source_b",
            "render", "select_instances",

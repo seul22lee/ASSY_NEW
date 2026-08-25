@@ -179,7 +179,12 @@ class TestDeclaredCorpus(_Base):
         # by the human review pass, MAY_BE_EMPTY. A person shown a design that
         # has already committed must see the commitment their SELECT would
         # revise, and the decision family was in no review view.
-        self.assertEqual(71, len(rows), "the premise corpus changed size")
+        # 73 at the post-selection handoff closure (Unit E): s05 declares
+        # `hard_requirement_to_honour` (every stated hard requirement,
+        # DESIGN_WIDE) and `hard_requirement_debt_to_carry` (the compliance
+        # records owed to s05, COMMITTED_BRANCH, applicability
+        # DEFERRED_TO_INVOKING_RESPONSIBILITY), both MAY_BE_EMPTY.
+        self.assertEqual(73, len(rows), "the premise corpus changed size")
         for sid, p in rows:
             sel = p.get("instance_selection")
             self.assertTrue(sel, "%s/%s declares no instance_selection"

@@ -39,10 +39,12 @@ def _ref(p):
 
 
 EMBODIMENT = {
+    # Unit E: the feature names the interface it realizes, and its envelope is
+    # symbolic - unit-bearing constants here, never bare numbers.
     "features": [{"id": "FEA-0001", "body": "BOD-0001", "feature_kind": "BORE",
-                  "geometry": "axial bore",
-                  "envelope": {"centre": [20.0, 15.0, 10.0],
-                               "half_extent": [6.0, 6.0, 10.0]}}],
+                  "geometry": "axial bore", "interface": "IFC-0001",
+                  "envelope": {"centre": [_mm(20.0), _mm(15.0), _mm(10.0)],
+                               "half_extent": [_mm(6.0), _mm(6.0), _mm(10.0)]}}],
     "realizations": [{"id": "RLZ-0001", "addresses_obligations": ["OBL-0001"],
                       "participating_features": ["FEA-0001"],
                       "verification_predicate":

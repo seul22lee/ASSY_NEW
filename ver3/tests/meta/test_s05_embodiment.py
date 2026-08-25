@@ -25,8 +25,11 @@ def view(**families):
     return {k: list(v) for k, v in families.items()}
 
 
-def feature(fid, body, kind="FACE"):
-    return {"id": fid, "body": body, "feature_kind": kind, "geometry": "a face"}
+def feature(fid, body, kind="FACE", interface=None):
+    out = {"id": fid, "body": body, "feature_kind": kind, "geometry": "a face"}
+    if interface:
+        out["interface"] = interface
+    return out
 
 
 def realization(rid, obligations, features, predicate="the gap stays positive"):
@@ -42,14 +45,39 @@ class TestC1InterfaceFeatures(unittest.TestCase):
                          "interaction_kind": "CONTACT"}])
 
     def test_a_feature_on_each_side_passes(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1")]}
         self.assertEqual([], s05.check_c1_interface_features(parsed, self.V))
 
     def test_one_side_unrealised_is_reported(self):
         """Geometry that touches nothing. The other body has no surface to meet."""
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1")]}
         problems = s05.check_c1_interface_features(parsed, self.V)
         self.assertTrue(any("BOD-2" in p for p in problems), problems)
+
+    def test_a_feature_on_the_body_that_names_no_interface_realizes_nothing(self):
+        """Unit E: the trace is typed. Some feature on BOD-2 is not a feature
+        that realizes IFC-1's side on BOD-2."""
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2")]}
+        problems = s05.check_c1_interface_features(parsed, self.V)
+        self.assertTrue(any("BOD-2" in p and "IFC-1" in p for p in problems), problems)
+
+    def test_an_interface_the_branch_does_not_carry_may_not_be_named(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1"),
+                               feature("FEA-9", "BOD-1", interface="IFC-INVENTED")]}
+        problems = s05.check_c1_interface_features(parsed, self.V)
+        self.assertTrue(any("IFC-INVENTED" in p and "invented" in p for p in problems),
+                        problems)
+
+    def test_a_body_the_interface_does_not_involve_cannot_realize_it(self):
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1"),
+                               feature("FEA-3", "BOD-3", interface="IFC-1")]}
+        problems = s05.check_c1_interface_features(parsed, self.V)
+        self.assertTrue(any("BOD-3" in p and "does not involve" in p for p in problems),
+                        problems)
 
 
 class TestC2BlockingPairs(unittest.TestCase):
@@ -214,13 +242,25 @@ class TestC7NoParameterCycle(unittest.TestCase):
         self.assertEqual([], s05.check_c7_no_parameter_cycle(parsed))
 
 
+def mm(v):
+    return {"const": float(v), "unit": "mm"}
+
+
 def box(cx, cy, cz, hx=1.0, hy=1.0, hz=1.0):
-    return {"centre": [cx, cy, cz], "half_extent": [hx, hy, hz]}
+    """A fully constant envelope in millimetres (Unit E: never bare numbers)."""
+    return {"centre": [mm(cx), mm(cy), mm(cz)],
+            "half_extent": [mm(hx), mm(hy), mm(hz)]}
 
 
 def region(rid, role, centre, half, bodies=("BOD-1",)):
     return {"entity_id": rid, "role": role, "owning_bodies": list(bodies),
             "volume": {"centre": list(centre), "half_extent": list(half)}}
+
+
+#: The s04 basis a constant envelope is compared in: ABSOLUTE, one coordinate
+#: per millimetre, so a constant of v mm is the coordinate v.
+SCALE_MM = {"entity_id": "SCL-1", "basis": "ABSOLUTE",
+            "absolute": {"unit": "mm", "per_unit": 1.0}}
 
 
 class TestC8RegionIntrusion(unittest.TestCase):
@@ -232,7 +272,8 @@ class TestC8RegionIntrusion(unittest.TestCase):
     same aabb/overlaps arithmetic s04b uses.
     """
 
-    V = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))])
+    V = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))],
+             ReferenceScale=[SCALE_MM])
 
     def test_the_fixture_declares_a_usable_region(self):
         """Otherwise every case below passes for the wrong reason."""
@@ -257,7 +298,9 @@ class TestC8RegionIntrusion(unittest.TestCase):
         from ver3.assy_v3.stages.s04_envelope_and_motion import aabb, overlaps
         touching = box(6, 0, 0)          # region half-extent 5, feature half 1
         parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=touching)]}
-        expected = overlaps(aabb(touching["centre"], touching["half_extent"]),
+        numbers = lambda nodes: [n["const"] for n in nodes]           # noqa: E731
+        expected = overlaps(aabb(numbers(touching["centre"]),
+                                 numbers(touching["half_extent"])),
                             aabb([0, 0, 0], [5, 5, 5]))
         problems = s05.check_c8_region_intrusion(parsed, self.V)
         self.assertEqual(bool(expected), bool(problems))
@@ -278,14 +321,60 @@ class TestC8RegionIntrusion(unittest.TestCase):
         semantics, and the only thing it could prove was that an unknown role
         was silently ignored.
         """
-        v = view(FunctionalRegion=[region("FRG-2", "SUPPORT", (0, 0, 0), (5, 5, 5))])
+        v = view(FunctionalRegion=[region("FRG-2", "SUPPORT", (0, 0, 0), (5, 5, 5))],
+                 ReferenceScale=[SCALE_MM])
         parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
         self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
+
+    def test_a_symbolic_envelope_is_deferred_not_judged(self):
+        """Unit E. An envelope over declared parameters rests on dimensions
+        settlement has not decided: no finding, and no claim of clearance."""
+        parsed = {"parameters": [{"id": "PRM-R", "symbol": "r", "unit": "mm"}],
+                  "features": [dict(feature("FEA-1", "BOD-1"), envelope={
+                      "centre": [mm(0), mm(0), mm(0)],
+                      "half_extent": [{"ref": "PRM-R"}, {"ref": "PRM-R"}, mm(1)]})]}
+        self.assertEqual([], s05.check_c8_region_intrusion(parsed, self.V))
+
+    def test_a_bare_number_in_an_envelope_is_refused(self):
+        """Unit E. The contradiction removed: a number nobody solved."""
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope={
+            "centre": [0, 0, 0], "half_extent": [mm(1), mm(1), mm(1)]})]}
+        problems = s05.check_c8_region_intrusion(parsed, self.V)
+        self.assertTrue(any("bare number" in p for p in problems), problems)
+        # regions or no regions: the grammar is judged either way
+        self.assertTrue(any("bare number" in p
+                            for p in s05.check_c8_region_intrusion(parsed, view())))
+
+    def test_an_undeclared_parameter_in_an_envelope_is_refused(self):
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope={
+            "centre": [mm(0), mm(0), mm(0)],
+            "half_extent": [{"ref": "PRM-NOBODY"}, mm(1), mm(1)]})]}
+        problems = s05.check_c8_region_intrusion(parsed, self.V)
+        self.assertTrue(any("PRM-NOBODY" in p for p in problems), problems)
+
+    def test_a_relative_basis_defers_a_constant_envelope(self):
+        """A constant in millimetres against a region in a RELATIVE basis is not
+        comparable; nothing here invents the scale s04 left free."""
+        v = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))],
+                 ReferenceScale=[{"entity_id": "SCL-1", "basis": "RELATIVE"}])
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
+        self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
+
+    def test_the_basis_factor_scales_a_constant_into_the_region_frame(self):
+        """Ten millimetres per coordinate: a 100 mm centre is coordinate 10,
+        which lies inside a region of half-extent 20 at the origin."""
+        v = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (20, 20, 20))],
+                 ReferenceScale=[{"entity_id": "SCL-1", "basis": "ABSOLUTE",
+                                  "absolute": {"unit": "mm", "per_unit": 10.0}}])
+        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(100, 0, 0))]}
+        problems = s05.check_c8_region_intrusion(parsed, v)
+        self.assertTrue(any("FRG-1" in p for p in problems), problems)
 
     def test_an_undeclared_role_is_reported_rather_than_ignored(self):
         """An undeclared role has no occupancy policy. Passing it would be
         deciding the policy here, in a check, by omission."""
-        v = view(FunctionalRegion=[region("FRG-9", "GRIP", (0, 0, 0), (5, 5, 5))])
+        v = view(FunctionalRegion=[region("FRG-9", "GRIP", (0, 0, 0), (5, 5, 5))],
+                 ReferenceScale=[SCALE_MM])
         parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
         problems = s05.check_c8_region_intrusion(parsed, v)
         self.assertTrue(any("not in the declared vocabulary" in p
@@ -450,18 +539,19 @@ class TestC1RequiresBothSidesAndCompliantJointsAreInternal(unittest.TestCase):
             Joint=[self.joint("JNT-1", **over)])
 
     def test_a_two_body_interface_needs_both_sides(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1")]}
         problems = s05.check_c1_interface_features(parsed, self.TWO_BODY)
         self.assertTrue(any("BOD-2" in p for p in problems), problems)
 
     def test_both_sides_featured_passes(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1")]}
         self.assertEqual([], s05.check_c1_interface_features(parsed, self.TWO_BODY))
 
     def test_an_internal_compliant_joint_does_not_excuse_the_other_body(self):
         """The repair, stated directly. A flexure inside BOD-1 says nothing
         about whether BOD-2 was given the face it touches."""
-        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM", interface="IFC-1")]}
         problems = s05.check_c1_interface_features(parsed, self.internal_compliant())
         self.assertTrue(any("BOD-2" in p for p in problems),
                         "a compliant joint internal to BOD-1 was allowed to "
@@ -469,8 +559,8 @@ class TestC1RequiresBothSidesAndCompliantJointsAreInternal(unittest.TestCase):
 
     def test_an_internal_compliant_joint_is_not_itself_reported(self):
         """It is canonical. Featuring both sides must leave it uncomplained-about."""
-        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM"),
-                               feature("FEA-2", "BOD-2")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", "SNAP_ARM", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1")]}
         self.assertEqual([], s05.check_c1_interface_features(
             parsed, self.internal_compliant()))
 
@@ -479,7 +569,8 @@ class TestC1RequiresBothSidesAndCompliantJointsAreInternal(unittest.TestCase):
         v = self.internal_compliant()
         v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-1"},
                            {"entity_id": "RGP-2", "body": "BOD-2"}]
-        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1")]}
         problems = s05.check_c1_interface_features(parsed, v)
         self.assertTrue(any("ONE body" in p for p in problems), problems)
 
@@ -489,7 +580,8 @@ class TestC1RequiresBothSidesAndCompliantJointsAreInternal(unittest.TestCase):
         v = self.internal_compliant(jtype="REVOLUTE")
         v["RigidGroup"] = [{"entity_id": "RGP-1", "body": "BOD-1"},
                            {"entity_id": "RGP-2", "body": "BOD-2"}]
-        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+        parsed = {"features": [feature("FEA-1", "BOD-1", interface="IFC-1"),
+                               feature("FEA-2", "BOD-2", interface="IFC-1")]}
         self.assertEqual([], s05.check_c1_interface_features(parsed, v))
 
     def test_the_internal_helper_keys_by_body_not_by_pair(self):

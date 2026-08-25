@@ -132,6 +132,15 @@ instance_selection_vocabulary:
       one scenario or configuration, so no anchor excludes it. One rule covers
       scenario, configuration, actor and any future anchor, because it compares
       DECLARED RELATIONS against DECLARED ANCHORS and names neither.
+    DEFERRED_TO_INVOKING_RESPONSIBILITY: >
+      An instance applies when it is a hard-requirement compliance record that
+      is honestly unanswered at a DOWNSTREAM evaluation point and names the
+      invoking responsibility's authority stage as its evidence owner - the one
+      reading feasibility keeps (`compliance_deferred`), plus the owner test.
+      A record of any other family passes through untouched. This is how a
+      downstream responsibility is handed exactly the hard-requirement debt it
+      owes (Unit E): typed fields only, never a constraint kind, a reason
+      string or a candidate id.
     invocation_anchors: >
       An anchor is a canonical entity id together with the family it belongs to:
       what THIS reasoning invocation is about. It guides selection and is not
@@ -142,6 +151,41 @@ instance_selection_vocabulary:
       A new rule is a new named entry resolved at one point in the resolver. It
       must be derivable from canonical structured relations - never from text in
       a field, never from a stage id, never from a model's opinion.
+
+# ---------------------------------------------------------------- UNIT E
+# TWO DECLARATIONS A POST-SELECTION CONSUMER MAY MAKE. Both are read by the
+# generic view builder and by nothing else; a stage that declares neither
+# behaves exactly as before.
+post_selection_consumer_declarations:
+  branch_authority:
+    purpose: >
+      WHERE a consumer's branch comes from. Before selection a caller names the
+      branch it is working on (INVOCATION, the default): s03 and s04 run once
+      per alternative. After selection there is one design, and the branch is
+      the standing SelectionDecision's to name (SELECTION_DECISION): the view
+      is built on the committed branch whatever a caller passes, every
+      INVOCATION_BRANCH population resolves to that branch, and an invocation
+      naming a different candidate is recorded as a contradiction that leaves
+      the view UPSTREAM_INSUFFICIENT - so no caller can route embodiment to a
+      candidate nobody chose, and INVOCATION_BRANCH and COMMITTED_BRANCH cannot
+      disagree for such a consumer.
+    values: [INVOCATION, SELECTION_DECISION]
+  provider_projection:
+    purpose: >
+      WHAT OF THE VIEW A PROVIDER IS SHOWN. The recorded view always holds the
+      declared premises AND their representational closure - every referent a
+      selected value names, so the record is auditable and currentness can
+      walk it. FULL (the default) renders all of it to the provider.
+      DECLARED_ONLY renders exactly the instances the responsibility's declared
+      required minimum selected - its premise classes and the representational
+      dependencies of its own outputs - and keeps the closure on the record
+      only. A post-selection consumer reasons about one committed design; what
+      the commitment record cites as evidence of the decision (other
+      alternatives, their assessments, comparisons, preferences, a person's
+      rationale) is audit lineage of the decision, not engineering context for
+      embodying it, and the way to give a provider more is to declare a premise
+      class for it.
+    values: [FULL, DECLARED_ONLY]
 
 stages:
   s01:
@@ -1640,6 +1684,10 @@ stages:
       sweeping a composite motion this method cannot compute
   s05:
     name: physical embodiment
+    # UNIT E. A post-selection consumer: the branch is the standing
+    # SelectionDecision's, and the provider is shown the declared minimum only.
+    branch_authority: SELECTION_DECISION
+    provider_projection: DECLARED_ONLY
     # THE CANONICAL DECLARATION, added because the runtime needs one.
     #
     # ver3/contracts/stages/S05_CONTRACT.yaml has described this stage in detail
@@ -1662,21 +1710,34 @@ stages:
     - In what order is each body constructed, in its own frame?
     required_reasoning_premise_classes:
     - class: interaction_to_realize
+      # UNIT E. COMMITTED_BRANCH, like every branch-local premise of this
+      # responsibility: the branch is the selection's, never a caller's. The
+      # effect an interaction transmits comes with it, so a feature is asked to
+      # realize a named effect and not a bare relation.
       instance_selection:
-        population: INVOCATION_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: REQUIRED_NONEMPTY
-        existence_why: a stage that realizes interactions as geometry has nothing to realize
-          without them
-      what: the physical interactions this branch declared
+        by_role:
+        - role: physical_interaction
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: REQUIRED_NONEMPTY
+          existence_why: a stage that realizes interactions as geometry has nothing to
+            realize without them
+        - role: physical_effect_obligation
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: the effect an interaction discharges is design-wide material the
+            branch rests on; a branch whose interactions cite none has none to show
+      what: the physical interactions this branch declared, and the effects they discharge
       justified_by_question: Which feature realizes each side of each interaction?
       why: A feature pair exists because an interaction demanded it; without the interaction
         the geometry is invented.
       requires_semantics:
       - physical_interaction
+      - physical_effect_obligation
     - class: topology_with_axes
       instance_selection:
-        population: INVOCATION_BRANCH
+        population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: a feature is geometry ON a body, and it needs the body to be on
@@ -1690,8 +1751,11 @@ stages:
       - topology_relation
       - kinematic_axis
     - class: spatial_commitment
+      # UNIT E. What s04 committed is the ARRANGEMENT - which body sits where,
+      # in s04's basis, provisionally - and the regions and motion it reserved.
+      # It is respected, never copied: a provisional extent is not a dimension.
       instance_selection:
-        population: INVOCATION_BRANCH
+        population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
         existence: REQUIRED_NONEMPTY
         existence_why: an envelope constraint binds a layout parameter, and there is no
@@ -1703,6 +1767,13 @@ stages:
       requires_semantics:
       - spatial_commitment
     - class: obligation_to_discharge
+      # UNIT E. WHICH of the applicable obligations embodiment DISCHARGES and
+      # which it PRESERVES is the obligation's own `satisfiable_at`
+      # (`obligation_duties`): one dated at this stage is discharged by a
+      # Realization here; one satisfiable upstream was discharged by the
+      # selected branch's own s03/s04 records, which embodiment preserves by
+      # realizing them and may not re-claim. Applicability (whose) and duty
+      # (what kind) are two questions, and both are read from the record.
       instance_selection:
         population: DESIGN_WIDE
         coverage: ALL_APPLICABLE
@@ -1724,7 +1795,7 @@ stages:
       - physical_obligation
     - class: declared_clearance_relation
       instance_selection:
-        population: INVOCATION_BRANCH
+        population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a branch may declare no clearance or interference-free pair yet
@@ -1794,18 +1865,27 @@ stages:
       - candidate_acceptance
     - class: realized_configuration_to_preserve
       instance_selection:
-        population: COMMITTED_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: MAY_BE_EMPTY
-        existence_why: a static mechanism has no distinguished configurations
-      what: the configurations this branch established
+        by_role:
+        - role: realized_configuration
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a static mechanism has no distinguished configurations
+        - role: configuration_state
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a static mechanism names no configuration
+      what: the configurations this branch established, and the states that realize them
       justified_by_question: >-
         What states, motions and load routes must the embodiment still permit?
       why: >-
         Geometry that cannot occupy a configuration upstream established has
-        removed a state the design promised, silently.
+        removed a state the design promised, silently. The configuration a
+        state realizes is named, not inferred, so the record comes too.
       requires_semantics:
       - realized_configuration
+      - configuration_state
     - class: motion_to_preserve
       instance_selection:
         population: COMMITTED_BRANCH
@@ -1825,11 +1905,18 @@ stages:
       - motion_occupancy
     - class: load_route_to_carry
       instance_selection:
-        population: COMMITTED_BRANCH
-        coverage: ALL_APPLICABLE
-        existence: MAY_BE_EMPTY
-        existence_why: a branch may have no load route established yet
-      what: the load routes this branch established
+        by_role:
+        - role: load_route
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a branch may have no load route established yet
+        - role: load_case
+          population: COMMITTED_BRANCH
+          coverage: ALL_APPLICABLE
+          existence: MAY_BE_EMPTY
+          existence_why: a design may state no load case
+      what: the load routes this branch established, and the load cases they carry
       justified_by_question: >-
         What states, motions and load routes must the embodiment still permit?
       why: >-
@@ -1837,9 +1924,10 @@ stages:
         is how a member on the path gets sectioned away.
       requires_semantics:
       - load_route
+      - load_case
     - class: limit_to_produce
       instance_selection:
-        population: INVOCATION_BRANCH
+        population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a branch may declare no blocked degree of freedom
@@ -1857,7 +1945,7 @@ stages:
       - mobility_disposition
     - class: occupancy_to_avoid
       instance_selection:
-        population: INVOCATION_BRANCH
+        population: COMMITTED_BRANCH
         coverage: ALL_APPLICABLE
         existence: MAY_BE_EMPTY
         existence_why: a branch may declare no functional region
@@ -1868,6 +1956,43 @@ stages:
         not intrude into have to be visible.
       requires_semantics:
       - functional_region
+    # UNIT E. THE HARD REQUIREMENTS, TWICE OVER, AS TWO DIFFERENT FACTS. Every
+    # hard requirement the design states applies to the embodiment and is
+    # honoured; the subset whose compliance is honestly unanswered at a
+    # DOWNSTREAM point and owed to THIS responsibility is debt the embodiment
+    # carries explicitly - it must know what it owes, and it may not fabricate
+    # the evidence that would discharge it.
+    - class: hard_requirement_to_honour
+      instance_selection:
+        population: DESIGN_WIDE
+        coverage: ALL_APPLICABLE
+        existence: MAY_BE_EMPTY
+        existence_why: a design may state no hard requirement beyond its source requirements
+      what: every hard requirement the design states
+      justified_by_question: What does that geometry demand of the layout, as a constraint?
+      why: A requirement applies to every alternative, so it applies to the one being
+        embodied; an embodiment that cannot see it cannot honour it.
+      requires_semantics:
+      - design_constraint
+    - class: hard_requirement_debt_to_carry
+      instance_selection:
+        population: COMMITTED_BRANCH
+        coverage: ALL_APPLICABLE
+        applicability: DEFERRED_TO_INVOKING_RESPONSIBILITY
+        existence: MAY_BE_EMPTY
+        existence_why: a candidate may have been selected owing nothing to embodiment
+      what: the selected candidate's hard-requirement compliance records that are
+        NOT_YET_EVALUABLE at a DOWNSTREAM point and name this responsibility as their
+        evidence owner
+      justified_by_question: What does that geometry demand of the layout, as a constraint?
+      why: >-
+        Unit D lets a candidate be selected while a hard requirement is honestly
+        unanswered until embodiment; the debt was visible on the commitment and
+        must be visible to the stage that owes it. Read by typed fields - status,
+        evaluation_point, evidence_owner - never by a constraint kind or a
+        sentence, so the rule survives every kind the design ever states.
+      requires_semantics:
+      - hard_requirement_compliance
     permitted_output_semantics:
     # CANONICAL NAMES ONLY. S05_CONTRACT.structured_outputs is classified
     # LEGACY_PRODUCER and still spells these `Feature.rigid_group`,
@@ -1890,6 +2015,19 @@ stages:
     - Changing topology, DOF disposition, interaction kinds, load paths or assembly order;
       those escalate to s03
     - Expressing a ConstructionStatement in any frame but the owning body's own
+    # UNIT E. The post-selection boundary.
+    - Embodying any candidate but the one the standing SelectionDecision names,
+      accepting a branch from a caller, or reading a comparison, a ranking or a
+      preference for any purpose
+    - Revising the selected Candidate's principle, or any s02/s03/s04 fact it does not
+      own; an interface a feature realizes is named by typed reference, never invented
+    - Citing as discharged an obligation the selected branch's upstream records already
+      discharged (satisfiable before s05), or one the candidate does not owe
+    - Copying an s04 provisional extent, representative size or region into a constant
+      and presenting it as a dimension; every dimension is a declared Parameter or a
+      unit-bearing constant in a constraint the settlement loop can question
+    - Writing, asserting or implying the compliance of a hard requirement; the debt it
+      owes stays a standing NOT_YET_EVALUABLE record until its evidence exists
 premise_binding_rule: 'Every required_reasoning_premise_class declares `requires_semantics`: the
   SEMANTIC
 

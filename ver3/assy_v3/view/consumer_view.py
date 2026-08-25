@@ -927,6 +927,74 @@ def applicable_obligation_ids(obligations, acceptances) -> Set[str]:
     return out
 
 
+#: What an applicable obligation asks of a consuming stage (Unit E), read from
+#: `Obligation.satisfiable_at`: DISCHARGE where the obligation becomes
+#: satisfiable at that stage, PRESERVE where it was satisfiable upstream and the
+#: branch's own earlier records discharged it.
+DISCHARGE, PRESERVE = "DISCHARGE", "PRESERVE"
+
+#: `Obligation.satisfiable_at`, verbatim from DESIGN_STATE_CONTRACT, in order.
+SATISFIABLE_AT = ("s02", "s03", "s04", "s05")
+
+
+def obligation_duties(obligations, acceptances, stage_id: str) -> Dict[str, Set[str]]:
+    """{DISCHARGE: ids, PRESERVE: ids} for one consuming stage. ONE authority.
+
+    Applicability (`applicable_obligation_ids`) says WHOSE an obligation is;
+    this says WHAT KIND OF DUTY it is for the stage asking, and both are read
+    off the record. An obligation satisfiable at this stage is discharged here
+    by that stage's own realization; one satisfiable at an earlier stage was
+    discharged by the selected branch's earlier records, and a later stage
+    preserves what they established rather than re-claiming it. Nothing is
+    left to nobody: an obligation dated LATER than this stage, or dated at
+    nothing this contract knows, is DISCHARGE - fail closed, because an
+    obligation nobody dated is an obligation nobody excused.
+
+    Record-based and pure, like applicability, so the prompt that lists the
+    duties and the check that judges them read the same rule.
+    """
+    applicable = applicable_obligation_ids(obligations, acceptances)
+    out: Dict[str, Set[str]] = {DISCHARGE: set(), PRESERVE: set()}
+    here = SATISFIABLE_AT.index(stage_id) if stage_id in SATISFIABLE_AT else None
+    for record in obligations or ():
+        oid = record.get("entity_id")
+        if oid not in applicable:
+            continue
+        at = str(record.get("satisfiable_at") or "").strip().lower()
+        if here is not None and at in SATISFIABLE_AT and SATISFIABLE_AT.index(at) < here:
+            out[PRESERVE].add(oid)
+        else:
+            out[DISCHARGE].add(oid)
+    return out
+
+
+def _deferred_to_invoking_responsibility(ids, ctx):
+    """Narrow a compliance population to the debt the invoking responsibility owes.
+
+    THE ONE READING OF A COMPLIANCE RECORD IS FEASIBILITY'S (`compliance_
+    deferred`: NOT_YET_EVALUABLE, at a DOWNSTREAM point, naming an owner) and
+    this adds only the owner test - the record names this invocation's
+    authority stage. Typed fields, never a constraint kind or a sentence, so
+    a kind the design states tomorrow routes the same way. A record of any
+    other family passes through untouched, as the obligation rule's do.
+    """
+    from ..stages.feasibility import compliance_deferred
+
+    state = ctx["state"]
+    authority = _authority_of(str(ctx.get("responsibility") or ""))
+    keep = set()
+    for eid in ids:
+        rec = state.entities.get(eid) if state.has_entity(eid) else None
+        if rec is None:
+            continue
+        if rec.get("_family") != "HardRequirementCompliance":
+            keep.add(eid)
+            continue
+        if compliance_deferred(rec) and rec.get("evidence_owner") == authority:
+            keep.add(eid)
+    return keep
+
+
 def _applicable_to_committed_candidate(ids, ctx):
     """Narrow an obligation population to what the committed candidate owes.
 
@@ -957,17 +1025,20 @@ def _applicable_to_committed_candidate(ids, ctx):
 
 
 APPLICABLE_TO_COMMITTED_CANDIDATE = "APPLICABLE_TO_COMMITTED_CANDIDATE"
+DEFERRED_TO_INVOKING_RESPONSIBILITY = "DEFERRED_TO_INVOKING_RESPONSIBILITY"
 
 APPLICABILITY_RULES: Dict[str, Any] = {
     ALL_MEMBERS: lambda ids, _ctx: ids,
     MATCHES_INVOCATION_ANCHORS: _matches_invocation_anchors,
     APPLICABLE_TO_COMMITTED_CANDIDATE: _applicable_to_committed_candidate,
+    DEFERRED_TO_INVOKING_RESPONSIBILITY: _deferred_to_invoking_responsibility,
 }
 
 
 def expected_instances(state, contracts, families: List[str], rule: Dict[str, str],
                        branch, scopes: Optional["_Scopes"] = None,
-                       invocation: Optional[InvocationContext] = None) -> Set[str]:
+                       invocation: Optional[InvocationContext] = None,
+                       responsibility: Optional[str] = None) -> Set[str]:
     """Which standing instances SHOULD satisfy one atomic obligation.
 
     Computed from the contracts, the authoritative state and the premise's own
@@ -984,7 +1055,8 @@ def expected_instances(state, contracts, families: List[str], rule: Dict[str, st
     return set(_applicable(ids, rule.get("applicability") or ALL_MEMBERS,
                            {"state": state, "contracts": contracts,
                             "families": list(families), "branch": branch,
-                            "invocation": invocation}))
+                            "invocation": invocation,
+                            "responsibility": responsibility}))
 
 
 class _Scopes:
@@ -1023,7 +1095,8 @@ class _Scopes:
 def select_instances(state, contracts, requirement: Requirement,
                      branch: Optional[str],
                      scopes: Optional[Dict[str, str]] = None,
-                     invocation: Optional[InvocationContext] = None):
+                     invocation: Optional[InvocationContext] = None,
+                     responsibility: Optional[str] = None):
     """Which accumulated instances satisfy this requirement, and why each is here.
 
     Eligibility by family is necessary and not sufficient - and the sufficient
@@ -1039,7 +1112,7 @@ def select_instances(state, contracts, requirement: Requirement,
     for obligation, families in requirement.atoms():
         rule = requirement.selection_for(obligation)
         wanted = expected_instances(state, contracts, families, rule, branch, scopes,
-                                    invocation)
+                                    invocation, responsibility)
         for family in families:
             for rec in state.standing(family):
                 eid = rec["entity_id"]
@@ -1142,10 +1215,11 @@ class ConsumerView:
     """
 
     __slots__ = ("stage_id", "run_id", "required", "entities", "traces",
-                 "assessment", "status", "omitted", "branch", "occupancy")
+                 "assessment", "status", "omitted", "branch", "occupancy",
+                 "projection")
 
     def __init__(self, stage_id, run_id, required, entities, traces, assessment,
-                 status, omitted, branch, occupancy=None):
+                 status, omitted, branch, occupancy=None, projection=None):
         self.stage_id = stage_id
         self.run_id = run_id
         self.required = required
@@ -1162,6 +1236,15 @@ class ConsumerView:
         #: not supply it is still a valid view - an honest "nothing declared",
         #: never a silent claim that no id is taken.
         self.occupancy = dict(occupancy or {})
+        #: WHAT OF THIS VIEW A PROVIDER IS SHOWN (Unit E). FULL, the default,
+        #: renders every entity the view holds. DECLARED_ONLY renders exactly
+        #: the instances the declared required minimum selected and keeps the
+        #: representational closure on the record only: `provider_facing` is
+        #: the ids rendered, `audit_only` the ids held for audit and currentness.
+        #: Declared per responsibility in STAGE_RESPONSIBILITY_CONTRACT and
+        #: read by `build_consumer_view`; a view built without a projection is
+        #: FULL, which is what every view was before.
+        self.projection = dict(projection or {"mode": PROJECTION_FULL})
 
     # -- questions a reviewer asks -------------------------------------
     def why(self, entity_id: str) -> List[Dict[str, Any]]:
@@ -1190,12 +1273,38 @@ class ConsumerView:
                 # rebuilt from state that has since moved.
                 "namespace_occupancy": {k: list(v)
                                         for k, v in sorted(self.occupancy.items())},
+                # What the provider was rendered, and what was held back for
+                # audit only - so a reviewer reads the prompt's contents off
+                # the record rather than off the family list.
+                "provider_projection": {
+                    "mode": self.projection.get("mode", PROJECTION_FULL),
+                    "audit_only": sorted(self.projection.get("audit_only") or [])},
                 "entities": list(self.entities), "traces": list(self.traces)}
 
     def payload(self) -> Dict[str, List[Dict[str, Any]]]:
-        """The plain by-family structure a renderer consumes. Class C."""
+        """The plain by-family structure a renderer consumes. Class C.
+
+        EVERYTHING the view holds - the declared minimum and its representational
+        closure. This is the audit and currentness surface, and every check that
+        asks "was X in the view" reads it.
+        """
         out: Dict[str, List[Dict[str, Any]]] = {}
         for rec in self.entities:
+            out.setdefault(rec.get("_family"), []).append(rec)
+        return out
+
+    def provider_payload(self) -> Dict[str, List[Dict[str, Any]]]:
+        """What a PROVIDER is rendered (Unit E): `payload()` under FULL; under
+        DECLARED_ONLY the declared minimum's instances alone, the closure held
+        on the record for audit. Same shape, so a stage's prompt and its
+        deterministic checks read one structure either way."""
+        if self.projection.get("mode", PROJECTION_FULL) == PROJECTION_FULL:
+            return self.payload()
+        audit_only = set(self.projection.get("audit_only") or ())
+        out: Dict[str, List[Dict[str, Any]]] = {}
+        for rec in self.entities:
+            if rec.get("entity_id") in audit_only:
+                continue
             out.setdefault(rec.get("_family"), []).append(rec)
         return out
 
@@ -1240,7 +1349,8 @@ _SEVERITY = {Sufficiency.SATISFIED.value: 0, Sufficiency.UNRESOLVED.value: 1,
 def _assess_atom(state, contracts, obligation: str, families: List[str],
                  rule: Dict[str, str], selected_ids: Set[str], branch,
                  scopes: "_Scopes",
-                 invocation: Optional[InvocationContext] = None) -> Dict[str, Any]:
+                 invocation: Optional[InvocationContext] = None,
+                 responsibility: Optional[str] = None) -> Dict[str, Any]:
     """One atomic obligation, judged by comparing EXPECTED against SELECTED.
 
     Expected is derived independently - contracts, authoritative state, and the
@@ -1258,7 +1368,7 @@ def _assess_atom(state, contracts, obligation: str, families: List[str],
     """
     standing = {f: len(state.standing(f)) for f in families}
     expected = expected_instances(state, contracts, families, rule, branch, scopes,
-                                  invocation)
+                                  invocation, responsibility)
     got = expected & set(selected_ids)
     coverage = rule.get("coverage") or AT_LEAST_ONE
     existence = rule.get("existence") or REQUIRED_NONEMPTY
@@ -1298,7 +1408,8 @@ def _assess_atom(state, contracts, obligation: str, families: List[str],
 def _assess(state, contracts, requirement: Requirement,
             selected: List[Dict[str, Any]], branch=None,
             scopes: Optional["_Scopes"] = None,
-            invocation: Optional[InvocationContext] = None) -> Dict[str, Any]:
+            invocation: Optional[InvocationContext] = None,
+            responsibility: Optional[str] = None) -> Dict[str, Any]:
     """Structural sufficiency: per atomic obligation, then aggregated.
 
     A compound premise cannot be SATISFIED while a required role is not. No model
@@ -1309,7 +1420,7 @@ def _assess(state, contracts, requirement: Requirement,
     selected_ids = {r["entity_id"] for r in selected}
     coverage = [_assess_atom(state, contracts, name, fams,
                              requirement.selection_for(name), selected_ids,
-                             branch, scopes, invocation)
+                             branch, scopes, invocation, responsibility)
                 for name, fams in requirement.atoms()]
     worst = (max(coverage, key=lambda c: _SEVERITY[c["verdict"]])["verdict"]
              if coverage else Sufficiency.SATISFIED.value)
@@ -1317,6 +1428,31 @@ def _assess(state, contracts, requirement: Requirement,
             "verdict": worst, "coverage": coverage,
             "families": list(requirement.families),
             "selected": len(selected), "trace": requirement.trace}
+
+
+#: `branch_authority`, verbatim from STAGE_RESPONSIBILITY_CONTRACT.
+BRANCH_FROM_INVOCATION = "INVOCATION"
+BRANCH_FROM_SELECTION_DECISION = "SELECTION_DECISION"
+#: `provider_projection`, verbatim from the same contract.
+PROJECTION_FULL = "FULL"
+PROJECTION_DECLARED_ONLY = "DECLARED_ONLY"
+
+
+def _selection_contradiction(asked: str, committed: str) -> Dict[str, Any]:
+    """The assessment entry recorded when a caller names a branch the standing
+    decision did not choose. THE SHAPE the rest of the system reads: `_unmet`
+    formats an assessment by its `requirement` and `coverage` keys."""
+    detail = ("this invocation asks %s to embody %s, but the standing selection "
+              "commits to %s; embodiment may not be routed to a candidate nobody "
+              "chose" % ("the consumer", asked, committed))
+    return {"requirement": "selection_commitment",
+            "source": Source.REASONING_PREMISE.value,
+            "verdict": Sufficiency.MISSING_UPSTREAM.value,
+            "coverage": [{"obligation": "selection_decision",
+                          "verdict": Sufficiency.MISSING_UPSTREAM.value,
+                          "expected_count": 1, "selected_count": 0}],
+            "families": ["SelectionDecision"], "selected": 0,
+            "detail": detail, "trace": {"contradiction": detail}}
 
 
 def build_consumer_view(stage_id: str, state, contracts, responsibility,
@@ -1330,10 +1466,27 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
     is not given the committed branch is used, which is right for a stage that
     runs once after selection and wrong to assume for one that runs per candidate
     - so the caller says which it is rather than the view guessing.
+
+    UNIT E. A responsibility that declares `branch_authority: SELECTION_DECISION`
+    is not asked: its branch IS the standing SelectionDecision's, every branch
+    population resolves to it, and a caller naming a different candidate is
+    recorded as a contradiction that leaves the view UPSTREAM_INSUFFICIENT - so
+    INVOCATION_BRANCH and COMMITTED_BRANCH cannot disagree for it and no caller
+    can route it to a design nobody chose. One that declares
+    `provider_projection: DECLARED_ONLY` is rendered its declared minimum alone;
+    the representational closure stays on the record for audit and currentness.
     """
     required = derive_required_minimum(stage_id, contracts, responsibility)
-    branch = (invocation_branch or (invocation.branch if invocation else None)
-              or committed_branch(state, contracts))
+    declaration = (responsibility.get("stages") or {}).get(stage_id) or {}
+    asked = invocation_branch or (invocation.branch if invocation else None)
+    contradiction: Optional[Dict[str, Any]] = None
+    if declaration.get("branch_authority") == BRANCH_FROM_SELECTION_DECISION:
+        committed = committed_branch(state, contracts)
+        if asked and committed and asked != committed:
+            contradiction = _selection_contradiction(asked, committed)
+        branch = committed
+    else:
+        branch = asked or committed_branch(state, contracts)
 
     selected: Dict[str, Dict[str, Any]] = {}
     traces: List[Dict[str, Any]] = []
@@ -1341,14 +1494,18 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
 
     scopes = _Scopes(state, contracts)
     for req in required.requirements:
-        recs, tr = select_instances(state, contracts, req, branch, scopes, invocation)
+        recs, tr = select_instances(state, contracts, req, branch, scopes, invocation,
+                                    stage_id)
         for rec in recs:
             selected.setdefault(rec["entity_id"], rec)
         traces.extend(tr)
         assessment.append(_assess(state, contracts, req, recs, branch, scopes,
-                                  invocation))
+                                  invocation, stage_id))
+    declared_ids = set(selected)
 
     traces.extend(close_references(state, contracts, selected))
+    if contradiction is not None:
+        assessment.append(contradiction)
 
     omitted: List[Dict[str, Any]] = []
     status = ViewStatus.VIEW_READY
@@ -1357,10 +1514,19 @@ def build_consumer_view(stage_id: str, state, contracts, responsibility,
     elif any(a["verdict"] == Sufficiency.MISSING_UPSTREAM.value for a in assessment):
         status = ViewStatus.UPSTREAM_INSUFFICIENCY
 
+    mode = declaration.get("provider_projection") or PROJECTION_FULL
+    if mode not in (PROJECTION_FULL, PROJECTION_DECLARED_ONLY):
+        raise ValueError("%s declares provider_projection %r; the vocabulary is %s"
+                         % (stage_id, mode, [PROJECTION_FULL, PROJECTION_DECLARED_ONLY]))
+    projection = {"mode": mode,
+                  "audit_only": sorted(set(selected) - declared_ids)
+                  if mode == PROJECTION_DECLARED_ONLY else []}
+
     view = ConsumerView(stage_id, getattr(state, "run_id", None), required,
                         list(selected.values()), traces, assessment, status,
                         omitted, branch,
-                        derive_namespace_occupancy(stage_id, state, responsibility))
+                        derive_namespace_occupancy(stage_id, state, responsibility),
+                        projection)
 
     if budget_chars is not None:
         view = _apply_budget(view, budget_chars)
@@ -1403,7 +1569,7 @@ def _apply_budget(view: ConsumerView, budget_chars: int) -> ConsumerView:
     # tension here to resolve.
     reduced = ConsumerView(view.stage_id, view.run_id, view.required, kept,
                            view.traces, view.assessment, view.status, omitted,
-                           view.branch, view.occupancy)
+                           view.branch, view.occupancy, view.projection)
     if len(render(reduced)) <= budget_chars:
         return reduced
 

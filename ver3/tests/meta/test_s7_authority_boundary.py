@@ -422,12 +422,15 @@ class TestHardConstraintVisibility(_fixtures.StateBuilder, _Base):
         declaring = [sid for sid, spec in self.resp["stages"].items()
                      if any("design_constraint" in pc["requires_semantics"]
                             for pc in spec["required_reasoning_premise_classes"])]
-        self.assertEqual(["feasibility", "selection", "selection_advisory",
+        # SIX at Unit E: s05 embodies the committed design and must see every
+        # hard requirement the design states to honour it. It runs after the
+        # choice, decides nothing about eligibility, and writes no compliance.
+        self.assertEqual(["feasibility", "s05", "selection", "selection_advisory",
                           "selection_decision", "selection_human_review"],
                          sorted(declaring))
         for sid in declaring:
             self.assertIn(self.resp["stages"][sid].get("authority_stage", sid),
-                          ("feasibility", "selection"))
+                          ("feasibility", "selection", "s05"))
         for sid in ("s02", "s03a", "s03b", "s04a"):
             view = cv.build_consumer_view(
                 sid, s, self.c, self.resp,
