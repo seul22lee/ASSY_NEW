@@ -24,6 +24,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from ..stages import feasibility as _feas
 from ..stages import s03_topology_and_mobility as _s03
 from ..stages import s04_envelope_and_motion as _s04
 from .model import (FAIL, FALSE_ACCEPTANCE, Finding, NOT_EVALUABLE,
@@ -507,6 +508,7 @@ def commitment_validity(state) -> List[Finding]:
         candidate = decision.get("selected_candidate")
         refs = [did] + ([candidate] if candidate else [])
         problems: List[str] = []
+        deferred: List[str] = []
 
         human = [h for h in state.standing("HumanDecisionInput")
                  if h["entity_id"] == decision.get("human_decision")]
@@ -542,12 +544,22 @@ def commitment_validity(state) -> List[Finding]:
                 problems.append("%d current compliance records for %s against %s"
                                 % (len(compliance), candidate,
                                    constraint["entity_id"]))
-            elif compliance[0].get("status") != "SATISFIED":
-                problems.append("%s is %s against %s"
-                                % (candidate, compliance[0].get("status"),
-                                   constraint["entity_id"]))
-            else:
-                refs.append(compliance[0]["entity_id"])
+                continue
+            # THE ONE READING OF A COMPLIANCE RECORD (Unit D), feasibility's
+            # own and not a rule kept here: a violated requirement, or one
+            # whose pre-selection evidence is absent, fails the precondition;
+            # one honestly deferred to a later owner is a condition the
+            # commitment was made carrying, reported beside the pass and never
+            # counted as met.
+            blocked = _feas.compliance_blocks(compliance[0])
+            if blocked:
+                problems.append("%s: %s" % (candidate, blocked))
+                continue
+            refs.append(compliance[0]["entity_id"])
+            if _feas.compliance_deferred(compliance[0]):
+                deferred.append("%s (owed by %s)"
+                                % (constraint["entity_id"],
+                                   compliance[0].get("evidence_owner")))
 
         if problems:
             out.append(_fail(prop, "%s: %s" % (FALSE_ACCEPTANCE,
@@ -555,5 +567,7 @@ def commitment_validity(state) -> List[Finding]:
                              refs, code=FALSE_ACCEPTANCE))
         else:
             out.append(_pass(prop, "the commitment stands over conditions that "
-                                   "are met now", refs))
+                                   "are met now%s"
+                             % ("; it still carries deferred hard requirements: %s"
+                                % ", ".join(deferred) if deferred else ""), refs))
     return out

@@ -223,16 +223,20 @@ class _Decision(_Advisory):
             self.hrc(state, candidate, eid, status)
         return eid
 
-    def recompliance(self, state, candidate, constraint, status):
+    def recompliance(self, state, candidate, constraint, status,
+                     point="PRE_SELECTION", owner=None):
         """The same requirement, re-evaluated. The old record is withdrawn and a
         new one takes its place, which is what happens when evidence moves - and
-        withdrawing it stales everything premised on it."""
+        withdrawing it stales everything premised on it. Stamped PRE_SELECTION
+        unless the probe defers it to a named owner (Unit D)."""
         self.invalidate(state, "HRC-%s-%s" % (candidate, constraint),
                         stage="feasibility", why="re-evaluated on new evidence")
+        fields = {"candidate": candidate, "constraint": constraint,
+                  "status": status, "why": "probe", "evaluation_point": point}
+        if owner:
+            fields["evidence_owner"] = owner
         self.revise(state, Op("CREATE", "HardRequirementCompliance",
-                              "HRC-%s-%s-V2" % (candidate, constraint),
-                              {"candidate": candidate, "constraint": constraint,
-                               "status": status, "why": "probe"}, "t",
+                              "HRC-%s-%s-V2" % (candidate, constraint), fields, "t",
                               premise_refs=[candidate, constraint]),
                     stage="feasibility")
 

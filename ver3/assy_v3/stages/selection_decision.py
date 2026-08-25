@@ -165,6 +165,12 @@ class HumanReviewSnapshot:
     feasibility_assessments: Tuple[Dict[str, Any], ...]
     hard_requirement_results: Tuple[Dict[str, Any], ...]
     design_constraints: Tuple[Dict[str, Any], ...]
+    #: UNIT D. What each eligible candidate still owes to a later stage: one
+    #: row per {candidate, constraint, compliance, evidence_owner} whose
+    #: compliance is NOT_YET_EVALUABLE at a DOWNSTREAM point. Shown, hashed,
+    #: and recorded on what the person submits - a candidate is chosen WITH its
+    #: debt on the screen, never with it folded into "eligible".
+    deferred_hard_requirements: Tuple[Dict[str, Any], ...]
     advisories: Tuple[Dict[str, Any], ...]
     concerns: Tuple[Dict[str, Any], ...]
     digest: str
@@ -180,8 +186,16 @@ class HumanReviewSnapshot:
                 "feasibility_assessments": list(self.feasibility_assessments),
                 "hard_requirement_results": list(self.hard_requirement_results),
                 "design_constraints": list(self.design_constraints),
+                "deferred_hard_requirements": list(self.deferred_hard_requirements),
                 "advisories": list(self.advisories),
                 "concerns": list(self.concerns)}
+
+    def deferred_for(self, candidate: Optional[str]) -> List[Dict[str, Any]]:
+        """The deferred rows of one candidate, as shown - without the candidate
+        key, which the record they go on already names."""
+        return [{k: v for k, v in row.items() if k != "candidate"}
+                for row in self.deferred_hard_requirements
+                if row.get("candidate") == candidate]
 
     # -- what a renderer asks -------------------------------------------
     def advisory_ids(self) -> List[str]:
@@ -298,6 +312,13 @@ def build_human_review_snapshot(state) -> HumanReviewOutcome:
     eligible = tuple(sorted(k for k, (v, _w, _u) in population.items()
                             if v == sel.ELIGIBLE))
     established = not any(v == sel.UNRESOLVED for v, _w, _u in population.values())
+    # THE DEBT EACH ELIGIBLE CANDIDATE CARRIES (Unit D), by the same reading
+    # that established the population, flattened to rows a screen can show
+    # and a digest can cover.
+    deferred = sel.deferred_hard_requirements(ev, population)
+    deferred_rows = tuple(dict(row, candidate=candidate)
+                          for candidate in sorted(deferred)
+                          for row in deferred[candidate])
 
     def of(family: str) -> List[Dict[str, Any]]:
         return _by_id([r for r in (payload.get(family) or [])
@@ -325,6 +346,7 @@ def build_human_review_snapshot(state) -> HumanReviewOutcome:
         feasibility_assessments=tuple(of("MechanicalFeasibilityAssessment")),
         hard_requirement_results=tuple(of("HardRequirementCompliance")),
         design_constraints=tuple(of("DesignConstraint")),
+        deferred_hard_requirements=deferred_rows,
         advisories=tuple(_by_id([a for a in (payload.get("SelectionAdvisory") or [])
                                  if isinstance(a, dict)])),
         concerns=tuple(_by_id([c for c in (payload.get("SelectionConcern") or [])
@@ -442,6 +464,10 @@ def materialize_human_decision_input(state, snapshot: HumanReviewSnapshot,
         "reviewed_concerns": snapshot.concern_ids()}
     if candidate is not None:
         fields["selected_candidate"] = candidate
+        # THE DEBT THE PERSON WAS SHOWN FOR THIS CANDIDATE (Unit D), copied from
+        # the snapshot and never from the client; an explicit empty list says
+        # nothing was deferred. It is inside the digest as well.
+        fields["deferred_hard_requirements"] = snapshot.deferred_for(candidate)
         if snapshot.standing_decision is not None:
             # A SELECT made while a commitment stands asks for a REVISION, and
             # says so by naming the commitment the screen showed. From the
@@ -645,7 +671,12 @@ def _decision_fields(snapshot, human, candidate):
         "comparison": snapshot.comparison["entity_id"],
         "human_decision": human["entity_id"],
         "considered_advisories": sorted(human.get("reviewed_advisories") or []),
-        "considered_concerns": sorted(human.get("reviewed_concerns") or [])}
+        "considered_concerns": sorted(human.get("reviewed_concerns") or []),
+        # WHAT THE CHOSEN CANDIDATE STILL OWES, on the commitment itself (Unit
+        # D): the rows the review showed, so the stage that must discharge
+        # them reads them off the decision rather than discovering them. The
+        # compliance records they name are premises already.
+        "deferred_hard_requirements": snapshot.deferred_for(candidate)}
     if human.get("rationale"):
         fields["rationale"] = human["rationale"]
     premises = sorted(set(basis) | {human["entity_id"],

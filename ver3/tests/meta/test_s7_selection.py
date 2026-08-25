@@ -145,12 +145,19 @@ class _Selection(_Feas):
     def metric(self, out, criterion, candidate):
         return out.metrics[criterion][candidate]
 
-    def hrc(self, state, candidate, constraint, status):
-        """A compliance record as feasibility would have written it."""
+    def hrc(self, state, candidate, constraint, status, point="PRE_SELECTION",
+            owner=None):
+        """A compliance record as feasibility would have written it: the status
+        and the stamped evaluation point (Unit D). PRE_SELECTION unless the probe
+        says the requirement is honestly owed to a later owner, so every
+        existing probe keeps asking what it asked - an unanswered requirement
+        whose evidence is due before selection."""
+        fields = {"candidate": candidate, "constraint": constraint,
+                  "status": status, "why": "probe", "evaluation_point": point}
+        if owner:
+            fields["evidence_owner"] = owner
         self.revise(state, Op("CREATE", "HardRequirementCompliance",
-                              "HRC-%s-%s" % (candidate, constraint),
-                              {"candidate": candidate, "constraint": constraint,
-                               "status": status, "why": "probe"}, "t",
+                              "HRC-%s-%s" % (candidate, constraint), fields, "t",
                               premise_refs=[candidate, constraint]),
                     stage="feasibility")
 
@@ -394,7 +401,8 @@ class TestEligibility(_Selection):
         self.revise(state, Op("CREATE", "HardRequirementCompliance",
                               "HRC-CND-A-DUP",
                               {"candidate": "CND-A", "constraint": constraint,
-                               "status": "VIOLATED", "why": "probe"}, "t",
+                               "status": "VIOLATED", "why": "probe",
+                               "evaluation_point": "PRE_SELECTION"}, "t",
                               premise_refs=["CND-A", constraint]),
                     stage="feasibility")
         out = self.compare(state, {})

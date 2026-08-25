@@ -49,7 +49,7 @@ from ..lifecycle.records import address_operations
 from ..state.patch import Op, StagePatch
 from ..view.consumer_view import ViewStatus, branch_membership
 from . import s04_envelope_and_motion as s04
-from .feasibility import FEASIBLE
+from .feasibility import FEASIBLE, compliance_blocks, compliance_deferred
 
 RESPONSIBILITY = "selection"
 
@@ -370,6 +370,15 @@ def eligibility(ev: _Evidence):
     Reads only what feasibility established. Nothing here recomputes a domain, a
     compliance status or a maturity: `NOT_YET_EVALUABLE` is feasibility's verdict
     about the evidence and this responsibility may act on it, never restate it.
+
+    UNIT D. What a compliance record means for eligibility is feasibility's one
+    reading of its own record (`compliance_blocks`): SATISFIED passes, VIOLATED
+    blocks, NOT_YET_EVALUABLE blocks where the requirement's evidence is owed
+    before selection and does not where it is honestly owed to a later stage -
+    which is read off the stamp the evaluator put on the record, never off a
+    reason, a sentence, or this code's opinion of the kind. A candidate eligible
+    while still owing a hard requirement is eligible WITH that debt, and the
+    debt is reported beside it (`deferred_hard_requirements`), never dropped.
     """
     constraints = ev.fam("DesignConstraint")
     blocking = sorted(c["entity_id"] for c in constraints if _blocks_selection(c))
@@ -400,26 +409,62 @@ def eligibility(ev: _Evidence):
             out[candidate] = (INELIGIBLE, "feasibility is %s" % mfa.get("status"), used)
             continue
         verdict, why = ELIGIBLE, "feasible, and every blocking requirement satisfied"
+        deferred: List[str] = []
         for constraint in blocking:
             records = [h for h in ev.fam("HardRequirementCompliance")
                        if h.get("candidate") == candidate
                        and h.get("constraint") == constraint]
             if len(records) != 1:
+                # NO RECORD, OR TWO. Neither is compliance and neither is a
+                # verdict: the population is not established.
                 verdict = UNRESOLVED
                 why = ("%d current compliance records for %s"
                        % (len(records), constraint))
                 used += sorted(h["entity_id"] for h in records)
                 break
             used.append(records[0]["entity_id"])
-            status = records[0].get("status")
-            if status == VIOLATED:
-                verdict, why = INELIGIBLE, "%s is violated" % constraint
+            blocked = compliance_blocks(records[0])
+            if blocked:
+                verdict, why = INELIGIBLE, blocked
                 break
-            if status != SATISFIED:
-                verdict = INELIGIBLE
-                why = "%s is %s at the current maturity" % (constraint, status)
-                break
+            if compliance_deferred(records[0]):
+                deferred.append("%s -> %s" % (constraint,
+                                              records[0].get("evidence_owner")))
+        if verdict == ELIGIBLE and deferred:
+            why = ("feasible; every blocking requirement satisfied or deferred to "
+                   "its evidence owner (%s)" % ", ".join(deferred))
         out[candidate] = (verdict, why, sorted(set(used)))
+    return out
+
+
+def deferred_hard_requirements(ev: _Evidence, population
+                               ) -> Dict[str, List[Dict[str, Any]]]:
+    """candidate -> the selection-blocking requirements an ELIGIBLE candidate
+    still owes to a later stage: {constraint, compliance, evidence_owner}.
+
+    THE DEBT, MADE VISIBLE (Unit D). Read off the same records `eligibility`
+    read, by the same reading, so a candidate the comparison presents is
+    presented with what it still has to prove. Every eligible candidate has an
+    entry, an empty list where nothing is owed - absence is stated, never
+    implied. A candidate that is not eligible carries no row: its reason is
+    already its verdict.
+    """
+    blocking = sorted(c["entity_id"] for c in ev.fam("DesignConstraint")
+                      if _blocks_selection(c))
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for candidate, (verdict, _why, _used) in sorted(population.items()):
+        if verdict != ELIGIBLE:
+            continue
+        rows = []
+        for constraint in blocking:
+            records = [h for h in ev.fam("HardRequirementCompliance")
+                       if h.get("candidate") == candidate
+                       and h.get("constraint") == constraint]
+            if len(records) == 1 and compliance_deferred(records[0]):
+                rows.append({"constraint": constraint,
+                             "compliance": records[0]["entity_id"],
+                             "evidence_owner": records[0].get("evidence_owner")})
+        out[candidate] = rows
     return out
 
 
@@ -748,7 +793,12 @@ def evaluate_candidate_comparison(state, run_id: Optional[str] = None,
             c for c in metrics
             if any(m.availability != AVAILABLE for m in metrics[c].values())),
         "incomparable_criteria": incomparable_criteria(criteria, metrics,
-                                                       eligible)}
+                                                       eligible),
+        # WHAT EACH ELIGIBLE CANDIDATE STILL OWES (Unit D). On the record, so
+        # the comparison a person is shown never presents as clean a candidate
+        # that is choosable while a hard requirement on it waits for a later
+        # stage. The compliance records it names are already premises.
+        "deferred_hard_requirements": deferred_hard_requirements(ev, population)}
     standing = state.standing("CandidateComparison")
     if len(standing) > 1:
         return SelectionComparisonOutcome(

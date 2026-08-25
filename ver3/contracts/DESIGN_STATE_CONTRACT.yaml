@@ -2518,21 +2518,76 @@ assurance_families:
     # quantity_class MAGNITUDE and that parameter is present and numeric - which
     # is how "keep it reasonably compact" is refused without any code reading the
     # prose. s01's own typed capture answers it. (S7-B correction)
+    #
+    # UNIT D. WHEN A KIND CAN BE ANSWERED, declared beside what it needs. Two
+    # facts `evaluability` (WHO reads it: a check or a person) does not carry,
+    # and that nothing may infer from a compliance status, a reason code, a
+    # sentence, or a candidate's or benchmark's identity:
+    #
+    #   evaluation.point
+    #     PRE_SELECTION  the evidence that answers this kind is produced before
+    #                    mechanism selection (s01-s04). A compliance record that
+    #                    is still NOT_YET_EVALUABLE is required evidence ABSENT,
+    #                    and the candidate is not eligible until it exists.
+    #     DOWNSTREAM     the evidence is produced only by a later responsibility
+    #                    (embodiment, solving). NOT_YET_EVALUABLE before
+    #                    selection is what the design honestly knows; it does
+    #                    not by itself make the candidate ineligible, and it
+    #                    stays on the record - visibly - as deferred
+    #                    hard-requirement debt the evidence owner must discharge.
+    #   evaluation.evidence_owner
+    #     the responsibility whose canonical output makes the kind evaluable:
+    #     who owes the evidence while the record says NOT_YET_EVALUABLE.
+    #
+    # ONE TABLE, ONE READER. The feasibility responsibility reads it when it
+    # writes a HardRequirementCompliance and STAMPS the record with the point and
+    # the owner it evaluated under; selection, the decision screen and the
+    # assurance check read the stamped record and never this table, so no
+    # consumer keeps a second copy of the policy. A kind absent from this table,
+    # or one declaring no `evaluation`, fails closed: PRE_SELECTION, no owner.
+    # Absence widens nothing.
+    #
+    # STRICTNESS AND TIMING ARE DIFFERENT FACTS. "Hard" says the requirement
+    # must ultimately be satisfied; the point says when the evidence can exist.
+    # VIOLATED is decided by evidence and blocks at any point: a DOWNSTREAM
+    # point never hides a violation the current evidence establishes, and an
+    # evaluator never relabels NOT_YET_EVALUABLE as SATISFIED to let a
+    # candidate through.
     kinds:
       MATERIAL_CLASS_ONLY:
         quantitative: false
         parameters: [material_class]
+        # No canonical material assignment exists before embodiment; s05, which
+        # realizes the bodies as features, is where a material is committed.
+        evaluation: {point: DOWNSTREAM, evidence_owner: s05}
       PROHIBITED_ENERGY_SOURCE:
         quantitative: false
         parameters: [source]
+        # The energy source is a property of the mechanism PRINCIPLE the
+        # candidate embodies, which s02 states. A candidate driven by a
+        # prohibited source is not one to select and discover later; until the
+        # design carries a canonical actuation authority the record stays
+        # NOT_YET_EVALUABLE and blocks - required pre-selection evidence absent.
+        evaluation: {point: PRE_SELECTION, evidence_owner: s02}
       MAX_OVERALL_DIMENSION:
         quantitative: true
         quantity: limit
         parameters: [axis, limit, unit]
+        # Packaging is in the pre-selection required minimum (ARRANGEMENT), and
+        # s04 works in an ABSOLUTE basis whenever a requirement supplies an
+        # absolute quantity - which a stated limit is. The coarse arrangement
+        # therefore answers this before selection; one that cannot (no absolute
+        # basis, a unit that does not meet the limit's, a body without an
+        # extent) is required evidence absent, and blocks.
+        evaluation: {point: PRE_SELECTION, evidence_owner: s04a}
       LOAD_CAPACITY:
         quantitative: true
         quantity: magnitude
         parameters: [magnitude, unit]
+        # Strength is settled by embodiment and solving, which the pre-selection
+        # minimum deliberately excludes ("material, strength, stiffness and
+        # settlement"); before that there is nothing to evaluate it against.
+        evaluation: {point: DOWNSTREAM, evidence_owner: s05}
     origins:
       user_design_profile: >
         A structured section the user supplied. Carried across exactly, with no
@@ -2595,8 +2650,20 @@ assurance_families:
     owned_by: feasibility
     authority_class: AUTHORITATIVE
     purpose: "Whether ONE candidate satisfies ONE hard requirement, at the maturity the evidence has now."
-    required_fields: [entity_id, candidate, constraint, status, why]
+    required_fields: [entity_id, candidate, constraint, status, why, evaluation_point]
+    # UNIT D. `evidence_owner` is required exactly when the point is DOWNSTREAM:
+    # a deferral names who owes the evidence, or it is not a deferral.
+    optional_fields: [evidence_owner]
     status: [NOT_YET_EVALUABLE, SATISFIED, VIOLATED]
+    evaluation_point: [PRE_SELECTION, DOWNSTREAM]
+    conditional_requirements:
+      - name: a_deferral_names_its_owner
+        applies_when: {field: evaluation_point, equals: DOWNSTREAM}
+        additional_required_fields: [evidence_owner]
+        why: >-
+          NOT_YET_EVALUABLE at a DOWNSTREAM point does not block selection, so
+          the record must say which responsibility must establish it later; a
+          deferral to nobody would be absence becoming compliance.
     rules:
       - >
         A REQUIREMENT EXISTING IS NOT THE SAME AS ITS BEING EVALUABLE. Absence of
@@ -2610,6 +2677,29 @@ assurance_families:
         finding about the candidate; NOT_YET_EVALUABLE is a finding about the
         evidence.
       - "This is not mechanical feasibility. A violated requirement is not a broken mechanism."
+      - >
+        WHEN IT CAN BE ANSWERED IS A DECLARED FACT, NOT AN INFERENCE (Unit D).
+        `evaluation_point` and `evidence_owner` are stamped by the evaluator
+        from DesignConstraint.kinds.<kind>.evaluation - the one table - and are
+        never derived from the status, the reason codes, the `why`, or a
+        candidate's or a benchmark's identity. A record with no stamp is read
+        as PRE_SELECTION.
+      - >
+        WHAT SELECTION MAY DO WITH IT, per selection-blocking requirement:
+        SATISFIED does not block. VIOLATED makes the candidate INELIGIBLE at
+        any point. NOT_YET_EVALUABLE at PRE_SELECTION makes it INELIGIBLE,
+        because required pre-selection evidence is absent. NOT_YET_EVALUABLE
+        at DOWNSTREAM does not make it ineligible and is carried, visibly, as
+        deferred hard-requirement debt of `evidence_owner` on the comparison,
+        the review and the commitment. No current record, or two, at one
+        address leaves eligibility UNRESOLVED - never satisfied. The reading
+        is one function, feasibility's own, and every consumer calls it.
+      - >
+        A DOWNSTREAM point never launders a violation: an evaluator that can
+        establish VIOLATED from current evidence writes VIOLATED whatever the
+        point, and never relabels NOT_YET_EVALUABLE as SATISFIED to let a
+        candidate through. Deferral is what the design does not yet know, not
+        what it would rather not say.
 
   FeasibilityDomainAssessment:
     semantic_roles: [eligibility_evidence]
@@ -3092,7 +3182,8 @@ assurance_families:
     authority_class: DERIVED
     purpose: "Deterministic metrics over the ELIGIBLE candidates, computed before anything is asked of a model."
     required_fields: [entity_id, candidates, profile, metrics, outcome, frontier]
-    optional_fields: [stopping_priority, unavailable_criteria, incomparable_criteria]
+    optional_fields: [stopping_priority, unavailable_criteria, incomparable_criteria,
+                      deferred_hard_requirements]
     # S7-C. `availability` and `reason_code` are REQUIRED of every entry, because
     # a metric shape that can omit them lets absence look like an unfilled field.
     metric_shape: "criterion -> per candidate {availability, value, unit, reason_code, source_refs}"
@@ -3151,6 +3242,15 @@ assurance_families:
         `incomparable_criteria`; the metric itself stays AVAILABLE, because it
         was established. No conversion is attempted: nothing in this repository
         is an authority on what one unit is worth in another. (S7-C correction)
+      - >
+        DEFERRED HARD-REQUIREMENT DEBT IS ON THE RECORD (Unit D).
+        `deferred_hard_requirements` maps every eligible candidate to the
+        selection-blocking requirements whose compliance is NOT_YET_EVALUABLE
+        at a DOWNSTREAM point - {constraint, compliance, evidence_owner} - so a
+        comparison never presents as clean a candidate that is eligible while
+        still owing a hard requirement to a later stage. An empty list is a
+        value: nothing is owed. Read off the stamped compliance records by the
+        one reading; nothing here decides when a requirement can be answered.
 
   SelectionAdvisory:
     semantic_roles: [advisory]
@@ -3333,7 +3433,8 @@ assurance_families:
     authority_class: AUTHORITATIVE
     purpose: "What a human submitted at the decision screen, and what they were looking at when they submitted it."
     required_fields: [entity_id, action, rationale, comparison, profile, premise_digest]
-    optional_fields: [selected_candidate, reviewed_advisories, reviewed_concerns, revises]
+    optional_fields: [selected_candidate, reviewed_advisories, reviewed_concerns, revises,
+                      deferred_hard_requirements]
     action: [SELECT, KEEP_UNRESOLVED, REQUEST_MORE_EVIDENCE]
     rules:
       - >
@@ -3373,6 +3474,14 @@ assurance_families:
         advisory material and the digest all come from the snapshot that was
         rendered, so a client cannot claim to have reviewed one thing while
         submitting against another. (S7-E)
+      - >
+        A SELECT RECORDS THE DEBT IT WAS SHOWN (Unit D). `deferred_hard_
+        requirements` is the selected candidate's deferred rows exactly as the
+        snapshot displayed them - {constraint, compliance, evidence_owner} -
+        copied by the backend, never supplied by the client, and an explicit
+        empty list where nothing was deferred. The rows are inside the digest
+        too, so a requirement becoming deferred or ceasing to be between screen
+        and submission is a stale screen like any other.
 
 
   SelectionDecision:
@@ -3467,7 +3576,16 @@ assurance_families:
     # CONSIDERED, never premise - separate fields from the premise ones above,
     # so no propagation path runs from a model's wording to this decision's
     # standing. Rewording an advisory or a concern stales nothing.
-    optional_fields: [considered_advisories, considered_concerns, rationale]
+    #
+    # UNIT D. `deferred_hard_requirements` is what the selected candidate still
+    # owes at commitment - the selection-blocking requirements NOT_YET_EVALUABLE
+    # at a DOWNSTREAM point, {constraint, compliance, evidence_owner} - copied
+    # from the review the person committed on. The compliance records it names
+    # are already premises (hard_requirement_results); the field makes the debt
+    # explicit on the commitment so s05 reads what it must discharge rather
+    # than discovering it.
+    optional_fields: [considered_advisories, considered_concerns, rationale,
+                      deferred_hard_requirements]
     rules:
       - >
         Only a candidate that is SELECTION_ELIGIBLE may be selected: mechanical

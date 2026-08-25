@@ -639,6 +639,9 @@ def run_selection_checkpoint(case_id: str, state, trial: int) -> Dict[str, Any]:
     rec["comparison"] = snapshot.comparison["entity_id"]
     rec["profile"] = snapshot.profile["entity_id"]
     rec["eligible_candidates"] = list(snapshot.eligible_candidates)
+    # The debt each eligible candidate was shown carrying (Unit D).
+    rec["deferred_hard_requirements"] = [dict(r) for r in
+                                         snapshot.deferred_hard_requirements]
     rec["reviewed_advisories"] = snapshot.advisory_ids()
     rec["reviewed_concerns"] = snapshot.concern_ids()
     rec["counts"] = state.counts()

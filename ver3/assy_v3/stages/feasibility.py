@@ -1949,6 +1949,93 @@ def aggregate(verdicts: Sequence[Verdict]) -> Aggregation:
 # =====================================================================
 SATISFIED, VIOLATED, NOT_YET_EVALUABLE = "SATISFIED", "VIOLATED", "NOT_YET_EVALUABLE"
 
+#: WHEN a hard requirement can be answered, in the contract's words (Unit D).
+#: PRE_SELECTION: the evidence exists before mechanism selection, so an
+#: unanswered record is required evidence absent. DOWNSTREAM: only a later
+#: responsibility produces it, so an unanswered record is honest, and owed.
+PRE_SELECTION, DOWNSTREAM = "PRE_SELECTION", "DOWNSTREAM"
+
+_EVALUATION_POLICY: Optional[Dict[str, Dict[str, Any]]] = None
+
+
+def evaluation_policy() -> Dict[str, Dict[str, Any]]:
+    """kind -> {point, evidence_owner}, READ FROM THE CONTRACT, ONCE.
+
+    `DesignConstraint.kinds.<kind>.evaluation` is the one table that says when
+    a hard requirement of that kind can be answered and who owes the evidence
+    while it cannot. Nothing keeps a second copy: selection, the decision
+    screen and the assurance check read the stamp this responsibility puts on
+    each compliance record, never a table of their own - the same discipline
+    `classification` keeps for the finding codes.
+    """
+    global _EVALUATION_POLICY
+    if _EVALUATION_POLICY is None:
+        kinds = (Contracts().families.get("DesignConstraint") or {}).get("kinds") or {}
+        _EVALUATION_POLICY = {
+            kind: dict(spec.get("evaluation") or {})
+            for kind, spec in kinds.items() if isinstance(spec, dict)}
+    return _EVALUATION_POLICY
+
+
+def evaluation_timing(kind: Any) -> Dict[str, Any]:
+    """{point, evidence_owner} for one kind. FAILS CLOSED.
+
+    A kind the table does not know, one that declares no point, and a
+    DOWNSTREAM point that names no owner are all PRE_SELECTION: a policy
+    nobody declared widens nothing, and a deferral to nobody is not a
+    deferral anyone can discharge. Read by the evaluator when it writes the
+    record, and by nothing that reads the record.
+    """
+    spec = evaluation_policy().get(kind) or {}
+    owner = spec.get("evidence_owner")
+    owner = owner if isinstance(owner, str) and owner else None
+    if spec.get("point") == DOWNSTREAM and owner:
+        return {"point": DOWNSTREAM, "evidence_owner": owner}
+    return {"point": PRE_SELECTION, "evidence_owner": owner}
+
+
+def compliance_deferred(record: Dict[str, Any]) -> bool:
+    """A record honestly unanswered at a DOWNSTREAM point, naming who owes it.
+
+    Explicit on every count - the status, the stamped point, a non-empty
+    owner - or it is not deferred. Nothing is inferred from the `why`.
+    """
+    owner = record.get("evidence_owner")
+    return (record.get("status") == NOT_YET_EVALUABLE
+            and record.get("evaluation_point") == DOWNSTREAM
+            and isinstance(owner, str) and bool(owner))
+
+
+def compliance_blocks(record: Dict[str, Any]) -> Optional[str]:
+    """Why ONE compliance record stops a candidate being chosen, or None.
+
+    THE ONE READING OF A STAMPED RECORD, and the only one: selection reads
+    eligibility through it, the assurance check re-derives a commitment's
+    preconditions through it, and no consumer keeps a rule of its own. Typed
+    fields only - the status and the stamped point - never the reason, the
+    `why`, or whose candidate it is.
+
+        SATISFIED                        -> does not block
+        VIOLATED                         -> blocks, at any point; a deferral
+                                            never hides an established violation
+        NOT_YET_EVALUABLE, DOWNSTREAM    -> does not block: deferred debt, owed
+        NOT_YET_EVALUABLE, otherwise     -> blocks: required evidence absent
+        anything else, or no stamp       -> blocks, closed
+    """
+    constraint = record.get("constraint")
+    status = record.get("status")
+    if status == SATISFIED:
+        return None
+    if status == VIOLATED:
+        return "%s is violated" % constraint
+    if compliance_deferred(record):
+        return None
+    if status == NOT_YET_EVALUABLE:
+        owner = record.get("evidence_owner")
+        return ("%s is NOT_YET_EVALUABLE and its evidence is required before "
+                "selection%s" % (constraint, " (owed by %s)" % owner if owner else ""))
+    return "%s is %r, which is no compliance status" % (constraint, status)
+
 
 def _material_class_only(constraint, ev):
     """No canonical material assignment exists anywhere in the representation.
@@ -2177,11 +2264,21 @@ def evaluate_candidate_feasibility(state, candidate_id: str,
     ops += made
     for constraint, hstatus, codes, used, why in compliance:
         cid = constraint.get("entity_id")
+        # WHEN THIS CAN BE ANSWERED, AND BY WHOM - stamped from the one table
+        # (Unit D), so every reader downstream reads the record and none reads
+        # the table. The status above is what the evidence established; the
+        # stamp is what the design declared about the kind. A policy revised
+        # in the contract reaches the record on the next reconcile, as a
+        # revision of it, and everything premised on it goes stale.
+        timing = evaluation_timing(constraint.get("kind"))
+        fields = {"candidate": candidate_id, "constraint": cid, "status": hstatus,
+                  "why": why or "; ".join(codes),
+                  "evaluation_point": timing["point"]}
+        if timing["evidence_owner"]:
+            fields["evidence_owner"] = timing["evidence_owner"]
         made, _hrc = address_operations(
             state, "HardRequirementCompliance",
-            "HRC-%s-%s" % (candidate_id, cid),
-            {"candidate": candidate_id, "constraint": cid, "status": hstatus,
-             "why": why or "; ".join(codes)},
+            "HRC-%s-%s" % (candidate_id, cid), fields,
             sorted({candidate_id, cid} | {u for u in used if u}), prov,
             current_compliance(state, candidate_id, cid))
         ops += made

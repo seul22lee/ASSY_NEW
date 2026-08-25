@@ -617,15 +617,29 @@ class TestPopulation(_Lifecycle):
 
     def test_F23_a_new_blocking_requirement_reopens_eligibility(self):
         """No old compliance record could have named it, and no default answers
-        it: a requirement nobody has evaluated leaves the candidate unresolved,
-        which is a different fact from satisfied and from violated."""
+        it: a requirement nobody has evaluated is NOT_YET_EVALUABLE, which is a
+        different fact from satisfied and from violated.
+
+        WHAT THAT DOES TO THE POPULATION is the requirement's declared
+        evaluation point (Unit D). The fixture's kind is owed to a later stage,
+        so the candidates stay eligible - carrying the debt - and the comparison
+        is remade with it on the record; the person decided without seeing it,
+        so the commitment reopens. A kind owed before selection empties the
+        population instead, and no comparison may stand."""
         state, decision = self.committed()
         self.constraint(state, eid="DSC-NEW01", blocks=True)
         out = self.reconcile(state)
-        # NOT_YET_EVALUABLE is not "unknown eligibility": S7-C decided that a
-        # requirement nobody can evaluate at the current maturity is one the
-        # candidate has not satisfied, so the population is empty rather than
-        # unestablished. Either way no comparison may stand.
+        self.assertEqual(sel.COMPARISON_WRITTEN, out.comparison)
+        self.assertEqual(["DSC-NEW01"],
+                         [r["constraint"] for r in
+                          self.comparison(state)["deferred_hard_requirements"]["CND-A"]])
+        self.assertEqual(STALE, self.validity(state, decision))
+        self.assertEqual(lc.AWAITING_HUMAN_DECISION, out.human_state)
+
+        state, decision = self.committed()
+        self.constraint(state, eid="DSC-NEW02", blocks=True,
+                        kind="PROHIBITED_ENERGY_SOURCE")
+        out = self.reconcile(state)
         self.assertEqual(sel.NO_ELIGIBLE_CANDIDATES, out.comparison)
         self.assertIsNone(self.comparison(state))
         self.assertEqual(STALE, self.validity(state, decision))
@@ -645,13 +659,19 @@ class TestPopulation(_Lifecycle):
         state = self.chain()
         self.constraint(state, eid="DSC-GONE01", blocks=True)
         self.reconcile(state)
-        self.assertIsNone(self.comparison(state))
+        # the fixture's kind is deferred (Unit D): the comparison stands, with
+        # the debt on it
+        self.assertEqual(["DSC-GONE01"],
+                         [r["constraint"] for r in
+                          self.comparison(state)["deferred_hard_requirements"]["CND-A"]])
         self.withdraw(state, "DSC-GONE01", stage="s01",
                       why="the requirement was withdrawn")
         out = self.reconcile(state)
         self.assertEqual(sel.COMPARISON_WRITTEN, out.comparison)
         self.assertEqual(["CND-A", "CND-B"],
                          sorted(self.comparison(state)["candidates"]))
+        self.assertEqual({"CND-A": [], "CND-B": []},
+                         self.comparison(state)["deferred_hard_requirements"])
         self.assertEqual(STALE, self.validity(
             state, [h["entity_id"] for h in state.family(
                 "HardRequirementCompliance")
@@ -1236,13 +1256,29 @@ class TestLifecycleMatrix(_Lifecycle):
         self.assertIsNone(after["commitment"])
 
     def test_MATRIX_05_a_new_blocking_requirement_reopens_eligibility(self):
+        """Unit D: by the requirement's declared evaluation point. A kind owed
+        downstream keeps the population and remakes the comparison with the
+        debt on it; a kind owed before selection empties the population. Both
+        reopen the commitment, which was made without the requirement."""
         state, _d = self.committed()
         self.constraint(state, eid="DSC-MATRIX5", blocks=True)
         self.reconcile(state)
+        picture = self.picture(state)
+        self.assertIsNotNone(picture["comparison"])
+        self.assertIsNone(lc.current_commitment(state))
+        record = records.current_compliance(state, "CND-A", "DSC-MATRIX5")
+        self.assertEqual(sel.NOT_YET_EVALUABLE, record["status"])
+        self.assertEqual("DOWNSTREAM", record["evaluation_point"])
+
+        state, _d = self.committed()
+        self.constraint(state, eid="DSC-MATRIX5B", blocks=True,
+                        kind="PROHIBITED_ENERGY_SOURCE")
+        self.reconcile(state)
         self.assertIsNone(self.picture(state)["comparison"])
         self.assertIsNone(lc.current_commitment(state))
-        self.assertEqual(sel.NOT_YET_EVALUABLE, records.current_compliance(
-            state, "CND-A", "DSC-MATRIX5")["status"])
+        record = records.current_compliance(state, "CND-A", "DSC-MATRIX5B")
+        self.assertEqual(sel.NOT_YET_EVALUABLE, record["status"])
+        self.assertEqual("PRE_SELECTION", record["evaluation_point"])
 
     def test_MATRIX_06_a_preference_change_leaves_feasibility_alone(self):
         state, _d = self.committed()

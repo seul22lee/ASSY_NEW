@@ -55,6 +55,18 @@ CONCERN_LABEL = ("Concerns raised for a human to weigh. A concern decides "
 OBLIGATION_LABEL = ("An obligation is work with an owner, recorded with the "
                     "feasibility answer. It decides nothing here.")
 
+#: UNIT D. A hard requirement a candidate still owes to a later stage is shown
+#: as exactly that - debt with an owner - under its own heading, and its
+#: absence is stated. A row here is never a reason the candidate is
+#: ineligible, and never folded into why it is eligible.
+DEFERRED_LABEL = ("Hard requirements deferred to a later stage - still to be "
+                  "satisfied, not yet evaluable")
+DEFERRED_ABSENT = "No hard requirement is deferred to a later stage."
+DEFERRED_NOTE = ("A deferred hard requirement must still be satisfied. It does "
+                 "not make the candidate ineligible now; the named owner must "
+                 "establish it before the design is complete, and selecting the "
+                 "candidate selects that debt with it.")
+
 #: The candidate control starts here, and this is not a candidate.
 CHOOSE_PLACEHOLDER = "- choose a candidate -"
 
@@ -127,6 +139,10 @@ def comparison_rows(snapshot: dec.HumanReviewSnapshot) -> List[Dict[str, Any]]:
         rows.append({
             "candidate": candidate,
             "eligible_because": why.get(candidate, ""),
+            # What this candidate still owes to a later stage (Unit D): the
+            # requirement ids, so a row can say it beside the metrics.
+            "deferred": [r.get("constraint") for r in snapshot.deferred_hard_requirements
+                         if r.get("candidate") == candidate],
             # NOT "winner", NOT "best", NOT "selected". The frontier is what the
             # comparison could not tell apart, and naming it a winner on a screen
             # would make the deterministic step look like the decision.
@@ -197,6 +213,20 @@ def review_lines(snapshot: dec.HumanReviewSnapshot) -> List[str]:
                  % (len(snapshot.feasibility_assessments),
                     len(snapshot.hard_requirement_results),
                     len(snapshot.design_constraints)))
+
+    # HARD REQUIREMENTS STILL OWED (Unit D). A candidate can be eligible now
+    # while a hard requirement on it is honestly unanswered until a later stage
+    # produces the evidence. Shown as what it is - debt with an owner - and its
+    # absence stated; nothing here decides anything from it.
+    lines.append("## %s" % DEFERRED_LABEL)
+    if not snapshot.deferred_hard_requirements:
+        lines.append(DEFERRED_ABSENT)
+    for row in snapshot.deferred_hard_requirements:
+        lines.append("- %s: %s is NOT_YET_EVALUABLE now and must be established by "
+                     "%s (%s)" % (row.get("candidate"), row.get("constraint"),
+                                  row.get("evidence_owner"), row.get("compliance")))
+    if snapshot.deferred_hard_requirements:
+        lines.append(DEFERRED_NOTE)
 
     # WHAT EACH CANDIDATE CARRIES, as the feasibility answer recorded it. Read
     # off the records the eligibility basis names and rendered generically -

@@ -145,10 +145,17 @@ def main() -> int:
         "population": rows, "eligible": eligible,
         "population_established": not any(v == sel.UNRESOLVED
                                           for v, _w, _u in population.values()),
+        # WHAT EACH ELIGIBLE CANDIDATE STILL OWES to a later stage (Unit D),
+        # by the same reading; an empty list is a value.
+        "deferred_hard_requirements": sel.deferred_hard_requirements(
+            sel.evidence_of(state, payload), population),
         "rule": "sel.eligibility: current MechanicalFeasibilityAssessment "
                 "FEASIBLE_FOR_SELECTION for the same branch, exactly one, and "
-                "every selection-blocking DesignConstraint's compliance "
-                "SATISFIED. Preference-blind."})
+                "every selection-blocking DesignConstraint's compliance read by "
+                "feasibility.compliance_blocks - SATISFIED passes, VIOLATED "
+                "blocks, NOT_YET_EVALUABLE blocks at a PRE_SELECTION evaluation "
+                "point and is carried as deferred debt at a DOWNSTREAM one. "
+                "Preference-blind."})
 
     profile_out = sel.materialize_selection_profile(state, None)
     _dump(os.path.join(OUT, "03_preferences.json"), {
