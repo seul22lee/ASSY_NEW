@@ -101,6 +101,21 @@ authority_status:
     class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
     authoritative_for_canonical_semantics: false
+  compilation_entry:
+    class: "OPERATIONAL"
+    note: >
+      Unit F. When compilation may be entered, and why a signature is never
+      written over nothing. Enforced in
+      `assy_v3/downstream/canonical_io.compilation_readiness` and by the
+      GeometrySignature family's `requires_premises`; explained here.
+    authoritative_for_canonical_semantics: false
+  execution_semantics:
+    class: "OPERATIONAL"
+    note: >
+      Unit F. What each opcode does and in which units, stated once in
+      `assy_v3/downstream/ir.OPCODE_SEMANTICS`; this section explains that s07
+      executes those and decides nothing.
+    authoritative_for_canonical_semantics: false
 stage_id: s07
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
@@ -172,6 +187,34 @@ allowed_unresolved: []
 unresolved_rationale: >
   Nothing may remain unresolved at s07. If a symbol has no value, s06 did not
   converge and s07 must not have been entered.
+
+compilation_entry:
+  principle: >
+    s07 executes a settled program. It is entered only when the committed
+    branch has a current, non-empty construction program; every parameter a
+    statement references carries a standing value with a solver artifact;
+    every standing Constraint of the branch carries a feasible settlement;
+    every statement parameter is in the kernel's unit; and no post-settlement
+    occupancy finding stands. Anything less is refused BEFORE the kernel is
+    asked, with the reason recorded, and nothing is written.
+  never: >
+    A compile over no statements is not a success. Zero bodies is not a
+    design. A GeometrySignature carries the statements, bodies and settled
+    values it was compiled from as premises, so ordinary currentness stales it
+    when any of them moves; the write boundary refuses one with no premise.
+
+execution_semantics:
+  principle: >
+    By the time a statement reaches s07 it answers everything: the body it
+    builds, the feature it realizes, the opcode, the operands and their order,
+    the settled values, the frame and the units. The opcode semantics are the
+    IR's (`OPCODE_SEMANTICS`): a BOX spans [0,dx]x[0,dy]x[0,dz] from the body
+    frame origin, a CYLINDER stands on the origin along +Z, a SPHERE is centred
+    on it, TRANSLATE and ROTATE move an operand within the body frame, the
+    booleans combine operands in the order written. Lengths are millimetres
+    and angles degrees, and a value in any other unit is refused rather than
+    converted. s07 may choose how to call the kernel; it may not choose a
+    form, a placement, an axis, a dimension, a material or a feature.
 
 maturity_expectations:
   geometry: CAD_SOLIDS

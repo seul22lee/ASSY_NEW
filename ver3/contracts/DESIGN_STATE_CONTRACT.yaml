@@ -169,6 +169,21 @@ multi_owner_exceptions:
 #
 # A NEW FAMILY PARTICIPATES BY DECLARING ITS OWN ROLES - no consuming stage and
 # no resolver code is edited.
+# UNIT F. TWO FAMILY-LEVEL DECLARATIONS THE WRITE BOUNDARY READS.
+#
+#   ir_validation: parameter | constraint | statement | envelope
+#     The record (or its envelope field) is read by the deterministic
+#     downstream's one grammar, `assy_v3/downstream/ir.py`, before it may
+#     enter standing state. References resolve against the state the patch
+#     would leave. Nothing is solved here; this is well-formedness.
+#   requires_premises: true
+#     Every CREATE of the family must carry at least one premise, because the
+#     family is evidence concluded from other records and a premise-less
+#     record could never go stale.
+family_declarations_read_by_the_boundary:
+  ir_validation: [parameter, constraint, statement, envelope]
+  requires_premises: [true]
+
 semantic_role_vocabulary:
   actor_role: >
     Something outside the product that acts on it or must reach into it.
@@ -834,8 +849,15 @@ entity_families:
     # complete. Occupancy against a reserved region is evaluated where the
     # expression resolves to constants comparable with the region's basis, and
     # re-evaluated after settlement otherwise; neither is a claim of clearance.
-    # The referenced parameters are NOT premises of the feature: the envelope
-    # names them symbolically, exactly as a construction statement does.
+    #
+    # UNIT F. The referenced parameters ARE premises of the feature, as they
+    # are of a construction statement: a revised or withdrawn DECLARATION
+    # stales the geometry that named it, while the settlement of the value -
+    # an s06 extension of an s05-owned record - leaves the owner's own records
+    # standing by the boundary's ordinary rule and stales only what a later
+    # stage concluded from the value (the geometry signature). Unit E declared
+    # the opposite on the strength of history that predates that rule.
+    # The envelope is read by the one grammar at the boundary (`ir_validation`).
     #
     # `interface` is the typed trace from a feature to the s03 Interface whose
     # side it realizes. A feature that realizes an interaction names it;
@@ -843,6 +865,7 @@ entity_families:
     # per participating body per interface, and the interface is a premise of
     # the feature so a revised interface stales the geometry that realized it.
     optional_fields: [envelope, interface]
+    ir_validation: envelope
     field_semantics:
       envelope:
         kind: spatial
@@ -1018,6 +1041,12 @@ entity_families:
     semantic_roles: [quantity_constraint]
     owned_by: s05
     extendable_by: [s06]
+    # UNIT F. Every record is read by the settlement grammar at the write
+    # boundary (`downstream.ir.record_problems`): a unit, a symbol, a status
+    # from the vocabulary, and a value only beside the solver artifact that
+    # settled it. What s06 may extend is `extendable_fields` below; what a
+    # record must look like to be readable is this.
+    ir_validation: parameter
     # THE ENFORCED AUTHORITY. `extendable_by` above is prose; the write boundary
     # reads `extendable_fields` and refuses anything absent from it, so a family
     # named there with no field listed here grants nothing. Exactly two fields,
@@ -1044,6 +1073,13 @@ entity_families:
     semantic_roles: [embodiment_settlement]
     owned_by: s05
     extendable_by: [s06]
+    # UNIT F. `expression` is read by the ONE grammar in `downstream.ir` at the
+    # boundary: a relation from the declared vocabulary (==, <=, >=), two
+    # expression trees of parameter references, unit-bearing constants and the
+    # four arithmetic operators, every reference resolving to a standing
+    # Parameter and listed in `parameters`. A relation or a node the solver
+    # could not read is refused here, never committed for s06 to reject.
+    ir_validation: constraint
     # One field: what the settlement said about this relation. s06 may record an
     # outcome against a constraint; it may not rewrite the relation, because the
     # relation is s05's engineering statement.
@@ -2385,6 +2421,13 @@ assurance_families:
       axis:
         kind: enum
     owned_by: s05
+    # UNIT F. Read by the construction grammar at the boundary: an opcode from
+    # the closed vocabulary with its required parameters as expressions over
+    # standing Parameters and unit-bearing constants, operands that name
+    # standing statements, an axis where ROTATE needs one. The execution
+    # semantics of every opcode and the kernel's units are declared once, in
+    # `downstream.ir.OPCODE_SEMANTICS`; s07 executes them and decides nothing.
+    ir_validation: statement
     purpose: "One step of the ConstructionProgram that Stage 07 compiles."
     required_fields: [entity_id, operation, operands, parameters]
     # Declared so state can hold them. `body` is what the construction frame rule
@@ -2415,6 +2458,17 @@ assurance_families:
     optional_fields: [feature_map, compiled_bodies]
     purpose: "A deterministic semantic description of built geometry."
     required_fields: [entity_id, signature_sha256, per_body, critical_dimensions]
+    # UNIT F. A signature is a conclusion about a construction program and the
+    # settled values it was compiled from, and it stands only while they do.
+    # A record of it with no premise could never go stale - which is exactly
+    # what a signature over an empty program produced. Enforced by the write
+    # boundary: a CREATE with no premise_refs is refused.
+    requires_premises: true
+    rules:
+      - >
+        Compiled from a NON-EMPTY program. A branch with no current
+        construction statements has nothing to compile, and s07 refuses it
+        rather than signing the hash of nothing (Unit F).
 
   NegativeControl:
     owned_by: [s08, s09]

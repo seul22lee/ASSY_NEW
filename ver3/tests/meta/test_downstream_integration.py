@@ -58,10 +58,24 @@ def body(state, bid="BOD-0001"):
                                     "created_by_stage": "s03"}, "s03:topology")])
 
 
+def box(sid, bid, dx, dy=None, dz=None, premises=()):
+    """A construction statement: THE MINIMUM EMBODIMENT BASIS (Unit F).
+
+    Settlement is asked FOR a program; a state with parameters and constraints
+    and nothing to build is `not_ready`, not an empty problem that solved. Every
+    settlement fixture therefore carries a body and one statement.
+    """
+    return Op("CREATE", "ConstructionStatement", sid,
+              {"body": bid, "operation": "BOX", "operands": [],
+               "parameters": {"dx": dx, "dy": dy or MM(10), "dz": dz or MM(4)}},
+              "s05:embodiment", premise_refs=[bid] + list(premises))
+
+
 class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
 
     def setUp(self):
         self.state = DesignState(run_id="settle")
+        self.assertEqual([], body(self.state))
         self.assertEqual([], apply(self.state, "s05", [
             param("PRM-0001", "pin_r"), param("PRM-0002", "wall"),
             param("PRM-0003", "boss_r"),
@@ -69,7 +83,8 @@ class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
                    {"op": "+", "args": [REF("PRM-0001"), REF("PRM-0002")]},
                    ["PRM-0001", "PRM-0002", "PRM-0003"]),
             equals("CON-0002", REF("PRM-0001"), MM(4), ["PRM-0001"]),
-            equals("CON-0003", REF("PRM-0002"), MM(2), ["PRM-0002"])]))
+            equals("CON-0003", REF("PRM-0002"), MM(2), ["PRM-0002"]),
+            box("CST-0001", "BOD-0001", REF("PRM-0003"))]))
 
     def test_a_feasible_settlement_is_written_with_its_evidence(self):
         report, execution = ex.execute_settlement(self.state, Progression())
@@ -101,7 +116,9 @@ class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
 
     def test_an_unsettled_system_writes_nothing(self):
         state = DesignState(run_id="free")
-        self.assertEqual([], apply(state, "s05", [param("PRM-0009", "free")]))
+        self.assertEqual([], body(state))
+        self.assertEqual([], apply(state, "s05", [
+            param("PRM-0009", "free"), box("CST-0009", "BOD-0001", REF("PRM-0009"))]))
         report, execution = ex.execute_settlement(state, Progression())
         self.assertEqual(ir.UNDERDETERMINED, report.solver_status)
         self.assertFalse(execution.patch_applied)
@@ -141,7 +158,9 @@ class TestBoundedConvergence(unittest.TestCase):
 
     def _coupled(self, determined=True):
         state = DesignState(run_id="conv")
-        ops = [param("PRM-A", "a"), param("PRM-B", "b")]
+        self.assertEqual([], body(state))
+        ops = [param("PRM-A", "a"), param("PRM-B", "b"),
+               box("CST-AB", "BOD-0001", REF("PRM-A"), REF("PRM-B"))]
         if determined:
             ops += [
                 equals("CON-1", {"op": "+", "args": [REF("PRM-A"), REF("PRM-B")]},
@@ -211,6 +230,11 @@ class TestBranchIsolation(unittest.TestCase):
                                    [candidate("CND-A", "DIRECT_MANUAL"),
                                     candidate("CND-B", "STORED_ENERGY")]))
         for branch, pid, value in (("CND-A", "PRM-A1", 10), ("CND-B", "PRM-B1", 99)):
+            bid = "BOD-%s" % branch[-1]
+            self.assertEqual([], apply(self.state, "s03", [
+                Op("CREATE", "Body", bid,
+                   {"instance_identity": bid, "role": "shell", "created_by_stage": "s03"},
+                   "s03:topology", premise_refs=[branch])]))
             self.assertEqual([], apply(self.state, "s05", [
                 Op("CREATE", "Parameter", pid,
                    {"symbol": "w", "unit": "mm", "status": ir.DECLARED},
@@ -219,7 +243,8 @@ class TestBranchIsolation(unittest.TestCase):
                    {"kind": "DIMENSIONAL", "parameters": [pid],
                     "expression": {"relation": "==", "lhs": REF(pid),
                                    "rhs": MM(value)}},
-                   "s05:embodiment", premise_refs=[branch])]))
+                   "s05:embodiment", premise_refs=[branch]),
+                box("CST-%s" % pid, bid, REF(pid), premises=[branch])]))
 
     def test_a_branch_reads_only_its_own_parameters(self):
         self.assertEqual(["PRM-A1"],
@@ -309,7 +334,12 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
                                  self.state.entities[eid].get("_validity", "STANDING"))
 
     def test_a_value_with_no_solver_evidence_never_reaches_the_kernel(self):
-        """R-23 at the last door. The compiler compiles solved decisions only."""
+        """R-23 at the last door. The compiler compiles solved decisions only.
+
+        Unit F moved the door forward: the unsettled reference is refused by
+        the compilation entry gate, by name, before the kernel is asked - so
+        no statement fails, because none is executed.
+        """
         state = DesignState(run_id="unsolved")
         self.assertEqual([], body(state))
         self.assertEqual([], apply(state, "s05", [
@@ -320,7 +350,9 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
                "s05:embodiment")]))
         result, execution = ex.execute_compilation(state, Progression())
         self.assertFalse(result.ok)
-        self.assertEqual("CST-1", result.failed_statement)
+        self.assertIsNone(result.failed_statement, "the kernel was asked")
+        self.assertTrue(any("PRM-X" in p and "no standing settled value" in p
+                            for p in result.problems), result.problems)
         self.assertFalse(execution.patch_applied)
 
     def test_a_failed_compile_registers_no_artifact(self):

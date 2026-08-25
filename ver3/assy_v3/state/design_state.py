@@ -432,6 +432,17 @@ class DesignState:
                     problems.append("MISSING_REQUIRED: %s %s -> %s" % (fam, eid, missing))
                 if not op.provenance_ref:
                     problems.append("NO_PROVENANCE: %s" % eid)
+                # UNIT F. EVIDENCE THAT RESTS ON NOTHING CAN NEVER GO STALE. A
+                # family that declares `requires_premises` is one whose every
+                # record is a conclusion about other records - a geometry
+                # signature about a program and its settled values - and a
+                # record of it with no premise would stand forever, whatever
+                # moved underneath it. Declared per family, enforced here.
+                if (self.c.families.get(fam) or {}).get("requires_premises") \
+                        and not op.premise_refs:
+                    problems.append("PREMISELESS_EVIDENCE: %s creates %s with no "
+                                    "premise; a %s must rest on what it was concluded "
+                                    "from, or nothing can ever stale it" % (fam, eid, fam))
                 seen.add(eid)
             elif op.kind in ("EXTEND", "SUPERSEDE", "INVALIDATE"):
                 # The entity already exists, so its STORED family is the
@@ -483,14 +494,34 @@ class DesignState:
             # already reported. Running invariants over a half-applied copy
             # would answer questions about a state that will never exist.
             return problems
+        families = self.c.families
+        ir_known = None
+        created_here = {op.entity_id for op in patch.operations if op.kind == "CREATE"}
         for eid in _touched_entities(patch, unauthorised):
             family = prospective.stored_family(eid)
-            if family is None or family not in self.c.families:
+            if family is None or family not in families:
                 continue                      # already reported as unknown
             record = _prospective_record(prospective, eid)
             problems.extend(_conditional_problems(self.c, family, eid, record))
             problems.extend(_relational_problems(prospective, self.c, family,
                                                  eid, record))
+            # UNIT F. IR WELL-FORMEDNESS AT THE DOOR. A family that declares
+            # `ir_validation` holds values the deterministic downstream must be
+            # able to read - a constraint expression, a construction statement, a
+            # symbolic envelope, a parameter declaration - and the reading is the
+            # one grammar in `downstream.ir`. A record the solver or the compiler
+            # could not parse is refused here rather than accepted as standing
+            # state that fails a stage later; references are resolved against the
+            # state this patch would leave, so a parameter created beside its
+            # constraint resolves and an invented one does not.
+            kind = (families.get(family) or {}).get("ir_validation")
+            if kind:
+                from ..downstream import ir as _ir
+                if ir_known is None:
+                    ir_known = (prospective.declared_ids("Parameter"),
+                                prospective.declared_ids("ConstructionStatement"))
+                problems.extend(_ir.record_problems(kind, record, *ir_known,
+                                                    created=eid in created_here))
         return problems
 
     # ------------------------------------------------------- U-4 operations
@@ -1377,6 +1408,21 @@ class _Prospective:
         from half a patch is answering about a state that will never exist.
         """
         return self._ok
+
+    def declared_ids(self, family: str) -> Set[str]:
+        """The ids DECLARED in this family after the patch: present and not
+        withdrawn, whatever their currentness.
+
+        A reference resolves against the state the patch leaves, never the one
+        before it - and against declarations, not standing. A parameter whose
+        settled value this very patch stales (a revised constraint stales what
+        it settled) is still the declared quantity the revised constraint is
+        about; refusing the reference would refuse the one write that could
+        re-settle it. Withdrawn (INVALIDATED) records do not resolve.
+        """
+        return {r["entity_id"] for r in self._twin.family(family)
+                if r.get("_validity", ValidityStatus.STANDING.value)
+                != ValidityStatus.INVALIDATED.value}
 
     # ---- reads, delegated to a real DesignState carrying the patch ----
     def get(self, entity_id: str) -> Optional[Dict[str, Any]]:

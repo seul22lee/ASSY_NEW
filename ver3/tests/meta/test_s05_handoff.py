@@ -579,8 +579,12 @@ class TestSpatialBridge(_Handoff):
             self.assertEqual(SYMBOLIC, env)
             for node in env["centre"] + env["half_extent"]:
                 self.assertIsInstance(node, dict)
-            self.assertNotIn("PRM-0001", f["_premises"],
-                             "a symbolic reference is not a premise")
+            # Unit F: the parameters an envelope names ARE premises - a revised
+            # declaration stales the geometry stated in it; the settlement of
+            # the value does not (owner rule, proven in the settlement gate
+            # tests).
+            self.assertIn("PRM-0001", f["_premises"],
+                          "the declaration an envelope rests on is a premise")
         self.assertEqual([], [p for p in state.standing("Parameter") if "value" in p])
 
     def test_16_the_numeric_envelope_contradiction_is_gone_from_production(self):

@@ -69,6 +69,14 @@ authority_status:
       and their owners are DESIGN_STATE_CONTRACT's, and the responsibility is
       STAGE_RESPONSIBILITY_CONTRACT's. Not authoritative.
     authoritative_for_canonical_semantics: false
+  ir_authority:
+    class: "OPERATIONAL"
+    note: >
+      Unit F. The expression, constraint and construction grammar this stage
+      authors is the deterministic downstream's one grammar
+      (`assy_v3/downstream/ir.py`), read at the write boundary; this section
+      explains that and defines nothing.
+    authoritative_for_canonical_semantics: false
   post_selection_handoff:
     class: "OPERATIONAL"
     note: >
@@ -314,6 +322,26 @@ post_selection_handoff:
     DECLARED_ONLY`): the closure stays on the record as audit_only. Other
     alternatives, their assessments, comparisons, preferences and a person's
     rationale are lineage of the decision, not context for embodying it.
+
+ir_authority:
+  grammar: >
+    One grammar, s06's and s07's: a constraint relation is ==, <= or >=; an
+    expression node is exactly one of {ref}, {const, unit} or {op, args} with
+    op in + - * /; a construction statement is an opcode from the closed
+    vocabulary with its required parameters as such expressions; a feature
+    envelope's components are such expressions. s05 authors in it and the
+    write boundary reads it (`ir_validation`) before anything becomes
+    standing state, so a record the solver or the compiler cannot read is
+    never committed for them to refuse.
+  zero: >
+    A coordinate at the body frame origin is the typed zero of the frame's
+    unit - {"const": 0, "unit": "mm"} - a coordinate definition, not an
+    invented dimension. A bare number is refused wherever it appears.
+    A dimensionless factor carries unit "1".
+  premises: >
+    The parameters a feature envelope or a construction statement references
+    are premises of that record: a revised declaration stales what named it;
+    the settlement of a value does not (the boundary's owner rule).
 
 allowed_unresolved:
   - "embodiment alternatives"

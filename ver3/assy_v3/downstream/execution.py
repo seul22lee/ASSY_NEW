@@ -70,7 +70,23 @@ def execute_settlement(state, progression: Progression, *,
     Writes only on FEASIBLE. An infeasible or underdetermined report is evidence
     and evidence does not become a value - which is the whole reason the loop
     exists rather than a fallback.
+
+    UNIT F. THE ENTRY GATE COMES FIRST. A branch with no current embodiment
+    program is `not_ready`: no solver runs, nothing is written, the failure is
+    recorded. "s05 produced nothing" must never read as "the empty system
+    solved".
     """
+    ready, why_not = canonical_io.settlement_readiness(state, branch)
+    if not ready:
+        report = canonical_io._solver.SolverReport(
+            solver_status=ir.NOT_READY, problems=list(why_not),
+            formulation_sha256=_digest({"branch": branch, "not_ready": why_not}))
+        progression.fail(CONTRACT_CONDITION, "s06", ir.NOT_READY, why_not)
+        execution = progression.record_deterministic(DeterministicExecution(
+            responsibility_id="s06", stage_id="s06", outcome=ir.NOT_READY,
+            input_digest=report.formulation_sha256, patch_applied=False,
+            problems=tuple(why_not), evidence_id=None))
+        return report, execution
     report, params = canonical_io.solve_from_state(state, branch)
     evidence = canonical_io.evidence_identity(report)
     ops = canonical_io.settlement_operations(report, params, evidence)
@@ -104,13 +120,31 @@ def execute_compilation(state, progression: Progression, *,
     A failed compile registers nothing. There is no partial signature and no
     half-written artifact reference, because an artifact that exists in state is
     read as current.
+
+    UNIT F. THE ENTRY GATE COMES FIRST. No program, an unsettled reference, an
+    unfeasible or absent settlement, a statement in the wrong unit, or a
+    standing post-settlement occupancy finding refuses compilation before the
+    kernel is asked; the reason is recorded and nothing is written. A compile
+    over nothing was once a success with a signature over `{}`; it is not.
     """
+    ready, why_not = canonical_io.compilation_readiness(state, branch)
+    if not ready:
+        result = canonical_io._compiler.CompileResult(ok=False, problems=list(why_not))
+        progression.fail(CONTRACT_CONDITION, "s07", "compilation not ready",
+                         {"problems": why_not})
+        execution = progression.record_deterministic(DeterministicExecution(
+            responsibility_id="s07", stage_id="s07", outcome="not_ready",
+            input_digest=_digest({"branch": branch, "not_ready": why_not}),
+            patch_applied=False, problems=tuple(why_not), evidence_id=None))
+        return result, execution
     result = canonical_io.compile_from_state(state, out_dir=out_dir, branch=branch)
     signature = canonical_io.signature_identity(result) if result.ok else None
     # The settled parameters the compiler actually consumed become premises of
     # the signature, so a re-solve stales the geometry it produced.
     ops = (canonical_io.compilation_operations(
-        result, signature, sorted(canonical_io.resolved_values(state, branch)))
+        result, signature, sorted(canonical_io.resolved_values(state, branch)),
+        statements_compiled=[s.entity_id for s in
+                             canonical_io.read_program(state, branch).statements])
         if result.ok else [])
     problems = list(result.problems)
     applied = False
@@ -159,6 +193,9 @@ SETTLED = "SETTLED"
 BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
 CYCLE = "REPEATED_STATE"
 ESCALATED = "ESCALATED"
+#: UNIT F. The branch had no embodiment program to settle for; the loop does
+#: not spin on it - refining a placement cannot supply a program.
+NOT_READY = "NOT_READY"
 
 
 def settle(state, progression: Progression, *,
@@ -184,6 +221,9 @@ def settle(state, progression: Progression, *,
         outcome.reports.append(report)
         if report.solver_status == ir.FEASIBLE:
             outcome.status = SETTLED
+            return outcome
+        if report.solver_status == ir.NOT_READY:
+            outcome.status = NOT_READY
             return outcome
 
         signature = (tuple(sorted(report.conflicting)),

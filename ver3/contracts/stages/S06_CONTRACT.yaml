@@ -94,6 +94,20 @@ authority_status:
     class: "OPERATIONAL"
     note: "non-semantic detail; defines no canonical meaning"
     authoritative_for_canonical_semantics: false
+  settlement_entry:
+    class: "OPERATIONAL"
+    note: >
+      Unit F. When settlement may be asked at all, and how an absent embodiment
+      is told apart from an empty system. Enforced in
+      `assy_v3/downstream/canonical_io.settlement_readiness`; explained here.
+    authoritative_for_canonical_semantics: false
+  post_settlement_checks:
+    class: "OPERATIONAL"
+    note: >
+      Unit F. The deterministic re-evaluation of s04 spatial commitments once
+      s06 has settled the quantities an s05 envelope was stated in. Enforced in
+      `assy_v3/downstream/settled_geometry`; explained here.
+    authoritative_for_canonical_semantics: false
 stage_id: s06
 status: draft
 governed_by: ver3/phase0/ARCHITECTURE_INVARIANTS.yaml
@@ -131,7 +145,57 @@ prohibited_decisions:
 structured_outputs:
   per_parameter: [value_or_status, maturity]
   solver_report: [residuals, active_set, margins, solver_status]
-  solver_status: [feasible, infeasible, underdetermined, unsupported_formulation, solver_failure]
+  # Unit F: `not_ready` is reported BEFORE solving, for a branch with no
+  # current embodiment program; it is the answer to "settle what?", never a
+  # property of a system. A system with no unknowns is `feasible` with
+  # `unknown_count` 0, which the report states explicitly.
+  solver_status: [feasible, infeasible, underdetermined, unsupported_formulation, solver_failure, not_ready]
+
+settlement_entry:
+  principle: >
+    Settlement is asked FOR an embodiment. The minimum current s05 basis is
+    the branch's standing construction program - at least one
+    ConstructionStatement of the committed candidate - together with every
+    standing Parameter and Constraint of that branch reading as well-formed IR
+    (the write boundary guarantees this for everything written since Unit F).
+    Without a program there is nothing the settled numbers would build, and a
+    solve over the empty system is not evidence of anything.
+  not_ready: >
+    A branch with no current construction program yields `not_ready`: no
+    solver runs, nothing is written, a CONTRACT_CONDITION failure is recorded
+    against s06, and the settlement loop stops. This is the only honest
+    reading of "s05 produced nothing" and it never resembles success.
+  empty_system: >
+    A branch whose program references no Parameter and states no Constraint
+    has nothing to settle, and that is a legitimate, explicit result:
+    `feasible` with `unknown_count` 0 and an empty settled set. It is told
+    apart from `not_ready` by the presence of the program.
+  units: >
+    The kernel builds in millimetres and turns in degrees. Every construction
+    parameter must reduce to exactly that dimension in that unit; a statement
+    in another unit is refused at compilation entry and never converted -
+    nothing in this repository is an authority on what one unit is worth in
+    another.
+
+post_settlement_checks:
+  principle: >
+    s04's arrangement, regions and sweeps are provisional commitments in s04's
+    basis; s05 states where a feature's material may be as an expression over
+    the parameters it declares; s06 settles those parameters. Only then can
+    the deferred question - does the embodiment respect what s04 reserved -
+    be asked deterministically, and it is asked in s04's own arithmetic
+    (`aabb`, `overlaps`, `excludes_occupancy`).
+  evaluable: >
+    A feature envelope whose every component resolves to a constant with the
+    settled values, in a basis the ReferenceScale can convert (ABSOLUTE, and
+    the constant's unit is the basis unit), is compared against every
+    FunctionalRegion whose role excludes occupancy. An intrusion is a
+    finding, and compilation entry refuses while one stands.
+  not_evaluable: >
+    A RELATIVE basis, a unit the basis does not state, or a parameter without a
+    settled value leaves the check NOT_ESTABLISHED for that feature. No scale
+    is invented and no relative coordinate is read as a length. Reported,
+    never silently passed.
 
 # =====================================================================
 convergence_block:

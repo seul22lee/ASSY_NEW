@@ -152,11 +152,20 @@ class TestProvisionalSizesDecideNoFit(_Authority):
         self.revise(state, Op("CREATE", "Parameter", "PRM-DIN",
                               {"symbol": "d_in", "unit": "mm", "status": "DECLARED"},
                               "s05:embodiment", premise_refs=["CND-A"]), stage="s05")
+        self.revise(state, Op("CREATE", "Parameter", "PRM-DOUT",
+                              {"symbol": "d_out", "unit": "mm", "status": "DECLARED"},
+                              "s05:embodiment", premise_refs=["CND-A"]), stage="s05")
+        # Unit F: the expression is the IR's - typed, over declared parameters.
+        # The string this fixture once wrote was a constraint no solver could
+        # read, and the write boundary now refuses it.
         self.revise(state, Op("CREATE", "Constraint", "CON-FIT",
-                              {"expression": "d_in <= d_out", "parameters": ["PRM-DIN"],
+                              {"expression": {"relation": "<=",
+                                              "lhs": {"ref": "PRM-DIN"},
+                                              "rhs": {"ref": "PRM-DOUT"}},
+                               "parameters": ["PRM-DIN", "PRM-DOUT"],
                                "kind": "CLEARANCE", "governs_interface": "IFC-0A"},
                               "s05:embodiment",
-                              premise_refs=["CND-A", "IFC-0A", "PRM-DIN"]),
+                              premise_refs=["CND-A", "IFC-0A", "PRM-DIN", "PRM-DOUT"]),
                     stage="s05")
         v = self.domain(self.assess(state, apply_patch=False), "gross_interference")
         self.assertIn("SIZING_DEFERRED_TO_EMBODIMENT", v.reason_codes, "owed until settled")

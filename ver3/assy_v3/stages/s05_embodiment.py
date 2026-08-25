@@ -122,8 +122,11 @@ RULES
    rule you can name; every other size is a parameter.
 7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds each
    body IN ITS OWN FRAME. Never place a body in the world; assembly poses are
-   derived elsewhere. Operations are exactly:
+   derived elsewhere. Operations are exactly, and mean exactly:
 {opcodes}
+   Lengths are in mm and angles in deg - state every constant in those units,
+   never in another. A coordinate at the body frame origin is the typed zero
+   {{"const": 0, "unit": "mm"}}: a coordinate definition, not a dimension.
    Each statement names the body it builds, its operation, its operands (ids of
    EARLIER statements, for the combining and transforming operations only) and
    its parameters, each of which is an <expr> as above. Exactly one statement per
@@ -281,7 +284,8 @@ class S05Embodiment(Stage):
     def prompt(self, inputs: Dict[str, Any]) -> str:
         proj = inputs["consumer_view"]
         opcodes = "\n".join(
-            "     %-10s %s" % (op, ("takes " + ", ".join(p)) if p else "combines operands")
+            "     %-10s %s - %s" % (op, ("takes " + ", ".join(p)) if p else "combines operands",
+                                    ir.OPCODE_SEMANTICS.get(op, ""))
             for op, p in sorted(ir.OPCODES.items()))
         return PROMPT.format(
             projection=_render(proj),
@@ -337,6 +341,13 @@ class S05Embodiment(Stage):
                 # does not rest on the frame, and premising it anyway would stale
                 # geometry that a change of basis cannot affect.
                 premises += scales
+                # THE PARAMETERS THE ENVELOPE NAMES ARE PREMISES (Unit F). A
+                # revised or withdrawn declaration stales the geometry stated
+                # in it; the settlement of its value - s06 extending an s05
+                # record - leaves this record standing by the boundary's owner
+                # rule. Malformed envelopes are refused at the boundary; here
+                # the refs are simply read.
+                premises += sorted(_envelope_refs(f["envelope"]))
             ops.append(Op("CREATE", "Feature", f["id"], fields, prov,
                           premise_refs=premises))
         for r in parsed.get("realizations", []):
@@ -371,26 +382,32 @@ class S05Embodiment(Stage):
             for optional in ("axis", "feature"):
                 if s.get(optional):
                     fields[optional] = s[optional]
-            # THE BODY, THE RESULTS IT CONSUMES, AND THE FEATURE IT REALIZES -
-            # and deliberately NOT the parameters it reads.
+            # THE BODY, THE RESULTS IT CONSUMES, AND THE PARAMETERS IT READS
+            # (Unit F) - and NOT the feature it realizes.
             #
-            # A statement references a parameter SYMBOLICALLY; it does not rest
-            # on that parameter's value. Recording the parameter as a premise
-            # made every statement go STALE the moment s06 settled the dimension
-            # it names, because an extension by a stage outside the owner stales
-            # what was concluded from the record - so the program was stale
-            # before the compiler ever read it, in the ordinary successful flow.
+            # The parameters used to be left out on the ground that s06
+            # settling a value staled every statement that named it. That was
+            # true before the boundary's owner rule: an extension of an
+            # s05-owned record by s06 now skips s05's own records and stales
+            # only what a later stage concluded from the value - the geometry
+            # signature - which is exactly the currentness the design needs. A
+            # revised DECLARATION (a SUPERSEDE) still stales the statement, as
+            # it must: the program then names a different quantity.
             #
-            # What DOES rest on the settled values is the geometry, and the
-            # GeometrySignature records them as premises for exactly that reason.
-            # NOT the feature either, and the direction is why. A statement
-            # REALIZES a feature; it does not rest on one. Recording the feature
-            # as a premise inverted that, and s07 writing
+            # NOT the feature, and the direction is why. A statement REALIZES a
+            # feature; it does not rest on one. Recording the feature as a
+            # premise inverted that, and s07 writing
             # `Feature.compiled_by_statement` then staled the very statement it
             # had just compiled - the compiler's record of success invalidating
             # its own input. `feature` stays as the traceability link it is.
+            # A response whose `parameters` is not an object is refused at the
+            # boundary by name (the IR reads it); this only reads references and
+            # must not be the place a malformed statement dies.
+            params = s.get("parameters")
+            refs = sorted({r for expr in (params.values() if isinstance(params, dict) else [])
+                           for r in _expr_refs(expr)})
             ops.append(Op("CREATE", "ConstructionStatement", s["id"], fields, prov,
-                          premise_refs=[s["body"]] + list(s.get("operands") or [])))
+                          premise_refs=[s["body"]] + list(s.get("operands") or []) + refs))
         for u in parsed.get("unresolved", []):
             ops.append(Op("CREATE", "UnresolvedDecision", u["id"], {
                 "decision": u["decision"], "why_open": u["why_open"],
@@ -775,7 +792,15 @@ def check_c5_program_totality(parsed) -> List[str]:
     declared = {p.get("id") for p in parsed.get("parameters") or []}
     out = []
     for s in parsed.get("construction_statements") or []:
-        for name, expr in (s.get("parameters") or {}).items():
+        params = s.get("parameters")
+        if params is not None and not isinstance(params, dict):
+            # Observed live (Unit F): parameters written positionally. The IR
+            # names the defect and the boundary refuses it; this check reports
+            # it rather than dying on it and taking every other finding along.
+            out.append("S05-C5: statement %s parameters is not an object of named "
+                       "expressions; a positional list names nothing" % s.get("id"))
+            continue
+        for name, expr in (params or {}).items():
             for ref in _expr_refs(expr):
                 if ref not in declared:
                     out.append("S05-C5: statement %s parameter %s references %s, "
@@ -790,6 +815,13 @@ def _expr_refs(expr: Any) -> Set[str]:
     if expr.get("ref"):
         return {expr["ref"]}
     return {r for a in (expr.get("args") or []) for r in _expr_refs(a)}
+
+
+def _envelope_refs(envelope: Any) -> Set[str]:
+    if not isinstance(envelope, dict):
+        return set()
+    return {r for axis in ("centre", "half_extent")
+            for node in (envelope.get(axis) or []) for r in _expr_refs(node)}
 
 
 def check_c6_units(parsed) -> List[str]:
@@ -923,47 +955,15 @@ def envelope_expressions(feature_id: Any, envelope: Any, declared: Set[str]
                          ) -> Tuple[Optional[Dict[str, List[Any]]], List[str]]:
     """Parse a symbolic envelope: (expressions by axis list, problems).
 
-    The constraint grammar, at the leaves of a spatial claim: `{ref}` naming a
-    declared parameter, `{const, unit}`, or arithmetic. A bare number is the
-    contradiction Unit E removed - a solved dimension demanded of the stage
-    that is told never to invent one - and is refused by name. A reference to
-    an undeclared parameter is refused as C5 refuses it in a statement.
+    THE IR'S GRAMMAR, AND NOTHING BESIDE IT (Unit F): `ir.envelope_problems`
+    is the one reading of a symbolic envelope - the write boundary applies it
+    before a Feature stands, this check applies it to the response so the
+    finding carries the check's name. A bare number is refused by name; a
+    reference to an undeclared parameter is refused as C5 refuses it.
     """
-    if not isinstance(envelope, dict):
-        return None, ["S05-C8: feature %s declares an envelope that is not an object"
-                      % feature_id]
-    out: Dict[str, List[Any]] = {}
-    problems: List[str] = []
-    for axis_list in ("centre", "half_extent"):
-        components = envelope.get(axis_list)
-        if not isinstance(components, list) or len(components) != 3:
-            problems.append("S05-C8: feature %s envelope %s is not three components"
-                            % (feature_id, axis_list))
-            continue
-        parsed_components = []
-        for index, node in enumerate(components):
-            if isinstance(node, bool) or isinstance(node, (int, float)):
-                problems.append(
-                    "S05-C8: feature %s envelope %s[%d] is a bare number (%r); a "
-                    "dimension is a declared parameter or a unit-bearing constant, "
-                    "never a value invented here" % (feature_id, axis_list, index, node))
-                continue
-            try:
-                expr = ir.Expr.parse(node)
-            except ir.IRError as exc:
-                problems.append("S05-C8: feature %s envelope %s[%d]: %s"
-                                % (feature_id, axis_list, index, exc))
-                continue
-            for ref in sorted(expr.refs()):
-                if ref not in declared:
-                    problems.append("S05-C8: feature %s envelope references %s, which "
-                                    "no Parameter declares" % (feature_id, ref))
-            parsed_components.append(expr)
-        if len(parsed_components) == 3:
-            out[axis_list] = parsed_components
-    if problems or len(out) != 2:
-        return None, problems
-    return out, []
+    exprs, problems = ir.envelope_problems(feature_id, envelope, declared)
+    return exprs, ["S05-C8: %s" % p[len("IR: "):] if p.startswith("IR: ") else p
+                   for p in problems]
 
 
 def _constant_in_basis(expr: Any, scale: Optional[Dict[str, Any]]) -> Optional[float]:

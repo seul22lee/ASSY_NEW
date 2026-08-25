@@ -55,8 +55,13 @@ INFEASIBLE = "infeasible"
 UNDERDETERMINED = "underdetermined"
 UNSUPPORTED_FORMULATION = "unsupported_formulation"
 SOLVER_FAILURE = "solver_failure"
+#: UNIT F. The settlement was asked of a branch with no current embodiment
+#: program to settle for. Distinct from a system that has no unknowns - which
+#: is FEASIBLE with `unknown_count` 0 - and reported before any solving, so an
+#: absent s05 output can never be read as an empty problem that solved.
+NOT_READY = "not_ready"
 SOLVER_STATUSES = (FEASIBLE, INFEASIBLE, UNDERDETERMINED,
-                   UNSUPPORTED_FORMULATION, SOLVER_FAILURE)
+                   UNSUPPORTED_FORMULATION, SOLVER_FAILURE, NOT_READY)
 
 #: Parameter value states. DECLARED is what s05 may author; SOLVED is what s06
 #: may write and only with a cited solver artifact (S05-C10).
@@ -217,6 +222,37 @@ OPCODES = {
 COMBINING = ("UNION", "CUT", "INTERSECT")
 TRANSFORMING = ("TRANSLATE", "ROTATE")
 
+#: UNIT F. THE EXECUTION SEMANTICS OF EVERY OPCODE, stated once. s07 executes
+#: exactly these; a statement whose author meant something else did not say
+#: so. Every primitive is placed against the OWNING BODY'S OWN FRAME, whose
+#: origin is a coordinate definition and not a dimension - which is why a
+#: coordinate at the origin is written as the typed zero of the frame's unit,
+#: `{"const": 0, "unit": "mm"}`, and never as a bare number.
+KERNEL_LENGTH_UNIT = "mm"
+KERNEL_ANGLE_UNIT = "deg"
+OPCODE_SEMANTICS = {
+    "BOX": "the solid [0,dx] x [0,dy] x [0,dz] from the body frame origin",
+    "CYLINDER": "the solid of radius r, axis +Z from z=0 to z=height, centred "
+                "on the frame origin in X and Y",
+    "SPHERE": "the solid of radius r centred on the frame origin",
+    "TRANSLATE": "the operand moved by (dx, dy, dz) in the body frame",
+    "ROTATE": "the operand rotated by angle (degrees) about the named body axis "
+              "through the frame origin",
+    "UNION": "the operands fused",
+    "CUT": "the first operand with every later operand removed",
+    "INTERSECT": "the common volume of the operands",
+}
+#: What each opcode parameter IS, so a value in the wrong unit is refused
+#: rather than fed to a kernel that assumes millimetres and degrees.
+OPCODE_PARAMETER_KINDS = {
+    "BOX": {"dx": "length", "dy": "length", "dz": "length"},
+    "CYLINDER": {"radius": "length", "height": "length"},
+    "SPHERE": {"radius": "length"},
+    "TRANSLATE": {"dx": "length", "dy": "length", "dz": "length"},
+    "ROTATE": {"angle": "angle"},
+    "UNION": {}, "CUT": {}, "INTERSECT": {},
+}
+
 #: ROTATE needs an axis; it is the one transform with a direction, and naming it
 #: in the statement rather than inferring it is what keeps s07 from choosing one.
 AXES = ("X", "Y", "Z")
@@ -346,3 +382,172 @@ def dependency_cone(program: ConstructionProgram, entity_id: str) -> List[str]:
         seen.append(cur)
         frontier.extend(by_id[cur].operands)
     return seen
+
+
+# ==========================================================================
+# UNIT F. RECORD VALIDATORS - the grammar as a write-boundary check.
+#
+# `Expr.parse`, `TypedConstraint.parse` and `Statement.parse` RAISE, which is
+# right for a reader that has been handed a record and cannot go on. A boundary
+# that decides whether a record may enter standing state needs the same grammar
+# as a list of problems, so these wrap the parsers and add what a parser cannot
+# know: whether a reference names a Parameter that exists, whether an operand
+# names a statement that exists, whether a listed parameter is one the
+# expression uses. ONE grammar, two surfaces; nothing below re-decides what a
+# node means.
+# ==========================================================================
+IR_VALIDATION_KINDS = ("parameter", "constraint", "statement", "envelope")
+
+
+def parameter_record_problems(record: Dict[str, Any], created: bool = False) -> List[str]:
+    """`created`: the record is being AUTHORED by this patch. A value on an
+    authored declaration is a number the declaring stage invented (S05-C10 /
+    "no fabricated s06 value"); a value arriving by extension is the settler's,
+    and whether it carries its artifact is R-23's question, asked where the
+    value is read (`canonical_io.resolved_values`)."""
+    eid = record.get("entity_id")
+    out: List[str] = []
+    unit = record.get("unit")
+    if not isinstance(unit, str) or not unit.strip():
+        out.append("IR: Parameter %s declares no unit (INV-004)" % eid)
+    if record.get("status") not in PARAMETER_STATUSES:
+        out.append("IR: Parameter %s status %r is not one of %s"
+                   % (eid, record.get("status"), list(PARAMETER_STATUSES)))
+    if not isinstance(record.get("symbol"), str) or not record.get("symbol", "").strip():
+        out.append("IR: Parameter %s declares no symbol" % eid)
+    value = record.get("value")
+    if value is not None:
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            out.append("IR: Parameter %s value %r is not a number" % (eid, value))
+        if created and not record.get("solved_by"):
+            out.append("IR: Parameter %s is declared with a value and no solver "
+                       "artifact; a declaration does not carry the number it is "
+                       "declared to be settled to (S05-C10)" % eid)
+    for bound in ("lower", "upper"):
+        b = record.get(bound)
+        if b is not None and (isinstance(b, bool) or not isinstance(b, (int, float))):
+            out.append("IR: Parameter %s %s %r is not a number" % (eid, bound, b))
+    return out
+
+
+def _expression_problems(where: str, node: Any, known: Set[str]) -> List[str]:
+    try:
+        expr = Expr.parse(node)
+    except IRError as exc:
+        return ["IR: %s: %s" % (where, exc)]
+    return ["IR: %s references %s, which no standing Parameter declares" % (where, ref)
+            for ref in sorted(expr.refs()) if ref not in known]
+
+
+def constraint_record_problems(record: Dict[str, Any], known_parameters: Set[str]
+                               ) -> List[str]:
+    eid = record.get("entity_id")
+    expr = record.get("expression")
+    if not isinstance(expr, dict):
+        return ["IR: Constraint %s expression is not an object" % eid]
+    out: List[str] = []
+    if expr.get("relation") not in RELATIONS:
+        out.append("IR: Constraint %s relation %r is not one of %s"
+                   % (eid, expr.get("relation"), list(RELATIONS)))
+    for side in ("lhs", "rhs"):
+        out += _expression_problems("Constraint %s %s" % (eid, side), expr.get(side),
+                                    known_parameters)
+    listed = record.get("parameters")
+    if not isinstance(listed, list):
+        out.append("IR: Constraint %s parameters is not a list" % eid)
+        return out
+    for pid in listed:
+        if pid not in known_parameters:
+            out.append("IR: Constraint %s lists %s, which no standing Parameter declares"
+                       % (eid, pid))
+    if not out:
+        used = TypedConstraint.parse(record).refs()
+        for ref in sorted(used - set(listed)):
+            out.append("IR: Constraint %s uses %s in its expression and does not list "
+                       "it in `parameters`" % (eid, ref))
+    return out
+
+
+def statement_record_problems(record: Dict[str, Any], known_parameters: Set[str],
+                              known_statements: Set[str]) -> List[str]:
+    eid = record.get("entity_id")
+    try:
+        stmt = Statement.parse(record)
+    except IRError as exc:
+        return ["IR: %s" % exc]
+    out: List[str] = []
+    for ref in sorted(stmt.refs()):
+        if ref not in known_parameters:
+            out.append("IR: ConstructionStatement %s references %s, which no standing "
+                       "Parameter declares" % (eid, ref))
+    for operand in stmt.operands:
+        if operand not in known_statements:
+            out.append("IR: ConstructionStatement %s consumes %s, which is no standing "
+                       "ConstructionStatement" % (eid, operand))
+    return out
+
+
+def envelope_problems(feature_id: Any, envelope: Any, known_parameters: Set[str]
+                      ) -> Tuple[Optional[Dict[str, List[Expr]]], List[str]]:
+    """Parse a symbolic feature envelope: (expressions by axis list, problems).
+
+    The constraint grammar at the leaves of a spatial claim: `{ref}` naming a
+    declared Parameter, `{const, unit}`, or arithmetic over them. A bare number
+    is a solved dimension demanded of the stage that is told never to invent
+    one, and is refused by name; a coordinate at the frame origin is the typed
+    zero of the frame's unit.
+    """
+    if not isinstance(envelope, dict):
+        return None, ["IR: feature %s declares an envelope that is not an object"
+                      % feature_id]
+    out: Dict[str, List[Expr]] = {}
+    problems: List[str] = []
+    for axis_list in ("centre", "half_extent"):
+        components = envelope.get(axis_list)
+        if not isinstance(components, list) or len(components) != 3:
+            problems.append("IR: feature %s envelope %s is not three components"
+                            % (feature_id, axis_list))
+            continue
+        parsed: List[Expr] = []
+        for index, node in enumerate(components):
+            if isinstance(node, bool) or isinstance(node, (int, float)):
+                problems.append(
+                    "IR: feature %s envelope %s[%d] is a bare number (%r); a "
+                    "dimension is a declared parameter or a unit-bearing constant, "
+                    "never a value invented here" % (feature_id, axis_list, index, node))
+                continue
+            try:
+                expr = Expr.parse(node)
+            except IRError as exc:
+                problems.append("IR: feature %s envelope %s[%d]: %s"
+                                % (feature_id, axis_list, index, exc))
+                continue
+            for ref in sorted(expr.refs()):
+                if ref not in known_parameters:
+                    problems.append("IR: feature %s envelope references %s, which no "
+                                    "standing Parameter declares" % (feature_id, ref))
+            parsed.append(expr)
+        if len(parsed) == 3:
+            out[axis_list] = parsed
+    if problems or len(out) != 2:
+        return None, problems
+    return out, []
+
+
+def record_problems(kind: str, record: Dict[str, Any], known_parameters: Set[str],
+                    known_statements: Set[str], created: bool = False) -> List[str]:
+    """THE ONE ENTRY the write boundary calls, by the kind a family declares."""
+    if kind == "parameter":
+        return parameter_record_problems(record, created=created)
+    if kind == "constraint":
+        return constraint_record_problems(record, known_parameters)
+    if kind == "statement":
+        return statement_record_problems(record, known_parameters, known_statements)
+    if kind == "envelope":
+        if record.get("envelope") is None:
+            return []
+        _exprs, problems = envelope_problems(record.get("entity_id"),
+                                             record.get("envelope"), known_parameters)
+        return problems
+    raise IRError("unknown ir_validation kind %r; the vocabulary is %s"
+                  % (kind, list(IR_VALIDATION_KINDS)))
