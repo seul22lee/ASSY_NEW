@@ -303,11 +303,13 @@ class TestTheUnimplementedStagesAreSpecifiedNotUndefined(_Built):
 
     def test_construction_statement_is_fully_typed(self):
         """The specific claim that was wrong, pinned so it cannot recur."""
-        cs = self.fams["ConstructionStatement"]
-        # Unit G: `body` is required. The reader always refused a statement with
-        # no owning body; the contract listing it optional was the disagreement.
-        self.assertEqual(["entity_id", "body", "operation", "operands", "parameters"],
-                         cs["required_fields"])
+        # Unit G: construction is a FEATURE'S. No family carries it beside a
+        # feature, and a feature is not a feature without its placement and its
+        # construction.
+        self.assertNotIn("ConstructionStatement", self.fams)
+        feature = self.fams["Feature"]
+        for required in ("placement", "construction"):
+            self.assertIn(required, feature["required_fields"])
 
     def test_the_solver_and_compiler_declare_no_model_role(self):
         """s06 and s07 are deterministic by contract. A paid call there is waste."""

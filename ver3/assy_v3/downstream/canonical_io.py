@@ -15,7 +15,7 @@ and there is no legacy form on either side of it.
 
 WHY IT EXISTS RATHER THAN DIRECT CALLS
 
-`solver.solve` and `compiler.compile_program` take typed values and know nothing
+`solver.solve` and `compiler.compile_embodiment` take typed values and know nothing
 about DesignState - which is right, and is what makes them testable. But a caller
 that assembled solver input by hand would be a second reading of what the design
 says, and the settlement it wrote back would be a second write path. So exactly
@@ -87,17 +87,59 @@ def read_constraints(state, branch: Optional[str] = None) -> List[ir.TypedConstr
     return out
 
 
-def read_program(state, branch: Optional[str] = None) -> ir.ConstructionProgram:
-    """The construction statements, read in committed order.
+def read_features(state, branch: Optional[str] = None) -> List[ir.FeatureSpec]:
+    """Every standing feature of the branch, as the IR reads it. A record the
+    grammar cannot read is not silently skipped: `embodiment_basis` reports it,
+    and the gates refuse on it."""
+    out = []
+    for rec in sorted(state.standing("Feature"), key=lambda r: r["entity_id"]):
+        if branch and not _in_branch(rec, branch):
+            continue
+        try:
+            out.append(ir.FeatureSpec.parse(rec))
+        except ir.IRError:
+            continue
+    return out
 
-    A READING of state, not a second authority. There is no ConstructionProgram
-    family and there does not need to be: the statements already carry the body
-    they build and the operands they consume, and ordering is theirs.
-    """
-    rows = [r for r in sorted(state.standing("ConstructionStatement"),
-                              key=lambda r: r["entity_id"])
-            if not branch or _in_branch(r, branch)]
-    return ir.ConstructionProgram.parse(rows)
+
+def datum_rows(state, branch: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
+    """The s04 spatial commitments a feature may be placed against."""
+    rows: Dict[str, List[Dict[str, Any]]] = {}
+    for fam in ("Joint", "Envelope", "FunctionalRegion", "RigidGroup", "State", "Transition"):
+        rows[fam] = [r for r in sorted(state.standing(fam), key=lambda r: r["entity_id"])
+                     if not branch or _in_branch(r, branch)]
+    return rows
+
+
+def reference_scale(state, branch: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    scales = [r for r in state.standing("ReferenceScale") if not branch or _in_branch(r, branch)]
+    return scales[0] if len(scales) == 1 else None
+
+
+def known_for(state, branch: Optional[str] = None) -> ir.Known:
+    """What a standing record may refer to (declared, not withdrawn)."""
+    def declared(family):
+        return [r for r in state.family(family)
+                if r.get("_validity", "STANDING") != "INVALIDATED"
+                and (not branch or _in_branch(r, branch))]
+    datums, feature_bodies, datum_bodies, joint_axes = {}, {}, {}, {}
+    for fam in ("Joint", "Envelope", "FunctionalRegion", "Feature"):
+        for rec in declared(fam):
+            datums[rec["entity_id"]] = fam
+            if fam == "Joint":
+                joint_axes[rec["entity_id"]] = rec.get("axis_direction")
+            if fam == "Feature":
+                feature_bodies[rec["entity_id"]] = rec.get("body")
+            elif fam == "Envelope" and rec.get("body"):
+                datum_bodies[rec["entity_id"]] = {rec["body"]}
+            elif fam == "FunctionalRegion":
+                datum_bodies[rec["entity_id"]] = {b for b in (rec.get("owning_bodies") or [])
+                                                  if isinstance(b, str)}
+    return ir.Known(parameters={r["entity_id"] for r in declared("Parameter")},
+                    datums=datums, feature_bodies=feature_bodies, datum_bodies=datum_bodies,
+                    joint_axes=joint_axes,
+                    units={r["entity_id"]: r.get("unit") for r in declared("Parameter")
+                           if isinstance(r.get("unit"), str) and r.get("unit")})
 
 
 def _in_branch(record: Dict[str, Any], branch: str) -> bool:
@@ -117,33 +159,19 @@ def _in_branch(record: Dict[str, Any], branch: str) -> bool:
 # UNIT F - the embodiment basis, and the two entry gates
 # ==========================================================================
 def embodiment_basis(state, branch: Optional[str] = None) -> Dict[str, Any]:
-    """What of the branch's s05 embodiment currently STANDS, and whether it reads.
-
-    Counted from standing state and read by the one grammar; a record the
-    boundary admitted before the grammar guarded it is reported here rather
-    than crashing a stage. The counts are what the entry gates decide on.
-    """
+    """What of the branch's s05 embodiment currently STANDS, and whether it reads."""
     def mine(family):
         return [r for r in sorted(state.standing(family), key=lambda r: r["entity_id"])
                 if not branch or _in_branch(r, branch)]
     basis: Dict[str, Any] = {"branch": branch, "problems": [],
-                             "statements": [r["entity_id"] for r in mine("ConstructionStatement")],
+                             "features": [r["entity_id"] for r in mine("Feature")],
                              "parameters": [r["entity_id"] for r in mine("Parameter")],
-                             "constraints": [r["entity_id"] for r in mine("Constraint")],
-                             "features": [r["entity_id"] for r in mine("Feature")]}
-    # References resolve against DECLARED records - present, not withdrawn -
-    # as at the write boundary: a stale parameter is still the quantity a
-    # constraint is about. Whether it can be solved is the solver's report.
-    def declared(family):
-        return {r["entity_id"] for r in state.family(family)
-                if r.get("_validity", "STANDING") != "INVALIDATED"
-                and (not branch or _in_branch(r, branch))}
-    known_params = declared("Parameter")
-    known_statements = declared("ConstructionStatement")
+                             "constraints": [r["entity_id"] for r in mine("Constraint")]}
+    known = known_for(state, branch)
     for family, kind in (("Parameter", "parameter"), ("Constraint", "constraint"),
-                         ("ConstructionStatement", "statement"), ("Feature", "feature")):
+                         ("Feature", "feature")):
         for rec in mine(family):
-            basis["problems"] += ir.record_problems(kind, rec, known_params, known_statements)
+            basis["problems"] += ir.record_problems(kind, rec, known)
     return basis
 
 
@@ -159,86 +187,108 @@ def settlement_readiness(state, branch: Optional[str] = None) -> Tuple[bool, Lis
     """
     basis = embodiment_basis(state, branch)
     problems = list(basis["problems"])
-    if not basis["statements"]:
-        problems.append("no current construction program stands for %s; there is "
-                        "no embodiment to settle for" % (branch or "the design"))
+    if not basis["features"]:
+        problems.append("no current embodiment (no standing feature) stands for %s; there is "
+                        "nothing to settle for" % (branch or "the design"))
         return False, problems
     # UNIT G. AND IT MUST BE CAD-CONSTRUCTIBLE: every body built, every
     # axis-bearing joint placed on each body it relates, every placed feature
     # realized, every stated mating side of its stated kind. The same checks
     # s05 runs on its response, over what actually stands.
-    from . import embodiment
-    problems += embodiment.structural_problems(embodiment.rows_from_state(state, branch))
+    problems += ["EMBODIMENT: " + f.detail for f in prerequisite_findings(state, branch)]
     return (not problems), problems
 
 
-def program_unit_problems(state, branch: Optional[str] = None) -> List[str]:
-    """Every construction parameter must reduce to the kernel's unit for its kind.
+def prerequisite_findings(state, branch: Optional[str] = None):
+    """The mandatory prerequisites of what STANDS, typed and owned.
 
-    The kernel builds in millimetres and turns in degrees, and nothing here is
-    an authority on what one unit is worth in another - so a length stated in
-    inches, a dimensionless zero in a length slot, or an area where a length
-    belongs is refused by name rather than fed to a kernel that would read the
-    number as millimetres.
+    The one way from state to those findings: the gate reads it to refuse, and
+    the settlement loop reads it to route the refusal to whoever owns the record
+    at fault. Reading it twice by two paths is how a gate and a repair round
+    come to disagree about what is missing.
     """
+    from . import embodiment
+    return embodiment.prerequisite_findings(embodiment.rows_from_state(state, branch))
+
+
+def construction_unit_problems(state, branch: Optional[str] = None) -> List[str]:
+    """Every construction parameter and every placement offset must reduce to
+    the kernel's unit for its kind; nothing is converted."""
     units = {p.entity_id: p.unit for p in read_parameters(state, branch)}
     expected = {"length": _solver.dim_of_unit(ir.KERNEL_LENGTH_UNIT),
                 "angle": _solver.dim_of_unit(ir.KERNEL_ANGLE_UNIT)}
     out: List[str] = []
-    for stmt in read_program(state, branch).statements:
-        kinds = ir.OPCODE_PARAMETER_KINDS.get(stmt.operation) or {}
-        for name, expr in sorted(stmt.parameters.items()):
-            kind = kinds.get(name)
-            if kind is None:
-                continue
-            try:
-                dim = _solver.reduce_expr(expr, units).dim
-            except ir.IRError as exc:
-                out.append("%s.%s: %s" % (stmt.entity_id, name, exc))
-                continue
-            if dim != expected[kind]:
-                out.append("%s.%s is a %s and must be in %s; it reduces to %s, and "
-                           "no conversion is attempted"
-                           % (stmt.entity_id, name, kind,
-                              ir.KERNEL_LENGTH_UNIT if kind == "length" else ir.KERNEL_ANGLE_UNIT,
-                              _solver.dim_str(dim)))
+
+    def check(where, expr, kind):
+        try:
+            dim = _solver.reduce_expr(expr, units).dim
+        except ir.IRError as exc:
+            out.append("%s: %s" % (where, exc))
+            return
+        if dim != expected[kind]:
+            out.append("%s is a %s and must be in %s; it reduces to %s, and no conversion is attempted"
+                       % (where, kind, ir.KERNEL_LENGTH_UNIT if kind == "length" else ir.KERNEL_ANGLE_UNIT,
+                          _solver.dim_str(dim)))
+
+    for spec in read_features(state, branch):
+        for index, expr in enumerate(spec.placement.offset):
+            check("%s placement offset[%d]" % (spec.entity_id, index), expr, "length")
+        for step in spec.steps:
+            kinds = ir.OPCODE_PARAMETER_KINDS.get(step.operation) or {}
+            for name, expr in sorted(step.parameters.items()):
+                if kinds.get(name):
+                    check("%s.%s.%s" % (spec.entity_id, step.step_id, name), expr, kinds[name])
     return out
+
+
+def scale_and_frames(state, branch: Optional[str] = None):
+    """(per_unit, how, frames, findings): the scale authority and every
+    feature's derived frame, with what could not be derived named."""
+    from . import kinematics
+
+    values = resolved_values(state, branch)
+    per_unit, how = kinematics.scale_authority(reference_scale(state, branch), values,
+                                               read_parameters(state, branch))
+    frames, findings = kinematics.feature_frames(read_features(state, branch),
+                                                 datum_rows(state, branch), per_unit, values)
+    return per_unit, how, frames, findings
 
 
 def compilation_readiness(state, branch: Optional[str] = None) -> Tuple[bool, List[str]]:
     """May s07 be entered? (ready, why not).
 
-    A current, non-empty program; a standing settled value for every parameter
-    a statement references; a feasible settlement on every standing constraint
-    of the branch; every statement parameter in the kernel's unit; and no
-    standing post-settlement occupancy finding. Anything less is refused
-    before the kernel is asked, and nothing is written.
+    A current embodiment that reads; every parameter a feature references
+    settled; every standing constraint feasibly settled; every dimension and
+    offset in the kernel's unit; every settled number one that builds; a scale
+    authority; and every feature's frame derivable from its datum. Anything
+    less is refused BEFORE the kernel is asked, and nothing is written.
     """
     from . import settled_geometry
 
     ready, problems = settlement_readiness(state, branch)
     if not ready:
         return False, problems
-    program = read_program(state, branch)
     values = resolved_values(state, branch)
-    for ref in sorted(program.parameter_refs()):
+    features = read_features(state, branch)
+    for ref in sorted({r for f in features for r in f.refs()}):
         if ref not in values:
-            problems.append("parameter %s is referenced by the program and has no "
-                            "standing settled value; s06 did not settle it and s07 "
-                            "does not choose one" % ref)
+            problems.append("parameter %s is referenced by the embodiment and has no standing "
+                            "settled value; s06 did not settle it and s07 does not choose one" % ref)
     for rec in sorted(state.standing("Constraint"), key=lambda r: r["entity_id"]):
         if branch and not _in_branch(rec, branch):
             continue
         settlement = rec.get("settlement") or {}
         if settlement.get("solver_status") != ir.FEASIBLE:
-            problems.append("constraint %s carries no feasible settlement (%s); the "
-                            "system was not settled feasible"
-                            % (rec["entity_id"], settlement.get("solver_status") or "none"))
-    problems += program_unit_problems(state, branch)
+            problems.append("constraint %s carries no feasible settlement (%s); the system was "
+                            "not settled feasible" % (rec["entity_id"],
+                                                      settlement.get("solver_status") or "none"))
+    problems += construction_unit_problems(state, branch)
     problems += settled_geometry.construction_problems(state, branch)
     problems += settled_geometry.clearance_problems(state, branch)
-    report = settled_geometry.evaluate(state, branch)
-    problems += ["post-settlement: %s" % f for f in report.findings]
+    per_unit, how, _frames, findings = scale_and_frames(state, branch)
+    if per_unit is None:
+        problems.append("no scale authority: %s" % how)
+    problems += [str(f) for f in findings if f.kind != "NOT_EVALUABLE" or per_unit is not None]
     return (not problems), problems
 
 
@@ -324,26 +374,24 @@ def resolved_values(state, branch: Optional[str] = None) -> Dict[str, float]:
     return out
 
 
-def read_placements(state, branch: Optional[str] = None) -> Dict[str, Any]:
-    """Feature id -> placement node, for every placed standing feature of the branch."""
-    return {f["entity_id"]: f["placement"]
-            for f in sorted(state.standing("Feature"), key=lambda r: r["entity_id"])
-            if f.get("placement") is not None and (not branch or _in_branch(f, branch))}
-
-
 def compile_from_state(state, out_dir: Optional[str] = None,
                        branch: Optional[str] = None) -> _compiler.CompileResult:
-    """Read the program, the settled values and the placements, and compile. No writes."""
-    return _compiler.compile_program(read_program(state, branch),
-                                     resolved_values(state, branch),
-                                     out_dir=out_dir,
-                                     placements=read_placements(state, branch))
+    """Read the features, the settled values, the derived frames and the
+    declared polarity, and compile. No writes."""
+    from . import embodiment
+
+    per_unit, how, frames, findings = scale_and_frames(state, branch)
+    blocking = [str(f) for f in findings if f.evaluable]
+    if per_unit is None or blocking:
+        return _compiler.CompileResult(ok=False, problems=(["no scale authority: %s" % how]
+                                                          if per_unit is None else []) + blocking)
+    return _compiler.compile_embodiment(read_features(state, branch), resolved_values(state, branch),
+                                        frames, embodiment.polarity_table(), out_dir=out_dir)
 
 
 def compilation_operations(result: _compiler.CompileResult,
                            signature_id: str,
-                           values_used: Optional[Sequence[str]] = None,
-                           statements_compiled: Optional[Sequence[str]] = None) -> List[Op]:
+                           values_used: Optional[Sequence[str]] = None) -> List[Op]:
     """What compiling recorded, as one CREATE inside s07's declared authority.
 
     s07 creates a GeometrySignature and extends NOTHING. It writes no engineering
@@ -362,17 +410,14 @@ def compilation_operations(result: _compiler.CompileResult,
     # The settled parameters and statements the geometry was compiled FROM.
     # These are the premises that make a re-solve or a program change stale the
     # geometry rather than leaving an old solid looking authoritative.
-    # UNIT F. EVERY statement the program executed, not only those that
-    # realize a feature: `statement_map` holds the feature links, and a
-    # feature-less statement could change without staling the geometry it
-    # built. The caller passes the program it compiled.
-    compiled_from = sorted({sid for b in result.bodies for sid in b.statement_map}
-                           | set(statements_compiled or ())
+    # UNIT G. EVERY feature composed into a body, the bodies, and every settled
+    # value the geometry was compiled from are premises: a revised feature, a
+    # re-solved value or a changed body stales the signature by the ordinary
+    # rule.
+    compiled_from = sorted({fid for b in result.bodies for fid in b.feature_map}
                            | {b.body_id for b in result.bodies}
                            | set(values_used or ()))
-    feature_map = {statement: feature
-                   for b in result.bodies
-                   for statement, feature in b.statement_map.items()}
+    feature_map = {fid: b.body_id for b in result.bodies for fid in b.feature_map}
     return [Op("CREATE", "GeometrySignature", signature_id, {
         "signature_sha256": result.signature["signature_sha256"],
         "per_body": result.signature["per_body"],

@@ -15,7 +15,6 @@ from typing import Any, Dict, Optional, Sequence, Tuple
 #: The closed vocabulary of what can be found. Each entry names ONE kind of
 #: contradiction between the artifact and what the design committed to.
 CONSTRUCTION_INVALID = "CONSTRUCTION_INVALID"          # a solid did not build / is not valid
-MATING_AXES_INCONSISTENT = "MATING_AXES_INCONSISTENT"  # the two sides of a joint disagree
 CLEARANCE_NEGATIVE = "CLEARANCE_NEGATIVE"              # a settled clearance has the wrong sign
 BODY_INTERFERENCE = "BODY_INTERFERENCE"                # two solids share volume where they may not
 MATING_NOT_REALIZED = "MATING_NOT_REALIZED"            # an intended contact/clearance is not there
@@ -27,10 +26,30 @@ UNSUPPORTED_OPERATION = "UNSUPPORTED_OPERATION"        # the stack cannot evalua
 EMBODIMENT_INCOMPLETE = "EMBODIMENT_INCOMPLETE"        # the embodiment does not define what CAD needs
 POSE_NOT_DERIVABLE = "POSE_NOT_DERIVABLE"              # the pose law cannot place a body
 NOT_EVALUABLE = "NOT_EVALUABLE"                        # a premise is missing; nothing was decided
-FINDING_KINDS = (CONSTRUCTION_INVALID, MATING_AXES_INCONSISTENT, CLEARANCE_NEGATIVE,
+
+#: THE MANDATORY PREREQUISITES OF AN EMBODIMENT, one kind per duty. These are
+#: STRUCTURAL: something the design committed to has no geometry at all, so no
+#: number could express it and the solver is not run. They are found before
+#: settlement by `downstream.embodiment.prerequisite_findings` and are answered
+#: by a structural revision - which is a different repair from an infeasible or
+#: underdetermined system, where the geometry exists and the numbers are wrong.
+INTERFACE_SIDE_UNREALIZED = "INTERFACE_SIDE_UNREALIZED"    # a participant body has no feature for it
+INTERFACE_NOT_CARRIED = "INTERFACE_NOT_CARRIED"            # a feature names an interface not in the branch
+INTERFACE_BODY_MISMATCH = "INTERFACE_BODY_MISMATCH"        # ... one that does not involve its body
+MATING_KIND_UNREALIZED = "MATING_KIND_UNREALIZED"          # the side is realized, not by the stated kind
+JOINT_UNREALIZED = "JOINT_UNREALIZED"                      # an axis-bearing joint carries no feature
+BODY_WITHOUT_MATERIAL = "BODY_WITHOUT_MATERIAL"            # nothing gives the body material
+FEATURE_OFF_BRANCH = "FEATURE_OFF_BRANCH"                  # a feature is on no body of the branch
+CLEARANCE_UNGOVERNED = "CLEARANCE_UNGOVERNED"              # a declared clearance no Constraint owns
+COMPLIANT_JOINT_MALFORMED = "COMPLIANT_JOINT_MALFORMED"    # compliance stated between two bodies
+PREREQUISITE_KINDS = (INTERFACE_SIDE_UNREALIZED, INTERFACE_NOT_CARRIED, INTERFACE_BODY_MISMATCH,
+                      MATING_KIND_UNREALIZED, JOINT_UNREALIZED, BODY_WITHOUT_MATERIAL,
+                      FEATURE_OFF_BRANCH, CLEARANCE_UNGOVERNED, COMPLIANT_JOINT_MALFORMED)
+
+FINDING_KINDS = (CONSTRUCTION_INVALID, CLEARANCE_NEGATIVE,
                  BODY_INTERFERENCE, MATING_NOT_REALIZED, TRAVEL_BLOCKED, ASSEMBLY_BLOCKED, FEATURE_OUTSIDE_REGION,
                  UNSETTLED_CRITICAL_PARAMETER, UNSUPPORTED_OPERATION, EMBODIMENT_INCOMPLETE,
-                 POSE_NOT_DERIVABLE, NOT_EVALUABLE)
+                 POSE_NOT_DERIVABLE, NOT_EVALUABLE) + PREREQUISITE_KINDS
 
 #: Who may change what the finding contradicts. s05 owns the embodiment; s03 the
 #: topology; s04 the arrangement, states and scale; s06 the settlement; s07 owns

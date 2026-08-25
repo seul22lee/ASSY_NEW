@@ -1,14 +1,15 @@
 """UNIT G. The generic foundation for workable CAD, kernel-free.
 
-Placement is one grammar with one frame convention; the pose law is derived
-from placements and joint coordinates; an embodiment is complete when CAD can
-be built from it; the gates refuse what s07 would otherwise have to invent; the
-model is shown the language the boundary enforces. Nothing here names a
-mechanism, a candidate or a benchmark. The solid-level claims live in
-tests/kernel/test_workable_cad_artifact.py.
+One spatial authority: s04's arrangement frame, its located joint frames, its
+envelopes and regions, and its scale. A feature is placed relative to those
+(a datum + an offset), owns its construction, and is composed into its body by
+declared polarity. The pose law is derived from the located joint frames and
+the joint coordinates. Nothing here names a mechanism, a candidate or a
+benchmark. The solid-level claims live in tests/kernel/test_workable_cad_artifact.py.
 """
 
 import unittest
+from string import Formatter
 
 from ver3.assy_v3.downstream import (canonical_io, embodiment, execution as ex, findings,
                                      ir, kinematics, settled_geometry)
@@ -36,17 +37,41 @@ def apply(state, stage, ops, attempt=1):
     return []
 
 
-def place(origin, axis):
-    return {"origin": [MM(c) for c in origin], "axis": axis}
+def box(sid, dx, dy, dz):
+    return {"id": sid, "operation": "BOX", "operands": [],
+            "parameters": {"dx": dx, "dy": dy, "dz": dz}}
+
+
+def cylinder(sid, radius, height):
+    return {"id": sid, "operation": "CYLINDER", "operands": [],
+            "parameters": {"radius": radius, "height": height}}
+
+
+def feature(fid, body, kind, datum, steps, offset=None, axis=None, interface=None,
+            premises=()):
+    placement = {"datum": datum}
+    if offset is not None:
+        placement["offset"] = offset
+    if axis is not None:
+        placement["axis"] = axis
+    fields = {"body": body, "feature_kind": kind, "geometry": "%s of %s" % (kind.lower(), body),
+              "placement": placement, "construction": list(steps)}
+    prem = [body, datum] + list(premises)
+    if interface:
+        fields["interface"] = interface
+        prem.append(interface)
+    return Op("CREATE", "Feature", fid, fields, "s05:embodiment", premise_refs=prem)
 
 
 # ----------------------------------------------------------------------
-# A two-body hinge: a base plate and a lid plate joined by one revolute joint
-# about +Y along the base's far edge. Generic: the same records serve a
-# prismatic variant by changing one word.
+# A two-body hinge as s03/s04 commit it: a base plate 40x30x10 at the origin,
+# a lid plate 40x30x10 beyond its far edge, one revolute joint about +Y
+# located along that edge, states at 0 and 90 degrees, a transition between.
+# In the arrangement basis, with an ABSOLUTE scale of 1 mm per unit unless
+# a RELATIVE basis is asked for.
 # ----------------------------------------------------------------------
-def hinge_upstream(state, joint_type="REVOLUTE", axis="+Y", basis="RELATIVE",
-                   contact="CONTACT", with_stop=False):
+def hinge_upstream(state, joint_type="REVOLUTE", axis="+Y", basis="ABSOLUTE",
+                   contact="CONTACT", locate_joint=True):
     assert [] == apply(state, "s03", [
         Op("CREATE", "Body", "BOD-A", {"instance_identity": "base", "role": "base",
                                        "created_by_stage": "s03"}, "s03:topology"),
@@ -70,23 +95,44 @@ def hinge_upstream(state, joint_type="REVOLUTE", axis="+Y", basis="RELATIVE",
     scale = {"basis": basis}
     if basis == "ABSOLUTE":
         scale["absolute"] = {"unit": "mm", "per_unit": 1.0}
-    assert [] == apply(state, "s04", [
+    ops = [
         Op("CREATE", "ReferenceScale", "SCL-1", scale, "s04:envelope"),
+        Op("CREATE", "Envelope", "ENV-A", {"body": "BOD-A", "extent": {"centre": [20, 15, 5],
+                                                                        "half_extent": [20, 15, 5]},
+                                           "frame": "world", "maturity": "PROVISIONAL"},
+           "s04:envelope", premise_refs=["SCL-1"]),
+        Op("CREATE", "Envelope", "ENV-B", {"body": "BOD-B", "extent": {"centre": [60, 15, 15],
+                                                                        "half_extent": [20, 15, 5]},
+                                           "frame": "world", "maturity": "PROVISIONAL"},
+           "s04:envelope", premise_refs=["SCL-1"]),
         Op("CREATE", "State", "STA-1", {"name": "closed", "configuration": "CFG-1",
                                         "joint_coordinates": {"JNT-1": 0.0}}, "s04:envelope"),
         Op("CREATE", "State", "STA-2", {"name": "open", "configuration": "CFG-2",
                                         "joint_coordinates": {"JNT-1": 90.0}}, "s04:envelope"),
         Op("CREATE", "Transition", "TRN-1", {"from_state": "STA-1", "to_state": "STA-2",
                                              "path": {"moving_groups": ["RGP-B"]},
-                                             "changed_coordinates": ["JNT-1"]}, "s04:envelope")])
+                                             "changed_coordinates": ["JNT-1"]}, "s04:envelope")]
+    if locate_joint:
+        ops.append(Op("EXTEND", "Joint", "JNT-1", {"frame_origin": [40, 0, 10]}, "s04:envelope",
+                      premise_refs=["SCL-1"]))
+    assert [] == apply(state, "s04", ops)
 
 
-def hinge_embodiment(state, axis="+Y", with_stop=False, lid_axis=None):
-    """Base plate 40x30x10 with the joint axis along its far top edge; lid plate
-    40x30x10 with the joint axis along its near bottom edge. At zero the lid
-    lies flat beyond the base, touching it; at 90 degrees it stands up."""
-    lid_axis = lid_axis or axis
-    ops = [
+def hinge_embodiment(state, with_stop=False, scale_parameter=None):
+    """Base stock at its envelope; lid stock at its envelope; a bore on the base
+    and a pin on the lid, both AT the joint; one settled width and radius.
+    `scale_parameter`: declare the RELATIVE basis's scale (mm per unit) as a
+    settled parameter, bound FIRST so nothing placed against it is staled."""
+    ops = []
+    if scale_parameter is not None:
+        ops += [
+            Op("CREATE", "Parameter", "PRM-S", {"symbol": "scale", "unit": "mm", "status": ir.DECLARED,
+                                                "role": "SCALE"}, "s05:embodiment"),
+            Op("CREATE", "Constraint", "CON-S", {"kind": "DIMENSIONAL", "parameters": ["PRM-S"],
+                                                 "expression": {"relation": "==", "lhs": REF("PRM-S"),
+                                                                "rhs": MM(scale_parameter)}},
+               "s05:embodiment", premise_refs=["PRM-S"])]
+    ops += [
         Op("CREATE", "Parameter", "PRM-W", {"symbol": "w", "unit": "mm", "status": ir.DECLARED},
            "s05:embodiment"),
         Op("CREATE", "Parameter", "PRM-R", {"symbol": "r", "unit": "mm", "status": ir.DECLARED},
@@ -99,265 +145,251 @@ def hinge_embodiment(state, axis="+Y", with_stop=False, lid_axis=None):
                                              "expression": {"relation": "==", "lhs": REF("PRM-R"),
                                                             "rhs": MM(3)}},
            "s05:embodiment", premise_refs=["PRM-R"]),
-        Op("CREATE", "Feature", "FEA-A", {"body": "BOD-A", "feature_kind": "BORE",
-                                          "geometry": "hinge bore", "joint": "JNT-1",
-                                          "interface": "IFC-1",
-                                          "placement": place((40, 0, 10), axis)},
-           "s05:embodiment", premise_refs=["BOD-A", "JNT-1"]),
-        Op("CREATE", "Feature", "FEA-B", {"body": "BOD-B", "feature_kind": "PIN",
-                                          "geometry": "hinge pin", "joint": "JNT-1",
-                                          "interface": "IFC-1",
-                                          "placement": place((0, 0, 0), lid_axis)},
-           "s05:embodiment", premise_refs=["BOD-B", "JNT-1"]),
-        Op("CREATE", "ConstructionStatement", "CST-A1", {"body": "BOD-A", "operation": "BOX",
-                                                         "operands": [],
-                                                         "parameters": {"dx": REF("PRM-W"),
-                                                                        "dy": MM(30), "dz": MM(10)}},
-           "s05:embodiment", premise_refs=["BOD-A", "PRM-W"]),
-        Op("CREATE", "ConstructionStatement", "CST-A2", {"body": "BOD-A", "operation": "CYLINDER",
-                                                         "operands": [], "feature": "FEA-A",
-                                                         "parameters": {"radius": REF("PRM-R"),
-                                                                        "height": MM(30)}},
-           "s05:embodiment", premise_refs=["BOD-A", "PRM-R"]),
-        Op("CREATE", "ConstructionStatement", "CST-A3", {"body": "BOD-A", "operation": "CUT",
-                                                         "operands": ["CST-A1", "CST-A2"],
-                                                         "parameters": {}},
-           "s05:embodiment", premise_refs=["BOD-A", "CST-A1", "CST-A2"]),
-        Op("CREATE", "ConstructionStatement", "CST-B1", {"body": "BOD-B", "operation": "BOX",
-                                                         "operands": [],
-                                                         "parameters": {"dx": REF("PRM-W"),
-                                                                        "dy": MM(30), "dz": MM(10)}},
-           "s05:embodiment", premise_refs=["BOD-B", "PRM-W"]),
-        Op("CREATE", "ConstructionStatement", "CST-B2", {"body": "BOD-B", "operation": "CYLINDER",
-                                                         "operands": [], "feature": "FEA-B",
-                                                         "parameters": {"radius": REF("PRM-R"),
-                                                                        "height": MM(30)}},
-           "s05:embodiment", premise_refs=["BOD-B", "PRM-R"]),
-        Op("CREATE", "ConstructionStatement", "CST-B3", {"body": "BOD-B", "operation": "UNION",
-                                                         "operands": ["CST-B1", "CST-B2"],
-                                                         "parameters": {}},
-           "s05:embodiment", premise_refs=["BOD-B", "CST-B1", "CST-B2"]),
+        feature("FEA-A-STOCK", "BOD-A", "STOCK", "ENV-A",
+                [box("plate", REF("PRM-W"), MM(30), MM(10))],
+                offset=[MM(-20), MM(-15), MM(-5)], axis="+Z", premises=["PRM-W"]),
+        feature("FEA-B-STOCK", "BOD-B", "STOCK", "ENV-B",
+                [box("plate", REF("PRM-W"), MM(30), MM(10))],
+                offset=[MM(-20), MM(-15), MM(-5)], axis="+Z", premises=["PRM-W"]),
+        feature("FEA-A-BORE", "BOD-A", "BORE", "JNT-1", [cylinder("hole", REF("PRM-R"), MM(30))],
+                interface="IFC-1", premises=["PRM-R"]),
+        feature("FEA-B-PIN", "BOD-B", "PIN", "JNT-1", [cylinder("pin", REF("PRM-R"), MM(30))],
+                interface="IFC-1", premises=["PRM-R"]),
     ]
     if with_stop:
-        # a block on the base beyond the hinge edge, in the lid's way at 90 degrees
-        ops += [
-            # a block under the plate's far end, sharing its bottom face, reaching
-            # beyond the hinge line below the pin: clear at zero, in the lid's
-            # way at 90 degrees
-            Op("CREATE", "Feature", "FEA-S", {"body": "BOD-A", "feature_kind": "STOP",
-                                              "geometry": "a block under the far end",
-                                              "placement": place((30, 0, -10), "+Z")},
-               "s05:embodiment", premise_refs=["BOD-A"]),
-            Op("CREATE", "ConstructionStatement", "CST-A4", {"body": "BOD-A", "operation": "BOX",
-                                                             "operands": [], "feature": "FEA-S",
-                                                             "parameters": {"dx": MM(20), "dy": MM(30),
-                                                                            "dz": MM(10)}},
-               "s05:embodiment", premise_refs=["BOD-A"]),
-            Op("CREATE", "ConstructionStatement", "CST-A5", {"body": "BOD-A", "operation": "UNION",
-                                                             "operands": ["CST-A3", "CST-A4"],
-                                                             "parameters": {}},
-               "s05:embodiment", premise_refs=["BOD-A", "CST-A3", "CST-A4"]),
-        ]
+        # a block under the base plate's far end, beyond the hinge line: clear
+        # at zero, in the lid's way at 90 degrees
+        ops.append(feature("FEA-S", "BOD-A", "STOP", "FEA-A-STOCK",
+                           [box("block", MM(20), MM(30), MM(10))],
+                           offset=[MM(30), MM(0), MM(-10)], axis="+Z"))
     return apply(state, "s05", ops)
 
 
-def hinge(joint_type="REVOLUTE", axis="+Y", basis="RELATIVE", contact="CONTACT",
-          with_stop=False, lid_axis=None):
+def hinge(**kwargs):
+    with_stop = kwargs.pop("with_stop", False)
+    scale_parameter = kwargs.pop("scale_parameter", None)
     state = DesignState(run_id="hinge")
-    hinge_upstream(state, joint_type=joint_type, axis=axis, basis=basis, contact=contact)
-    problems = hinge_embodiment(state, axis=axis, with_stop=with_stop, lid_axis=lid_axis)
+    hinge_upstream(state, **kwargs)
+    problems = hinge_embodiment(state, with_stop=with_stop, scale_parameter=scale_parameter)
     assert problems == [], problems
     return state
 
 
 # ======================================================================
-class TestOnePlacementGrammar(unittest.TestCase):
+class TestOnePlacementAuthority(unittest.TestCase):
 
-    def test_01_placement_is_origin_and_axis_and_nothing_else(self):
-        p = ir.Placement.parse(place((1, 2, 3), "-x"))
-        self.assertEqual("-X", p.axis)
-        for bad in ({"origin": [0, 0, 0], "axis": "+Y"},               # bare numbers
-                    {"origin": [MM(0)] * 2, "axis": "+Y"},              # two components
-                    {"origin": [MM(0)] * 3, "axis": "Q"},               # no such axis
-                    {"origin": [MM(0)] * 3, "axis": "+Y", "reference": "+X"},
-                    [MM(0)] * 3):
+    def test_01_a_feature_is_placed_against_a_datum_and_never_at_a_position(self):
+        p = ir.Placement.parse({"datum": "JNT-1"})
+        self.assertEqual("JNT-1", p.datum)
+        self.assertIsNone(p.axis)
+        for bad in ({"origin": [MM(0)] * 3, "axis": "+Y"},        # the retired absolute form
+                    {"datum": "ENV-A", "offset": [0, 0, 0]},        # bare numbers
+                    {"datum": "ENV-A", "axis": "Q"},
+                    {"datum": ""}, "JNT-1"):
             with self.subTest(bad=bad):
                 with self.assertRaises(ir.IRError):
                     ir.Placement.parse(bad)
 
-    def test_02_the_frame_convention_is_a_rule_not_a_choice(self):
-        x, y, z = ir.frame_axes("+Y")
-        self.assertEqual((0.0, 1.0, 0.0), z)
-        self.assertEqual((0.0, 0.0, 1.0), x)          # Y -> Z, the canonical perpendicular
-        self.assertEqual((1.0, 0.0, 0.0), y)          # right-handed
-        for axis in ir.SIGNED_AXES:
-            xa, ya, za = ir.frame_axes(axis)
-            dot = sum(a * b for a, b in zip(xa, za))
-            self.assertEqual(0.0, dot, axis)
+    def test_02_the_boundary_refuses_a_second_spatial_truth(self):
+        state = DesignState(run_id="p")
+        hinge_upstream(state)
+        stock = feature("FEA-1", "BOD-A", "STOCK", "ENV-A", [box("b", MM(1), MM(1), MM(1))], axis="+Z")
+        self.assertEqual([], apply(state, "s05", [stock]))
+        cases = {
+            "an axis on a joint datum that disagrees with the joint": feature(
+                "FEA-2", "BOD-A", "BORE", "JNT-1", [cylinder("c", MM(1), MM(1))], axis="+Z"),
+            "unknown datum": feature("FEA-2", "BOD-A", "BOSS", "JNT-9",
+                                     [cylinder("c", MM(1), MM(1))]),
+            "another body's envelope": feature("FEA-2", "BOD-A", "BOSS", "ENV-B",
+                                               [cylinder("c", MM(1), MM(1))], axis="+Z"),
+            "another body's feature": feature("FEA-2", "BOD-B", "BOSS", "FEA-1",
+                                              [cylinder("c", MM(1), MM(1))], axis="+Z"),
+            "no construction": Op("CREATE", "Feature", "FEA-2",
+                                  {"body": "BOD-A", "feature_kind": "BOSS", "geometry": "x",
+                                   "placement": {"datum": "ENV-A", "axis": "+Z"},
+                                   "construction": []}, "s05:embodiment"),
+            "two terminals": feature("FEA-2", "BOD-A", "BOSS", "ENV-A",
+                                     [cylinder("c1", MM(1), MM(1)), cylinder("c2", MM(1), MM(1))],
+                                     axis="+Z"),
+        }
+        for name, op in cases.items():
+            with self.subTest(case=name):
+                problems = apply(state, "s05", [op])
+                self.assertTrue(any(p.startswith("IR:") or "DANGLING" in p for p in problems), problems)
+                self.assertNotIn("FEA-2", state.entities)
+
+    def test_02b_a_consistent_restatement_and_an_omitted_axis_are_not_second_truths(self):
+        state = DesignState(run_id="p2")
+        hinge_upstream(state)
+        self.assertEqual([], apply(state, "s05", [
+            feature("FEA-1", "BOD-A", "STOCK", "ENV-A", [box("b", MM(1), MM(1), MM(1))]),
+            feature("FEA-2", "BOD-A", "BORE", "JNT-1", [cylinder("c", MM(1), MM(1))], axis="+Y")]))
+        per_unit, how, frames, notes = canonical_io.scale_and_frames(state)
+        z = [frames["FEA-1"].r[i][2] for i in range(3)]
+        self.assertEqual([0.0, 0.0, 1.0], z, "an envelope's frame is the arrangement's")
+        z = [frames["FEA-2"].r[i][2] for i in range(3)]
+        self.assertEqual([0.0, 1.0, 0.0], z, "a joint datum's axis is the joint's")
 
     def test_03_there_is_one_axis_table(self):
         self.assertEqual(tuple(ir.SIGNED_AXES) + ("NONE",), s03.AXIS_DIRECTIONS)
         self.assertEqual(ir.AXIS_VECTORS, s04.AXIS_VECTORS)
-        self.assertEqual(ir.AXIS_INDEX, s04.AXIS_INDEX)
         mating = Contracts().families["Interface"]["field_semantics"]["mating_geometry"]
         self.assertEqual(sorted(ir.SIGNED_AXES),
                          sorted(mating["record_field_semantics"]["axis_direction"]["values"]))
+        placement = Contracts().families["Feature"]["field_semantics"]["placement"]
+        self.assertEqual(sorted(ir.SIGNED_AXES),
+                         sorted(placement["record_field_semantics"]["axis"]["values"]))
 
-    def test_04_the_boundary_refuses_a_placement_it_cannot_read(self):
-        state = DesignState(run_id="p")
-        hinge_upstream(state)
-        problems = apply(state, "s05", [
-            Op("CREATE", "Feature", "FEA-X", {"body": "BOD-A", "feature_kind": "BORE",
-                                              "geometry": "x", "placement": {"origin": [0, 0, 0],
-                                                                             "axis": "+Y"}},
-               "s05:embodiment")])
-        self.assertTrue(any("IR:" in p and "bare number" in p for p in problems), problems)
-        problems = apply(state, "s05", [
-            Op("CREATE", "Feature", "FEA-X", {"body": "BOD-A", "feature_kind": "BORE",
-                                              "geometry": "x", "placement": place((0, 0, 0), "+Y"),
-                                              "joint": "JNT-9"}, "s05:embodiment")])
-        self.assertTrue(any("JNT-9" in p for p in problems), problems)
+    def test_04_the_scale_authority_is_the_reference_scales(self):
+        self.assertEqual((None,), kinematics.scale_authority({"basis": "RELATIVE"}, {})[:1])
+        self.assertEqual(2.0, kinematics.scale_authority(
+            {"basis": "ABSOLUTE", "absolute": {"unit": "mm", "per_unit": 2.0}}, {})[0])
+        self.assertIsNone(kinematics.scale_authority(
+            {"basis": "ABSOLUTE", "absolute": {"unit": "in", "per_unit": 2.0}}, {})[0])
+        scale_param = [{"entity_id": "PRM-S", "role": "SCALE"}]
+        self.assertIsNone(kinematics.scale_authority({"basis": "RELATIVE"}, {}, scale_param)[0])
+        self.assertEqual(3.0, kinematics.scale_authority({"basis": "RELATIVE"}, {"PRM-S": 3.0},
+                                                         scale_param)[0])
+        self.assertIsNone(kinematics.scale_authority({"basis": "RELATIVE"}, {"PRM-S": 3.0, "PRM-T": 1.0},
+                                                     scale_param + [{"entity_id": "PRM-T", "role": "SCALE"}])[0])
 
-    def test_05_the_feature_kind_vocabulary_is_the_contracts_and_is_enforced(self):
-        declared = Contracts().families["Feature"]["field_semantics"]["feature_kind"]["values"]
-        self.assertEqual(tuple(declared), s05.FEATURE_KINDS)
-        mating = Contracts().families["Interface"]["field_semantics"]["mating_geometry"]
+    def test_05_the_feature_kind_vocabulary_and_polarity_are_the_contracts(self):
+        fam = Contracts().families["Feature"]
+        self.assertEqual(tuple(fam["field_semantics"]["feature_kind"]["values"]), s05.FEATURE_KINDS)
+        polarity = embodiment.polarity_table()
+        self.assertEqual(set(s05.FEATURE_KINDS), set(polarity))
+        self.assertEqual("ADDITIVE", polarity["STOCK"])
+        self.assertEqual("SUBTRACTIVE", polarity["BORE"])
+        mating = fam and Contracts().families["Interface"]["field_semantics"]["mating_geometry"]
         inner = mating["record_field_semantics"]["inner_feature"]["values"]
         outer = mating["record_field_semantics"]["outer_feature"]["values"]
-        self.assertTrue(set(inner + outer) <= set(declared))
-        state = DesignState(run_id="k")
-        hinge_upstream(state)
-        problems = apply(state, "s05", [
-            Op("CREATE", "Feature", "FEA-X", {"body": "BOD-A", "feature_kind": "FLANGE_THING",
-                                              "geometry": "x"}, "s05:embodiment")])
-        self.assertTrue(any("ENUM_VALUE" in p for p in problems), problems)
+        self.assertTrue(set(inner + outer) <= set(s05.FEATURE_KINDS))
 
 
 # ======================================================================
-class TestThePoseLawIsDerived(unittest.TestCase):
+class TestFramesAndPosesAreDerived(unittest.TestCase):
 
-    def _law(self, state, coordinates):
-        joints = state.standing("Joint")
-        groups = state.standing("RigidGroup")
-        values = canonical_io.resolved_values(state)
-        frames, notes = kinematics.realizations(state.standing("Feature"), values)
-        self.assertEqual([], notes)
-        law = kinematics.derive_poses(joints, groups, frames, coordinates, ["BOD-A", "BOD-B"])
-        return law
+    def _frames(self, state):
+        ex.execute_settlement(state, Progression())
+        per_unit, how, frames, notes = canonical_io.scale_and_frames(state)
+        return per_unit, frames, notes
 
-    def test_06_revolute_placement_is_deterministic(self):
+    def test_06_a_feature_frame_comes_from_its_datum_the_scale_and_the_offset(self):
+        state = hinge()
+        per_unit, frames, notes = self._frames(state)
+        self.assertEqual(1.0, per_unit)
+        self.assertEqual([], [str(n) for n in notes])
+        self.assertEqual([0.0, 0.0, 0.0], [round(v, 9) for v in frames["FEA-A-STOCK"].t])
+        self.assertEqual([40.0, 0.0, 10.0], [round(v, 9) for v in frames["FEA-A-BORE"].t])
+        z = [frames["FEA-A-BORE"].r[i][2] for i in range(3)]
+        self.assertEqual([0.0, 1.0, 0.0], [round(v, 9) for v in z])         # the joint's +Y
+
+    def test_07_no_scale_means_no_frame_and_no_invented_one(self):
+        state = hinge(basis="RELATIVE")
+        per_unit, frames, notes = self._frames(state)
+        self.assertIsNone(per_unit)
+        self.assertEqual({}, frames)
+        self.assertTrue(all(n.kind == findings.NOT_EVALUABLE and not n.evaluable for n in notes))
+        ready, why = canonical_io.compilation_readiness(state)
+        self.assertFalse(ready)
+        self.assertTrue(any("no scale authority" in w for w in why), why)
+
+    def test_08_a_settled_scale_parameter_is_a_scale_authority(self):
+        state = hinge(basis="RELATIVE", scale_parameter=2)
+        per_unit, frames, notes = self._frames(state)
+        self.assertEqual(2.0, per_unit)
+        self.assertEqual([80.0, 0.0, 20.0], [round(v, 9) for v in frames["FEA-A-BORE"].t])
+
+    def test_09_the_pose_law_rotates_about_the_located_joint_frame(self):
         state = hinge()
         ex.execute_settlement(state, Progression())
-        law = self._law(state, {"JNT-1": 0.0})
-        self.assertEqual("BOD-A", law.base)
-        self.assertEqual([], [str(f) for f in law.findings])
-        self.assertEqual([40.0, 0.0, 10.0],
-                         [round(v, 9) for v in law.poses["BOD-B"].apply((0, 0, 0))])
-        # 90 degrees about +Y through the base's far edge: the lid's +X goes to -Z
-        law90 = self._law(state, {"JNT-1": 90.0})
-        self.assertEqual([40.0, 0.0, 0.0],
-                         [round(v, 9) for v in law90.poses["BOD-B"].apply((10, 0, 0))])
-        again = self._law(state, {"JNT-1": 90.0})
-        self.assertEqual(law90.as_record(), again.as_record())
+        joints, groups = state.standing("Joint"), state.standing("RigidGroup")
+        law0 = kinematics.derive_poses(joints, groups, {"JNT-1": 0.0}, 1.0, ["BOD-A", "BOD-B"])
+        self.assertEqual("BOD-A", law0.base)
+        self.assertEqual([], law0.findings)
+        self.assertEqual([50.0, 0.0, 10.0], [round(v, 9) for v in law0.poses["BOD-B"].apply((50, 0, 10))])
+        law90 = kinematics.derive_poses(joints, groups, {"JNT-1": 90.0}, 1.0, ["BOD-A", "BOD-B"])
+        # a lid point 10 beyond the hinge line swings to 10 below it
+        self.assertEqual([40.0, 0.0, 0.0], [round(v, 9) for v in law90.poses["BOD-B"].apply((50, 0, 10))])
+        self.assertEqual(law90.as_record(), kinematics.derive_poses(
+            joints, groups, {"JNT-1": 90.0}, 1.0, ["BOD-A", "BOD-B"]).as_record())
 
-    def test_07_prismatic_placement_is_deterministic(self):
+    def test_10_a_prismatic_joint_translates_along_its_axis_through_the_scale(self):
         state = hinge(joint_type="PRISMATIC", axis="+X")
-        ex.execute_settlement(state, Progression())
-        law = self._law(state, {"JNT-1": 12.5})
-        self.assertEqual([], [str(f) for f in law.findings])
-        self.assertEqual([52.5, 0.0, 10.0],
-                         [round(v, 9) for v in law.poses["BOD-B"].apply((0, 0, 0))])
-
-    def test_08_mating_axes_are_checked_not_assumed(self):
-        state = hinge(lid_axis="+Z")            # the lid realizes the hinge along the wrong axis
-        ex.execute_settlement(state, Progression())
-        law = self._law(state, {"JNT-1": 0.0})
-        self.assertTrue(any(f.kind == findings.MATING_AXES_INCONSISTENT for f in law.findings),
-                        [str(f) for f in law.findings])
-
-    def test_09_a_prismatic_travel_in_a_relative_basis_is_not_a_length(self):
-        state = hinge(joint_type="PRISMATIC", axis="+X", basis="RELATIVE")
-        coords, notes = kinematics.coordinates_in_kernel_units(
-            state.standing("Joint"), {"JNT-1": 12.5}, state.standing("ReferenceScale")[0])
+        joints, groups = state.standing("Joint"), state.standing("RigidGroup")
+        coords, notes = kinematics.coordinates_in_kernel_units(joints, {"JNT-1": 12.5}, 2.0)
+        self.assertEqual({"JNT-1": 25.0}, coords)
+        law = kinematics.derive_poses(joints, groups, coords, 2.0, ["BOD-A", "BOD-B"])
+        self.assertEqual([25.0, 0.0, 0.0], [round(v, 9) for v in law.poses["BOD-B"].apply((0, 0, 0))])
+        coords, notes = kinematics.coordinates_in_kernel_units(joints, {"JNT-1": 12.5}, None)
         self.assertEqual({}, coords)
-        self.assertEqual([findings.NOT_EVALUABLE], [f.kind for f in notes])
-        self.assertFalse(notes[0].evaluable)
-        state = hinge(joint_type="PRISMATIC", axis="+X", basis="ABSOLUTE")
-        coords, notes = kinematics.coordinates_in_kernel_units(
-            state.standing("Joint"), {"JNT-1": 12.5}, state.standing("ReferenceScale")[0])
-        self.assertEqual({"JNT-1": 12.5}, coords)
+        self.assertEqual([findings.NOT_EVALUABLE], [n.kind for n in notes])
 
-    def test_10_no_pose_is_invented_for_an_unrealized_joint(self):
-        state = DesignState(run_id="unrealized")
-        hinge_upstream(state)
+    def test_11_an_unlocated_joint_gives_no_pose_and_no_default(self):
+        state = DesignState(run_id="unlocated")
+        hinge_upstream(state, locate_joint=False)
         law = kinematics.derive_poses(state.standing("Joint"), state.standing("RigidGroup"),
-                                      {}, {"JNT-1": 0.0}, ["BOD-A", "BOD-B"])
+                                      {"JNT-1": 0.0}, 1.0, ["BOD-A", "BOD-B"])
         self.assertNotIn("BOD-B", law.poses)
-        self.assertTrue(any(f.kind == findings.POSE_NOT_DERIVABLE for f in law.findings))
+        self.assertEqual([findings.POSE_NOT_DERIVABLE], [f.kind for f in law.findings if f.owner == "s04"][:1])
 
-    def test_11_motion_is_sampled_as_s04_samples(self):
+    def test_12_an_unsupported_joint_class_is_reported_not_approximated(self):
+        state = hinge(joint_type="SPHERICAL")
+        law = kinematics.derive_poses(state.standing("Joint"), state.standing("RigidGroup"),
+                                      {"JNT-1": 0.0}, 1.0, ["BOD-A", "BOD-B"])
+        self.assertTrue(any(f.kind == findings.UNSUPPORTED_OPERATION for f in law.findings))
+        self.assertNotIn("BOD-B", law.poses)
+
+    def test_13_motion_is_sampled_as_s04_samples(self):
         samples, declaration = kinematics.motion_samples({"JNT-1": 0.0}, {"JNT-1": 90.0}, ["JNT-1"])
         self.assertEqual(s04.SAMPLES, len(samples))
-        self.assertEqual(0.0, samples[0]["JNT-1"])
-        self.assertEqual(90.0, samples[-1]["JNT-1"])
+        self.assertEqual((0.0, 90.0), (samples[0]["JNT-1"], samples[-1]["JNT-1"]))
         self.assertFalse(declaration["adaptive"])
 
 
 # ======================================================================
 class TestCompletenessMeansConstructible(unittest.TestCase):
 
-    def test_12_an_unrealized_joint_is_named(self):
+    def test_14_an_unrealized_joint_and_a_bodiless_stock_are_named(self):
         state = DesignState(run_id="c")
         hinge_upstream(state)
-        rows = embodiment.rows_from_state(state, None)
-        problems = embodiment.structural_problems(rows)
-        self.assertTrue(any("JNT-1" in p and "BOD-A" in p for p in problems), problems)
-        self.assertTrue(any("BOD-B has no construction statement" in p for p in problems), problems)
-
-    def test_13_a_complete_embodiment_has_no_structural_problem(self):
-        state = hinge()
-        self.assertEqual([], embodiment.structural_problems(embodiment.rows_from_state(state, None)))
-
-    def test_14_a_placed_feature_nothing_builds_is_named(self):
-        state = hinge()
-        self.assertEqual([], apply(state, "s05", [
-            Op("CREATE", "Feature", "FEA-Q", {"body": "BOD-A", "feature_kind": "STOP",
-                                              "geometry": "x", "placement": place((1, 1, 1), "+Z")},
-               "s05:embodiment")]))
         problems = embodiment.structural_problems(embodiment.rows_from_state(state, None))
-        self.assertTrue(any("FEA-Q" in p and "nothing is built" in p for p in problems), problems)
+        self.assertTrue(any("JNT-1" in p and "BOD-A" in p for p in problems), problems)
+        self.assertTrue(any("BOD-B has no additive feature" in p for p in problems), problems)
 
-    def test_15_the_settlement_gate_refuses_a_non_constructible_embodiment(self):
+    def test_15_a_complete_embodiment_has_no_structural_problem(self):
+        self.assertEqual([], embodiment.structural_problems(embodiment.rows_from_state(hinge(), None)))
+
+    def test_16_the_settlement_gate_refuses_a_non_constructible_embodiment(self):
         state = DesignState(run_id="g")
         hinge_upstream(state)
         self.assertEqual([], apply(state, "s05", [
-            Op("CREATE", "ConstructionStatement", "CST-A1", {"body": "BOD-A", "operation": "BOX",
-                                                             "operands": [],
-                                                             "parameters": {"dx": MM(1), "dy": MM(1),
-                                                                            "dz": MM(1)}},
-               "s05:embodiment")]))
+            feature("FEA-1", "BOD-A", "STOCK", "ENV-A", [box("b", MM(1), MM(1), MM(1))], axis="+Z")]))
         report, execution = ex.execute_settlement(state, Progression())
         self.assertEqual(ir.NOT_READY, report.solver_status)
         self.assertTrue(any("JNT-1" in p for p in report.problems), report.problems)
 
-    def test_16_s05_reports_the_same_checks_by_name_before_writing(self):
+    def test_17_s05_reports_the_grammar_and_the_structure_by_name_before_writing(self):
         state = DesignState(run_id="v")
         hinge_upstream(state)
-        view = {fam: state.standing(fam) for fam in ("Body", "RigidGroup", "Joint", "Interface")}
+        view = {fam: state.standing(fam) for fam in ("Body", "RigidGroup", "Joint", "Interface",
+                                                    "Envelope", "FunctionalRegion")}
         response = {"features": [{"id": "FEA-1", "body": "BOD-A", "feature_kind": "BORE",
-                                  "geometry": "x", "joint": "JNT-1",
-                                  "placement": place((0, 0, 0), "+Z")}],
-                    "construction_statements": [], "parameters": []}
+                                  "geometry": "x",
+                                  "placement": {"datum": "JNT-1", "axis": "+Z"},
+                                  "construction": [cylinder("c", MM(1), MM(1))]}],
+                    "parameters": []}
+        c5 = s05.check_c5_program_totality(response, view)
+        self.assertTrue(any("lies on the joint's axis" in p for p in c5), c5)
         c11 = s05.check_c11_joints_realized(response, view)
         self.assertTrue(any("BOD-B" in p for p in c11), c11)
-        self.assertTrue(any("+Z" in p and "+Y" in p for p in c11), c11)
+        self.assertFalse(any("BOD-A" in p for p in c11),
+                         "a feature placed at the joint realizes it; no second field is read")
         c12 = s05.check_c12_bodies_built(response, view)
         self.assertEqual(2, len(c12), c12)
-        c13 = s05.check_c13_placed_features_built(response, view)
-        self.assertTrue(any("FEA-1" in p for p in c13), c13)
 
-    def test_17_mating_kinds_are_checked_against_s04s_mating_geometry(self):
-        rows = {"Body": [], "RigidGroup": [], "Joint": [], "ConstructionStatement": [],
+    def test_18_mating_kinds_are_checked_against_s04s_mating_geometry(self):
+        rows = {"Body": [], "RigidGroup": [], "Joint": [],
                 "Interface": [{"entity_id": "IFC-1", "bodies": ["BOD-A", "BOD-B"],
                                "mating_geometry": {"inner_feature": "PIN", "outer_feature": "BORE",
                                                    "inner_body": "BOD-B", "outer_body": "BOD-A"}}],
@@ -365,47 +397,31 @@ class TestCompletenessMeansConstructible(unittest.TestCase):
                              "interface": "IFC-1"},
                             {"entity_id": "F2", "body": "BOD-B", "feature_kind": "FACE",
                              "interface": "IFC-1"}]}
-        problems = embodiment.mating_kind_problems(rows)
-        self.assertEqual(1, len(problems), problems)
-        self.assertIn("PIN", problems[0])
+        found = embodiment.mating_kind_findings(rows)
+        self.assertEqual(1, len(found), found)
+        self.assertEqual(findings.MATING_KIND_UNREALIZED, found[0].kind)
+        self.assertEqual("s05", found[0].owner)
+        self.assertIn("PIN", found[0].detail)
 
 
 # ======================================================================
 class TestGatesRefuseWhatS07WouldInvent(unittest.TestCase):
 
-    def test_18_an_unsettled_placement_parameter_blocks_compilation(self):
-        state = DesignState(run_id="u")
-        hinge_upstream(state)
+    def test_19_an_unsettled_offset_parameter_blocks_compilation(self):
+        state = hinge()
         self.assertEqual([], apply(state, "s05", [
             Op("CREATE", "Parameter", "PRM-H", {"symbol": "h", "unit": "mm", "status": ir.DECLARED},
                "s05:embodiment"),
-            Op("CREATE", "Feature", "FEA-A", {"body": "BOD-A", "feature_kind": "BORE", "geometry": "x",
-                                              "joint": "JNT-1",
-                                              "placement": {"origin": [MM(0), MM(0), REF("PRM-H")],
-                                                            "axis": "+Y"}}, "s05:embodiment"),
-            Op("CREATE", "Feature", "FEA-B", {"body": "BOD-B", "feature_kind": "PIN", "geometry": "x",
-                                              "joint": "JNT-1", "placement": place((0, 0, 0), "+Y")},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-A", {"body": "BOD-A", "operation": "CYLINDER",
-                                                            "operands": [], "feature": "FEA-A",
-                                                            "parameters": {"radius": MM(3),
-                                                                           "height": MM(5)}},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-B", {"body": "BOD-B", "operation": "CYLINDER",
-                                                            "operands": [], "feature": "FEA-B",
-                                                            "parameters": {"radius": MM(3),
-                                                                           "height": MM(5)}},
-               "s05:embodiment")]))
+            feature("FEA-L", "BOD-A", "LUG", "FEA-A-STOCK", [box("b", MM(5), MM(5), MM(5))],
+                    offset=[MM(0), MM(0), REF("PRM-H")], axis="+Z", premises=["PRM-H"])]))
         report, _ = ex.execute_settlement(state, Progression())
         self.assertEqual(ir.UNDERDETERMINED, report.solver_status)
         ready, why = canonical_io.compilation_readiness(state)
         self.assertFalse(ready)
         self.assertTrue(any("PRM-H" in w for w in why), why)
 
-    def test_19_a_non_positive_settled_dimension_is_refused_before_the_kernel(self):
-        state = DesignState(run_id="np")
-        hinge_upstream(state)
-        self.assertEqual([], hinge_embodiment(state))
+    def test_20_a_non_positive_settled_dimension_is_refused_before_the_kernel(self):
+        state = hinge()
         self.assertEqual([], apply(state, "s05", [
             Op("SUPERSEDE", "Constraint", "CON-R", {"expression": {"relation": "==", "lhs": REF("PRM-R"),
                                                                     "rhs": MM(-3)}},
@@ -413,72 +429,143 @@ class TestGatesRefuseWhatS07WouldInvent(unittest.TestCase):
         report, _ = ex.execute_settlement(state, Progression())
         self.assertEqual(ir.FEASIBLE, report.solver_status)
         problems = settled_geometry.construction_problems(state)
-        self.assertTrue(any("CONSTRUCTION_INVALID" in p and "CST-A2" in p for p in problems), problems)
-        ready, why = canonical_io.compilation_readiness(state)
-        self.assertFalse(ready)
+        self.assertTrue(any("CONSTRUCTION_INVALID" in p and "FEA-A-BORE" in p for p in problems), problems)
+        self.assertFalse(canonical_io.compilation_readiness(state)[0])
 
-    def test_20_findings_are_typed_and_owned(self):
-        f = findings.Finding(findings.BODY_INTERFERENCE, "s05", ("BOD-A", "BOD-B"), "they overlap",
-                             evidence={"shared_volume": 1.0})
+    def test_21_a_length_in_the_wrong_unit_is_refused_and_not_converted(self):
+        state = hinge()
+        self.assertEqual([], apply(state, "s05", [
+            Op("CREATE", "Parameter", "PRM-M", {"symbol": "m", "unit": "m", "status": ir.DECLARED},
+               "s05:embodiment"),
+            Op("CREATE", "Constraint", "CON-M", {"kind": "DIMENSIONAL", "parameters": ["PRM-M"],
+                                                 "expression": {"relation": "==", "lhs": REF("PRM-M"),
+                                                                "rhs": {"const": 0.05, "unit": "m"}}},
+               "s05:embodiment", premise_refs=["PRM-M"]),
+            feature("FEA-M", "BOD-A", "BOSS", "FEA-A-STOCK", [cylinder("c", REF("PRM-M"), MM(2))],
+                    axis="+Z", premises=["PRM-M"])]))
+        ex.execute_settlement(state, Progression())
+        problems = canonical_io.construction_unit_problems(state)
+        self.assertTrue(any("FEA-M.c.radius" in p and "no conversion" in p for p in problems), problems)
+
+    def test_21b_a_constraint_relates_quantities_of_one_dimension_or_does_not_stand(self):
+        """Observed live: `length + 2` (dimensionless) == 5 mm reached settlement
+        and failed there as an unsupported formulation. Dimension is
+        well-formedness: the boundary asks the solver's own reduction before
+        the record stands, and S05-C6 reports the same thing by name."""
+        state = hinge()
+        mixed = {"relation": "==", "lhs": {"op": "+", "args": [REF("PRM-W"), {"const": 2, "unit": "1"}]},
+                 "rhs": MM(5)}
+        problems = apply(state, "s05", [
+            Op("CREATE", "Constraint", "CON-X", {"kind": "DIMENSIONAL", "parameters": ["PRM-W"],
+                                                 "expression": mixed},
+               "s05:embodiment", premise_refs=["PRM-W"])])
+        self.assertTrue(any("combines dimensions" in p for p in problems), problems)
+        self.assertNotIn("CON-X", state.entities)
+        problems = apply(state, "s05", [
+            Op("CREATE", "Constraint", "CON-Y", {"kind": "DIMENSIONAL", "parameters": ["PRM-W"],
+                                                 "expression": {"relation": "==", "lhs": REF("PRM-W"),
+                                                                "rhs": {"const": 5, "unit": "deg"}}},
+               "s05:embodiment", premise_refs=["PRM-W"])])
+        self.assertTrue(any("relates mm to deg" in p for p in problems), problems)
+        # a bare zero asserts no dimension; a product of unknowns is the solver's
+        # report, not the grammar's
+        self.assertEqual([], apply(state, "s05", [
+            Op("CREATE", "Constraint", "CON-Z", {"kind": "DIMENSIONAL", "parameters": ["PRM-W", "PRM-R"],
+                                                 "expression": {"relation": ">=",
+                                                                "lhs": {"op": "*", "args": [REF("PRM-W"), REF("PRM-R")]},
+                                                                "rhs": {"const": 0, "unit": "1"}}},
+               "s05:embodiment", premise_refs=["PRM-W", "PRM-R"])]))
+        response = {"parameters": [{"id": "PRM-1", "symbol": "w", "unit": "mm"}],
+                    "constraints": [{"id": "CON-1", "kind": "DIMENSIONAL", "parameters": ["PRM-1"],
+                                     "expression": {"relation": "==", "lhs": REF("PRM-1"),
+                                                    "rhs": {"const": 5, "unit": "deg"}}}]}
+        self.assertTrue(any("CON-1" in p and "relates mm to deg" in p for p in s05.check_c6_units(response)))
+
+    def test_22_findings_are_typed_and_owned(self):
+        f = findings.Finding(findings.BODY_INTERFERENCE, "s05", ("BOD-A", "BOD-B"), "they overlap")
         self.assertEqual("s05", f.as_record()["owner"])
         with self.assertRaises(ValueError):
             findings.Finding("SOMETHING_ELSE", "s05", (), "x")
-        with self.assertRaises(ValueError):
-            findings.Finding(findings.BODY_INTERFERENCE, "cad", (), "x")
-        note = findings.Finding(findings.NOT_EVALUABLE, "s04", (), "no scale", evaluable=False)
-        self.assertEqual([], findings.blocking([note]))
+        self.assertEqual([], findings.blocking([findings.Finding(
+            findings.NOT_EVALUABLE, "s04", (), "no scale", evaluable=False)]))
 
 
 # ======================================================================
 class TestTheModelIsShownTheLanguageTheBoundaryEnforces(unittest.TestCase):
 
-    def test_21_the_grammar_section_is_rendered_from_the_ir(self):
+    def test_23_the_grammar_and_schema_are_rendered_from_the_contract_and_the_ir(self):
         grammar = s05.S05Embodiment.render_grammar()
         for op in ir.OPCODES:
             self.assertIn(op, grammar)
-            self.assertIn(ir.OPCODE_SEMANTICS[op], grammar)
+        self.assertIn('"datum"', grammar)
+        self.assertIn("negation", grammar)
         for axis in ir.SIGNED_AXES:
             self.assertIn('"%s"' % axis, grammar)
-        for relation in ir.RELATIONS:
-            self.assertIn('"%s"' % relation, grammar)
-        self.assertIn(ir.KERNEL_LENGTH_UNIT, grammar)
-        self.assertIn('"origin"', grammar)
-        self.assertIn("PARALLEL", grammar)
+        schema = " ".join(s05.S05Embodiment.render_response_schema().split())
+        self.assertIn("placement {datum, offset?, axis?}", schema)
+        self.assertIn("construction [{id, operation, operands?, parameters?, axis?}]", schema)
+        self.assertNotIn("envelope", schema)
+        self.assertNotIn("construction_statements", schema)
+        self.assertIn("role (optional)", schema)
+        # the placeholders are read from the template, not restated here: a
+        # hand-listed set says a section was added by failing to fill one in.
+        slots = {name for _, name, _, _ in Formatter().parse(s05.PROMPT) if name}
+        self.assertIn("STOCK", s05.PROMPT.format(**{k: "" for k in slots}))
 
-    def test_21b_negation_is_one_form_and_means_minus(self):
-        """A placement below the origin needs "minus this"; the one-argument
-        `-` is negation for the parser, the solver and the compiler alike."""
-        from ver3.assy_v3.downstream import compiler, solver
-        node = {"op": "-", "args": [{"op": "/", "args": [REF("PRM-W"), {"const": 2, "unit": "1"}]}]}
-        expr = ir.Expr.parse(node)
-        self.assertEqual(-20.0, compiler.resolve(expr, {"PRM-W": 40.0}))
-        form = solver.reduce_expr(expr, {"PRM-W": "mm"})
-        self.assertEqual(-0.5, form.terms["PRM-W"])
-        for bad in ({"op": "+", "args": [REF("PRM-W")]}, {"op": "-", "args": []}):
-            with self.subTest(bad=bad):
-                with self.assertRaises(ir.IRError):
-                    ir.Expr.parse(bad)
-        grammar = s05.S05Embodiment.render_grammar()
-        self.assertIn("negation", grammar)
-        self.assertIn("never its symbol", grammar)
-        self.assertIn("operands: two or more; parameters: none", grammar)
+    def test_23b_every_reference_field_is_shown_with_what_it_may_name(self):
+        """A reference typed in the contract is rendered with its target
+        families, so which ids belong in `kept_open_by`, `blocks`, `joint` or
+        `interface` is read from the schema, never guessed from a name."""
+        schema = " ".join(s05.S05Embodiment.render_response_schema().split())
+        self.assertIn("kept_open_by -> Ambiguity | Freedom ids", schema)
+        self.assertIn("blocks -> ANY ids", schema)
+        self.assertIn("role (optional) in {SCALE}", schema)
+        self.assertIn("feature_kind in {", schema)
+        features_line = schema.split("realizations[]")[0]
+        self.assertNotIn("joint", features_line.replace("placement", ""),
+                         "realizing a joint is the placement, not a second field")
+        self.assertIn("interface (optional) -> Interface id", schema)
+        self.assertIn("governs_interface (optional) -> Interface id", schema)
 
-    def test_22_the_response_schema_offers_placement_and_joint(self):
-        schema = s05.S05Embodiment.render_response_schema()
-        self.assertIn("placement", schema)
-        self.assertIn("joint", schema)
+    def test_23c_joints_to_realize_are_rendered_from_the_topology(self):
+        """Like obligations, the joints an embodiment must realize are listed
+        from s03's joints and groups - each with its class, its declared axis,
+        whether s04 located it, and the bodies it relates - not left as a rule."""
+        state = DesignState(run_id="jd")
+        hinge_upstream(state, joint_type="PRISMATIC", axis="+X")
+        view = {fam: state.standing(fam) for fam in ("Joint", "RigidGroup", "Body")}
+        block = s05.render_joint_duties(view)
+        for token in ("JNT-1", "PRISMATIC", "+X", "BOD-A, BOD-B", "frame located by s04",
+                      "datum JNT-1"):
+            self.assertIn(token, block)
+        self.assertIn("none", s05.render_joint_duties({}))
+        state2 = DesignState(run_id="jd2")
+        hinge_upstream(state2, joint_type="FIXED", axis="+X", locate_joint=False)
+        self.assertIn("none", s05.render_joint_duties(
+            {fam: state2.standing(fam) for fam in ("Joint", "RigidGroup", "Body")}))
+        prompt = s05.S05Embodiment().prompt({"consumer_view": view})
+        self.assertIn("JOINTS TO REALIZE", prompt)
+        section = prompt.split("JOINTS TO REALIZE\n-----------------")[1].split("HARD REQUIREMENTS")[0]
+        self.assertIn("JNT-1", section)
 
-    def test_23_to_operations_carries_placement_and_joint_as_typed_premises(self):
+    def test_24_to_operations_carries_datum_joint_scale_and_parameters_as_premises(self):
         response = {"features": [{"id": "FEA-1", "body": "BOD-A", "feature_kind": "BORE",
-                                  "geometry": "x", "joint": "JNT-1",
-                                  "placement": {"origin": [REF("PRM-1"), MM(0), MM(0)], "axis": "+Y"}}],
-                    "realizations": [], "parameters": [{"id": "PRM-1", "symbol": "a", "unit": "mm"}],
-                    "constraints": [], "construction_statements": [], "unresolved": []}
-        ops = s05.S05Embodiment().to_operations(response)
-        feature = next(op for op in ops if op.entity_type == "Feature")
-        self.assertEqual("JNT-1", feature.fields["joint"])
-        self.assertIn("JNT-1", feature.premise_refs)
-        self.assertIn("PRM-1", feature.premise_refs)
+                                  "geometry": "x",
+                                  "placement": {"datum": "JNT-1", "offset": [REF("PRM-1"), MM(0), MM(0)]},
+                                  "construction": [cylinder("c", REF("PRM-2"), MM(1))]}],
+                    "realizations": [], "parameters": [{"id": "PRM-1", "symbol": "a", "unit": "mm"},
+                                                       {"id": "PRM-2", "symbol": "b", "unit": "mm"}],
+                    "constraints": [], "unresolved": []}
+        response["parameters"][0]["role"] = "SCALE"
+        ops = s05.S05Embodiment().to_operations(response, {"consumer_view": {
+            "ReferenceScale": [{"entity_id": "SCL-1"}]}})
+        f = next(op for op in ops if op.entity_type == "Feature")
+        for premise in ("BOD-A", "JNT-1", "SCL-1", "PRM-1", "PRM-2"):
+            self.assertIn(premise, f.premise_refs)
+        scale = next(op for op in ops if op.entity_type == "Parameter" and op.entity_id == "PRM-1")
+        self.assertEqual("SCALE", scale.fields["role"])
+        self.assertEqual([], [op for op in ops if op.entity_type == "ReferenceScale"],
+                         "s04's scale record is never written by s05")
 
 
 if __name__ == "__main__":                                       # pragma: no cover

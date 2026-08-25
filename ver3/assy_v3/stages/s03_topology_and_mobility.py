@@ -937,7 +937,8 @@ class S03TopologyAndMobility(Stage):
             projection=_render(projection)) + revision_context_text(
                 inputs, self.REVISION_MAY_REVISE)
 
-    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state,
+                          parsed=None) -> List[Op]:
         """An owner revision REVISES the topology that stands, and never
         replaces it: the generic rule, under this pass's reason, behind the
         architecture guard."""
@@ -2102,7 +2103,7 @@ class S03BMobilityAndAssembly(Stage):
         "assembly step and transition requirement, and the open decisions; the "
         "DOF disposition is re-derived from what you state")
 
-    def repair_operations(self, ops, inputs, state):
+    def repair_operations(self, ops, inputs, state, parsed=None):
         """An owner revision REVISES the relations, paths, order and demands
         that stand. This pass authors no architecture, so the guard has
         nothing to refuse here; what it may not touch it cannot write."""

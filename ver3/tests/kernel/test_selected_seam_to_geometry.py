@@ -80,8 +80,8 @@ class TestTheChoiceReachesGeometry(_Built):
     def test_the_signature_traces_back_to_the_authored_statement(self):
         mapped = {}
         for body in self.result.bodies:
-            mapped.update(body.statement_map or {})
-        self.assertEqual("FEA-0001", mapped.get("CST-0002"))
+            mapped.update({fid: body.body_id for fid in (body.feature_map or {})})
+        self.assertEqual("BOD-0001", mapped.get("FEA-0002"))
 
     def test_the_geometry_signature_is_committed_and_standing(self):
         signatures = self.state.standing("GeometrySignature")
@@ -126,7 +126,7 @@ class TestWithdrawingTheChoiceStalesWhatRestedOnIt(_Built):
     def test_before_withdrawal_everything_stands(self):
         """The baseline. Without it, 'nothing stands afterwards' could be true
         because nothing stood in the first place."""
-        for family in ("Feature", "Parameter", "ConstructionStatement",
+        for family in ("Feature", "Parameter",
                        "GeometrySignature"):
             with self.subTest(family=family):
                 self.assertTrue(self._standing_ids(family))
@@ -135,8 +135,7 @@ class TestWithdrawingTheChoiceStalesWhatRestedOnIt(_Built):
         self._commit(self.state, "selection", [
             Op("INVALIDATE", "SelectionDecision", "SEL-0001", {},
                "selection:reopened", reason="the choice was reopened")])
-        for family in ("Feature", "Realization", "Parameter", "Constraint",
-                       "ConstructionStatement"):
+        for family in ("Feature", "Realization", "Parameter", "Constraint"):
             with self.subTest(family=family):
                 self.assertEqual(set(), self._standing_ids(family),
                                  "%s still stands after the choice it embodies "

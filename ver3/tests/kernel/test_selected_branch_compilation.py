@@ -69,9 +69,10 @@ class TestProductionCompilationBuildsOnlyTheSelection(_TwoBranchState):
         _state, result = self._compiled("CND-A")
         mapped = set()
         for body in result.bodies:
-            mapped |= set(body.statement_map or {})
+            mapped |= set(body.feature_map or {})
         self.assertTrue(result.bodies, "nothing compiled, so nothing is traced")
-        self.assertNotIn("CST-B", mapped)
+        self.assertNotIn("FEA-B", mapped)
+        self.assertIn("FEA-A", mapped)
 
 
 class TestProductionCompilationRefusesToGuess(_TwoBranchState):

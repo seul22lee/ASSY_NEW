@@ -231,8 +231,7 @@ def downstream_nodes(state, progression):
 
     # ---- s05: a producing responsibility, model-owned ----------------
     produced = {fam: sorted(e["entity_id"] for e in state.family(fam))
-                for fam in ("Feature", "Realization", "Parameter", "Constraint",
-                            "ConstructionStatement")}
+                for fam in ("Feature", "Realization", "Parameter", "Constraint")}
     if any(produced.values()):
         # Committed s05 state exists. HOW it got there is the caller's to say -
         # a replayed recording, a live call, or an authored development fixture -
@@ -259,12 +258,15 @@ def downstream_nodes(state, progression):
                             for f in sorted(state.family("Feature"),
                                             key=lambda x: x["entity_id"])],
                         construction_program=[
-                            {"statement": c["entity_id"], "body": c.get("body"),
-                             "operation": c.get("operation"),
-                             "operands": c.get("operands") or [],
-                             "feature": c.get("feature"),
-                             "validity": validity_of(state, c["entity_id"])}
-                            for c in sorted(state.family("ConstructionStatement"),
+                            {"feature": f["entity_id"], "body": f.get("body"),
+                             "feature_kind": f.get("feature_kind"),
+                             "placement": f.get("placement"),
+                             "steps": [{"id": st.get("id"), "operation": st.get("operation"),
+                                        "operands": st.get("operands") or []}
+                                       for st in (f.get("construction") or [])
+                                       if isinstance(st, dict)],
+                             "validity": validity_of(state, f["entity_id"])}
+                            for f in sorted(state.family("Feature"),
                                             key=lambda x: x["entity_id"])]))
     else:
         out.append(node("s05", "physical embodiment", MODEL_OWNED, NOT_EXERCISED,
@@ -454,14 +456,25 @@ def development_embodiment():
 
     Deliberately small and deliberately generic: no benchmark dimension, no
     reference geometry, nothing that names a case. What it exercises is the
-    SEAM - obligation to realization to feature to statement to solid.
+    SEAM - obligation to realization to feature to construction to solid. The
+    stock is placed at the body's s04 envelope; the bore at the stock.
     """
     return {
-        "features": [{"id": "FEA-0001", "body": "BOD-0001",
-                      "feature_kind": "BORE", "geometry": "axial bore"}],
+        "features": [
+            {"id": "FEA-0001", "body": "BOD-0001", "feature_kind": "STOCK",
+             "geometry": "the enclosure block",
+             "placement": {"datum": "ENV-0001", "axis": "+Z"},
+             "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                               "parameters": {"dx": _mm(40), "dy": _mm(30), "dz": _mm(20)}}]},
+            {"id": "FEA-0002", "body": "BOD-0001", "feature_kind": "BORE",
+             "geometry": "axial bore",
+             "placement": {"datum": "FEA-0001",
+                           "offset": [_mm(20), _mm(15), _mm(-5)], "axis": "+Z"},
+             "construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                               "parameters": {"radius": _ref("PRM-0003"), "height": _mm(30)}}]}],
         "realizations": [{"id": "RLZ-0001",
                           "addresses_obligations": ["OBL-0001"],
-                          "participating_features": ["FEA-0001"],
+                          "participating_features": ["FEA-0002"],
                           "verification_predicate":
                               "the bore admits the retained member"}],
         "parameters": [{"id": "PRM-0001", "symbol": "pin_r", "unit": "mm"},
@@ -479,17 +492,7 @@ def development_embodiment():
              "expression": {"relation": "==", "lhs": _ref("PRM-0003"),
                             "rhs": {"op": "+", "args": [_ref("PRM-0001"),
                                                         _ref("PRM-0002")]}}}],
-        "construction_statements": [
-            {"id": "CST-0001", "body": "BOD-0001", "operation": "BOX", "operands": [],
-             "parameters": {"dx": _mm(40), "dy": _mm(30), "dz": _mm(20)}},
-            {"id": "CST-0002", "body": "BOD-0001", "operation": "CYLINDER",
-             "operands": [], "feature": "FEA-0001",
-             "parameters": {"radius": _ref("PRM-0003"), "height": _mm(30)}},
-            {"id": "CST-0003", "body": "BOD-0001", "operation": "TRANSLATE",
-             "operands": ["CST-0002"],
-             "parameters": {"dx": _mm(20), "dy": _mm(15), "dz": _mm(-5)}},
-            {"id": "CST-0004", "body": "BOD-0001", "operation": "CUT",
-             "operands": ["CST-0001", "CST-0003"], "parameters": {}}],
+        "unresolved": [],
     }
 
 
@@ -517,6 +520,16 @@ def build_development_trace(out_dir):
     commit("s03", [Op("CREATE", "Body", "BOD-0001",
                       {"instance_identity": "enclosure", "role": "shell",
                        "created_by_stage": "s03"}, "s03:topology")])
+    # The s04 commitments an embodiment is placed against: an ABSOLUTE scale in
+    # the kernel unit and the body's envelope (Unit G).
+    commit("s04", [Op("CREATE", "ReferenceScale", "SCL-0001",
+                      {"basis": "ABSOLUTE", "absolute": {"unit": "mm", "per_unit": 1.0}},
+                      "s04:arrangement"),
+                   Op("CREATE", "Envelope", "ENV-0001",
+                      {"body": "BOD-0001", "extent": {"centre": [0, 0, 0],
+                                                      "half_extent": [20, 15, 10]},
+                       "frame": "world", "maturity": "PROVISIONAL"},
+                      "s04:arrangement", premise_refs=["SCL-0001"])])
     commit("s02", [Op("CREATE", "Obligation", "OBL-0001",
                       {"statement": "the retained member is located",
                        "derived_from_requirements": [], "mandatory": True,

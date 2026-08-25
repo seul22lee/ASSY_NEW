@@ -15,11 +15,13 @@ solver artifact is R-23 - copying a number and calling it solved. So s05 declare
 parameters with a unit and no value, writes the constraints that relate them, and
 lets the settlement loop do the arithmetic. S05-C10 enforces exactly that.
 
-CONSTRUCTION STATEMENTS ARE IN THE OWNING BODY'S OWN FRAME
+A FEATURE IS PLACED RELATIVE TO WHAT S04 COMMITTED, AND OWNS ITS CONSTRUCTION
 
-Never a world placement. s07 receives only the program and the parameters and
-must not need State (INV-006), so poses are derived downstream from located joint
-frames rather than compiled in.
+Never an absolute position. A feature names a datum - a joint frame, its body's
+envelope, a region, another feature of its body - and an offset in the kernel
+unit; its construction steps are in its own frame; a body is composed from its
+features by declared polarity. s07 derives every transform and every pose from
+s04's frames, the scale authority and the settled numbers (Unit G).
 
 THE MODEL PROPOSES; THE CONTRACT DECIDES
 
@@ -34,7 +36,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from ..downstream import ir
+from ..downstream import embodiment, ir
 from ..state.patch import Op
 from ..view import DISCHARGE, PRESERVE, applicable_obligation_ids, obligation_duties
 from .base import Stage
@@ -57,6 +59,15 @@ def _feature_kind_vocabulary() -> Tuple[str, ...]:
 #: build is a proposal nothing downstream can honour.
 FEATURE_KINDS = _feature_kind_vocabulary()
 
+
+def _polarity() -> Dict[str, Tuple[str, ...]]:
+    from ..state.design_state import Contracts
+    table = (Contracts().families.get("Feature") or {}).get("feature_kind_polarity") or {}
+    return {pol: tuple(kinds or ()) for pol, kinds in table.items()}
+
+
+FEATURE_KIND_POLARITY = _polarity()
+
 #: Constraint kinds s05 authors. ENVELOPE is the "a feature implies a minimum
 #: envelope" rule; CLEARANCE is the one S05-C9 counts.
 CONSTRAINT_KINDS = ("ENVELOPE", "CLEARANCE", "DIMENSIONAL", "INTERFERENCE_FREE")
@@ -78,28 +89,26 @@ RULES
    are decided upstream and you may not add, remove or reinterpret one.
    A feature names the body it is on, its kind, and a short geometry
    description.
-   PLACEMENT. Every feature that is somewhere - a bore, a pin, a slot, a
-   rail, a stop face, a boss - carries a `placement`: where it is and which
-   way its own axis points, IN THE FRAME OF THE BODY IT IS ON (see FRAMES
-   below). The construction statements that realize a placed feature are
-   built in that frame.
-   JOINTS. Every joint below that is not FIXED or COMPLIANT relates two
-   bodies about an axis. On EACH of those two bodies, exactly one feature
-   realizes that joint's axis - the bore and the pin, the rail and the
-   guide - and names the joint in `joint`. Its placement axis IS the joint's
-   `axis_direction`, and its origin is where the joint axis passes through
-   that body. Poses are derived from these two placements and the joint
-   coordinates; you never state a pose.
+   PLACEMENT. Every feature carries a `placement` RELATIVE TO SOMETHING THE
+   DESIGN HAS ALREADY COMMITTED (see GRAMMAR): a `datum` that is a Joint id
+   (the feature sits on that joint's located axis), the body's own Envelope id
+   (the feature sits at the body's centre), a FunctionalRegion id, or an
+   earlier feature of the SAME body; an optional `offset` of three <expr>s in
+   mm along the arrangement axes; and the feature's own `axis` where it has
+   one (a stock block at its envelope has none: the arrangement's +Z). Never
+   state a position of your own.
+   STOCK. Every body needs material: give each body one STOCK feature (its
+   plate, block or shell), placed at the body's Envelope, and place the
+   body's other features against that STOCK or against a joint.
+   JOINTS. Every joint listed under JOINTS TO REALIZE relates two bodies
+   about an axis. On EACH of those two bodies, the feature(s) that carry
+   that joint - the bore and the pin, the rail and the guide - are placed
+   with that joint as their `datum`; that placement IS the realization.
+   Poses are derived from the joint frames and the joint coordinates; you
+   never state a pose.
    MATING. Where an interface below carries `mating_geometry`, the feature
    on its `inner_body` is of the `inner_feature` kind and the feature on its
    `outer_body` of the `outer_feature` kind.
-   Optionally give a feature an `envelope` -
-   {{"centre": [x,y,z], "half_extent": [x,y,z]}} in the same frame as the
-   functional regions and envelopes below - where EVERY component is an <expr>
-   (rule 4). NEVER a bare number. The envelope says where the feature's
-   material may be, in the dimensions you declare; it is not a dimension. It
-   is evaluated against the reserved regions where it resolves; the built
-   geometry is evaluated against them again after settlement.
 2. THE OBLIGATIONS BELOW ARE SPLIT INTO TWO DUTIES. For every obligation under
    DISCHARGE emit a REALIZATION citing the obligation ids it discharges, the
    features that do the discharging, and a verification predicate - a sentence a
@@ -125,6 +134,9 @@ RULES
    naming it is a clearance the settlement loop was never given.
    A constraint is a typed relation, not prose (GRAMMAR below). Multiplying two
    lengths gives an AREA, not a length. A scale factor is written with unit "1".
+   Every number anywhere in your response - a constraint, an offset, a step
+   parameter - is a unit-bearing constant or a parameter reference, and
+   NEVER a bare number.
 5. Where a degree of freedom below is dispositioned BLOCKED_BY a constraint
    relation, the geometry must PRODUCE that limit: a pair of features that
    actually stops the motion, one on each side of the relation. A clearance
@@ -139,22 +151,38 @@ RULES
    arrangement s04 committed, in s04's own basis: respect where things sit
    relative to each other, and never copy a provisional extent, representative
    size or region into a constant and present it as a dimension. A constant in
-   a constraint is a bound the design actually states - a hard requirement, or a
-   rule you can name; every other size is a parameter.
-7. Write the CONSTRUCTION PROGRAM: an ordered list of statements that builds
-   EVERY body below IN ITS OWN FRAME. Never place a body in the world; assembly
-   poses are derived from the joint placements. Operations are exactly, and mean
-   exactly, what the GRAMMAR below says. A statement that builds a placed
-   feature's material names that feature in `feature`, and its primitive is
-   built in the feature's frame; every placed feature must be built by at
-   least one statement. Each statement names the body it builds, its
-   operation, its operands (ids of EARLIER statements, for the combining and
-   transforming operations only) and its parameters, an OBJECT of named
-   <expr>s. Exactly one statement per body must be consumed by nothing: that
-   final result IS the body. A body with no statements cannot be built.
-8. Never invent a dimension to make something buildable. If a value is unknown,
-   declare a parameter and constrain it.
-9. HARD REQUIREMENTS. Every requirement listed under HONOUR applies to this
+   a constraint is either a bound the design actually states (`basis`
+   STATED_BOUND - a hard requirement, a rule you can name) or a design choice
+   you make and mark as one (`basis` DESIGN_CHOICE); every other size is a
+   parameter related to others (`basis` GEOMETRIC_RELATION).
+7. Give every feature its CONSTRUCTION: an ordered list of steps, in the
+   feature's own frame (origin at the placement, Z along its axis), each with
+   a short local `id`, an `operation` from the GRAMMAR, `operands` (ids of
+   EARLIER steps of the same feature, for combining and transforming
+   operations only) and `parameters`, an OBJECT of named <expr>s. Exactly one
+   step must be consumed by nothing: that result IS the feature's solid. A
+   body is its ADDITIVE features fused with its SUBTRACTIVE features removed
+   (the kinds are listed under PERMITTED VALUES); a BORE is the cylinder that
+   is removed, a BOSS the cylinder that is added.
+8. CLOSE THE SYSTEM. The settlement is a solve, not a guess: every parameter
+   an offset or a construction step reads must be determined by the
+   constraints you write - each by a GEOMETRIC_RELATION to other parameters,
+   a STATED_BOUND, or a DESIGN_CHOICE (`==` a unit-bearing constant, marked
+   `basis` DESIGN_CHOICE). Choices are yours to make - a wall thickness, a pin
+   diameter, a clearance - and they must be visible as choices, never
+   presented as facts; a parameter no constraint determines is a free
+   direction the solver reports back, and nothing can be built from it. Do
+   not give a parameter a value directly (rule 3); close it with a constraint.
+9. SCALE. The arrangement below is stated in a basis (the ReferenceScale). If
+   that basis is RELATIVE, the design has no absolute size until something
+   states one: declare ONE parameter in mm with `role` "SCALE", meaning "mm
+   per basis unit", and close it like any other parameter - from a stated
+   bound where one exists (`basis` STATED_BOUND), otherwise by a design
+   choice marked as such (`basis` DESIGN_CHOICE), consistent with the mm
+   dimensions you choose for the features. Every feature is placed against
+   the arrangement THROUGH this scale, so an unclosed scale leaves nothing
+   placeable. If the basis is ABSOLUTE, declare no SCALE parameter.
+10. HARD REQUIREMENTS. Every requirement listed under HONOUR applies to this
    design and your geometry must be compatible with it. Every compliance record
    listed under OWED is a hard requirement THIS embodiment stage owes evidence
    for and cannot yet establish: it stays NOT_YET_EVALUABLE until that evidence
@@ -166,6 +194,14 @@ RULES
 OBLIGATION DUTIES OF THIS EMBODIMENT
 ------------------------------------
 {duties}
+
+JOINTS TO REALIZE
+-----------------
+{joint_duties}
+
+SETTLEMENT FEEDBACK
+-------------------
+{settlement_feedback}
 
 HARD REQUIREMENTS
 -----------------
@@ -190,6 +226,8 @@ below as already in use.
 
 PERMITTED VALUES
   feature_kind   {feature_kinds}
+    ADDITIVE     {additive_kinds}
+    SUBTRACTIVE  {subtractive_kinds}
   constraint kind {constraint_kinds}
   operation      {opcode_names}
   placement axis {signed_axes}
@@ -216,17 +254,15 @@ class S05Embodiment(Stage):
     #: `addresses_obligations`, and no ROI family at all.
     RESPONSE_ENVELOPE = (
         ("features", "Feature", "FEA-",
-         ("body", "feature_kind", "geometry", "interface", "joint", "placement",
-          "envelope"), ()),
+         ("body", "feature_kind", "geometry", "interface", "placement",
+          "construction"), ()),
         ("realizations", "Realization", "RLZ-",
          ("addresses_obligations", "participating_features",
           "verification_predicate"), ()),
         ("parameters", "Parameter", "PRM-",
-         ("symbol", "unit"), ("status",)),
+         ("symbol", "unit", "role"), ("status",)),
         ("constraints", "Constraint", "CON-",
-         ("expression", "parameters", "kind", "governs_interface"), ()),
-        ("construction_statements", "ConstructionStatement", "CST-",
-         ("body", "operation", "operands", "parameters"), ()),
+         ("expression", "parameters", "kind", "basis", "governs_interface"), ()),
         ("unresolved", "UnresolvedDecision", "S5U-",
          ("decision", "why_open", "alternatives", "alternatives_kind",
           "kept_open_by", "blocks"), ()),
@@ -293,11 +329,35 @@ class S05Embodiment(Stage):
         contracts = Contracts()
         lines = []
         for collection, family, prefix, fields, _supplied in cls.RESPONSE_ENVELOPE:
-            required = set(contracts.families[family].get("required_fields") or [])
-            shown = ['id "%s%s"' % (prefix, cls.ID_EXAMPLE_DIGITS)]
+            spec = contracts.families[family]
+            required = set(spec.get("required_fields") or [])
+            semantics = spec.get("field_semantics") or {}
+            shown = ['id "%s%s"' % (prefix, cls.ID_EXAMPLE_DIGITS)] if prefix else []
             for field in fields:
-                mark = "" if field in required else " (optional)"
-                shown.append("%s%s" % (field, mark))
+                mark = "" if field in required or prefix is None else " (optional)"
+                spec_f = semantics.get(field) or {}
+                nested = spec_f.get("record_field_semantics")
+                if nested:
+                    inner = ", ".join("%s%s" % (n, "" if sub.get("required") else "?")
+                                      for n, sub in nested.items())
+                    shape = "[{%s}]" if spec_f.get("kind") == "record_list" else "{%s}"
+                    shown.append("%s%s %s" % (field, mark, shape % inner))
+                elif spec_f.get("kind") == "enum" and spec_f.get("values"):
+                    # A CLOSED VOCABULARY, from the contract: shown beside the
+                    # field, so a role or a kind is never guessed from the name.
+                    shown.append("%s%s in {%s}" % (field, mark, " | ".join(str(v) for v in spec_f["values"])))
+                elif spec_f.get("kind") == "reference":
+                    # WHAT A REFERENCE MAY NAME, from the contract (Unit G). A
+                    # field typed as a reference to declared families is shown
+                    # with those families, so "which ids go here" is never left
+                    # to be guessed from the field's name.
+                    target = spec_f.get("target")
+                    targets = target if isinstance(target, list) else [target]
+                    many = spec_f.get("cardinality") == "many"
+                    shown.append("%s%s -> %s id%s" % (field, mark, " | ".join(str(t) for t in targets),
+                                                      "s" if many else ""))
+                else:
+                    shown.append("%s%s" % (field, mark))
             body = textwrap.wrap(", ".join(shown), 52)
             head = "  %-24s " % (collection + "[]")
             if len(head) > 27:
@@ -338,23 +398,39 @@ class S05Embodiment(Stage):
             "A coordinate at a frame origin is the typed zero %s - a coordinate "
             "definition, not a dimension." % zero,
             "",
-            "FRAMES. Every body has its own frame. All body frames are PARALLEL to the "
-            "arrangement frame the envelopes, regions and joint origins below are "
-            "stated in, in the pose where every joint coordinate is zero; so a body "
-            "axis and a joint's axis_direction name the same direction.",
-            "A placement is",
-            '  {"origin": [<expr>, <expr>, <expr>], "axis": %s}'
+            "FRAMES. The arrangement frame the envelopes, regions and joint origins "
+            "below are stated in is THE frame; every body frame coincides with it at "
+            "zero joint coordinates. A feature is placed RELATIVE to a committed datum:",
+            '  {"datum": "<Joint | Envelope | FunctionalRegion | Feature id>", '
+            '"offset": [<expr>, <expr>, <expr>], "axis": %s}'
             % " | ".join('"%s"' % a for a in ir.SIGNED_AXES),
-            "  origin: where the feature is, in its body's frame, in %s;"
-            % ir.KERNEL_LENGTH_UNIT,
-            "  axis: the feature's own axis (a bore's, a pin's, a slide's, a face's "
-            "normal) as a signed body axis.",
-            "The feature frame has Z along `axis`, origin at `origin`, and X along the "
-            "canonical perpendicular (Z->X, X->Y, Y->Z, positive); primitives that "
-            "realize the feature are built in it.",
+            "  datum: WHERE the feature sits - a Joint (its located frame), the body's own "
+            "Envelope (its centre), a FunctionalRegion (its centre), or an earlier feature of "
+            "the same body (its frame). A datum locates; it does not orient;",
+            "  offset: optional, three <expr>s in %s along the arrangement axes, default "
+            "zero;" % ir.KERNEL_LENGTH_UNIT,
+            "  axis: HOW the feature is oriented - its own axis (a bore's, a pin's, a "
+            "slide's, a face's normal) as a signed arrangement axis. Omitted at a joint it "
+            "is the joint's, which is what a bore, a pin or a bearing wants; omitted against "
+            "an envelope or a region it is the arrangement's +Z; omitted against a feature "
+            "it is that feature's. YOU MAY STATE A DIFFERENT AXIS AT A JOINT, and it means "
+            "\"located by this joint, oriented otherwise\" - a face whose normal crosses the "
+            "hinge line, a snap arm projecting across it. But a joint is REALIZED only by a "
+            "feature at it that LIES ON ITS AXIS: the bore or pin that makes the joint what "
+            "it is must be on the joint's own axis, and a feature oriented otherwise is "
+            "positioned by the joint without embodying it.",
+            "BASIS NUMBERS. The arrangement's own numbers - envelope extents and centres, "
+            "joint origins, region volumes - are in the ReferenceScale basis and are "
+            "DIMENSIONLESS: written as constants they carry unit \"1\", never \"%s\". A "
+            "length in %s that follows from one is scale x basis number: e.g. "
+            '{"op": "*", "args": [{"ref": "<SCALE parameter>"}, {"const": 100, "unit": "1"}]}.'
+            % (ir.KERNEL_LENGTH_UNIT, ir.KERNEL_LENGTH_UNIT),
+            "The feature frame has Z along its axis, origin at datum + offset, and X along "
+            "the canonical perpendicular (Z->X, X->Y, Y->Z, positive); the feature's "
+            "construction is built in it.",
             "",
             "Operations (parameters are an object of named <expr>s; operands are ids of "
-            "EARLIER statements of the same body):",
+            "EARLIER steps of the same feature):",
         ]
         for op, params in sorted(ir.OPCODES.items()):
             if op in ir.COMBINING:
@@ -365,8 +441,19 @@ class S05Embodiment(Stage):
                 shape = "operands: none; takes " + ", ".join(params)
             lines.append("  %-10s %-44s %s" % (op, shape, ir.OPCODE_SEMANTICS.get(op, "")))
         lines.append("  ROTATE also names `axis`, one of %s." % " | ".join(ir.AXES))
-        lines.append("  A combining operation has no parameters of its own: the material it "
-                     "adds or removes is an earlier primitive statement, named as an operand.")
+        lines.append("  A combining operation has no parameters of its own: what it combines is "
+                     "an earlier step OF THE SAME FEATURE, named as an operand.")
+        lines.append("  A feature never names another feature, or another feature's step, as an "
+                     "operand.")
+        lines.append("")
+        # THE ONE STATEMENT, from the IR that enforces it and the compiler that
+        # executes it. A subtractive feature that writes CUT to mean "remove me
+        # from the body" is the error this paragraph exists to prevent.
+        lines.append("POLARITY, NOT A STEP.")
+        for sentence in ir.CONSTRUCTION_SEMANTICS.split(". "):
+            sentence = sentence.strip()
+            if sentence:
+                lines.append("  " + sentence + ("" if sentence.endswith(".") else "."))
         return "\n".join(lines)
 
     def prompt(self, inputs: Dict[str, Any]) -> str:
@@ -376,8 +463,12 @@ class S05Embodiment(Stage):
             duties=render_duties(proj),
             hard_requirements=render_hard_requirements(proj),
             grammar=self.render_grammar(),
+            joint_duties=render_joint_duties(proj),
+            settlement_feedback=render_settlement_feedback(inputs),
             opcode_names=" | ".join(sorted(ir.OPCODES)),
             feature_kinds=" | ".join(FEATURE_KINDS),
+            additive_kinds=" | ".join(FEATURE_KIND_POLARITY.get("ADDITIVE", ())),
+            subtractive_kinds=" | ".join(FEATURE_KIND_POLARITY.get("SUBTRACTIVE", ())),
             constraint_kinds=" | ".join(CONSTRAINT_KINDS),
             signed_axes=" | ".join(ir.SIGNED_AXES),
             rotate_axes=" | ".join(ir.AXES),
@@ -412,7 +503,8 @@ class S05Embodiment(Stage):
             if inputs else []
         for f in parsed.get("features", []):
             fields = {"body": f["body"], "feature_kind": f["feature_kind"],
-                      "geometry": f["geometry"]}
+                      "geometry": f["geometry"], "placement": f.get("placement"),
+                      "construction": f.get("construction")}
             premises = [f["body"]]
             if f.get("interface"):
                 # THE TYPED TRACE (Unit E): which s03 interface this feature
@@ -421,35 +513,25 @@ class S05Embodiment(Stage):
                 # realized it. Never inferred from prose or from the body.
                 fields["interface"] = f["interface"]
                 premises.append(f["interface"])
-            if f.get("joint"):
-                # THE JOINT THIS FEATURE REALIZES A SIDE OF (Unit G): a typed
-                # reference the boundary resolves, and a premise - a withdrawn
-                # or re-axised joint stales the bore that was bored for it.
-                fields["joint"] = f["joint"]
-                premises.append(f["joint"])
-            if f.get("placement") is not None:
-                # WHERE IT IS (Unit G). The grammar is the IR's and the boundary
-                # refuses a malformed one by name; the parameters it names are
-                # premises exactly as an envelope's are.
-                fields["placement"] = f["placement"]
-                node = f["placement"]
-                for component in (node.get("origin") or []) if isinstance(node, dict) else []:
-                    premises += sorted(_expr_refs(component))
-            if f.get("envelope") is not None:
-                fields["envelope"] = f["envelope"]
-                # ONLY when there is an envelope. A feature with no coordinates
-                # does not rest on the frame, and premising it anyway would stale
-                # geometry that a change of basis cannot affect.
+            # THE DATUM AND THE PARAMETERS (Unit G). The feature rests on the s04
+            # commitment it is placed against - move the joint frame and the
+            # feature is stale - on the scale every datum coordinate is stated
+            # in, and on every parameter its offset or construction reads. The
+            # grammar is the IR's; the boundary refuses a malformed record by
+            # name, so only references are read here.
+            placement = f.get("placement") if isinstance(f.get("placement"), dict) else {}
+            if placement.get("datum"):
+                premises.append(placement["datum"])
                 premises += scales
-                # THE PARAMETERS THE ENVELOPE NAMES ARE PREMISES (Unit F). A
-                # revised or withdrawn declaration stales the geometry stated
-                # in it; the settlement of its value - s06 extending an s05
-                # record - leaves this record standing by the boundary's owner
-                # rule. Malformed envelopes are refused at the boundary; here
-                # the refs are simply read.
-                premises += sorted(_envelope_refs(f["envelope"]))
-            ops.append(Op("CREATE", "Feature", f["id"], fields, prov,
-                          premise_refs=premises))
+            refs: Set[str] = set()
+            for component in placement.get("offset") or []:
+                refs |= _expr_refs(component)
+            for step in f.get("construction") or []:
+                params = step.get("parameters") if isinstance(step, dict) else None
+                for expr in (params.values() if isinstance(params, dict) else []):
+                    refs |= _expr_refs(expr)
+            premises += sorted(refs)
+            ops.append(Op("CREATE", "Feature", f["id"], fields, prov, premise_refs=premises))
         for r in parsed.get("realizations", []):
             obligations = list(r.get("addresses_obligations") or [])
             features = list(r.get("participating_features") or [])
@@ -459,13 +541,22 @@ class S05Embodiment(Stage):
                 "verification_predicate": r["verification_predicate"]}, prov,
                 premise_refs=obligations + features))
         for p in parsed.get("parameters", []):
-            ops.append(Op("CREATE", "Parameter", p["id"], {
-                "symbol": p["symbol"], "unit": p["unit"],
-                "status": ir.DECLARED}, prov))
+            fields = {"symbol": p["symbol"], "unit": p["unit"], "status": ir.DECLARED}
+            if p.get("role"):
+                # UNIT G. A declared ROLE - SCALE: kernel units per basis unit,
+                # the one scale authority s05 may declare for a RELATIVE basis.
+                # s04's ReferenceScale is not written for it.
+                fields["role"] = p["role"]
+            ops.append(Op("CREATE", "Parameter", p["id"], fields, prov))
         for c in parsed.get("constraints", []):
             fields = {"expression": c["expression"],
                       "parameters": c.get("parameters", []),
                       "kind": c["kind"]}
+            if c.get("basis"):
+                # WHAT THE CONSTRAINT RESTS ON (Unit G): a relation, a stated
+                # bound, or a design choice - the choice is this stage's and
+                # stays visible as one.
+                fields["basis"] = c["basis"]
             premises = list(c.get("parameters") or [])
             if c.get("governs_interface"):
                 # A typed reference AND a premise: the constraint expresses that
@@ -475,39 +566,6 @@ class S05Embodiment(Stage):
                 premises.append(c["governs_interface"])
             ops.append(Op("CREATE", "Constraint", c["id"], fields, prov,
                           premise_refs=premises))
-        for s in parsed.get("construction_statements", []):
-            fields = {"body": s["body"], "operation": s["operation"],
-                      "operands": s.get("operands", []),
-                      "parameters": s.get("parameters", {})}
-            for optional in ("axis", "feature"):
-                if s.get(optional):
-                    fields[optional] = s[optional]
-            # THE BODY, THE RESULTS IT CONSUMES, AND THE PARAMETERS IT READS
-            # (Unit F) - and NOT the feature it realizes.
-            #
-            # The parameters used to be left out on the ground that s06
-            # settling a value staled every statement that named it. That was
-            # true before the boundary's owner rule: an extension of an
-            # s05-owned record by s06 now skips s05's own records and stales
-            # only what a later stage concluded from the value - the geometry
-            # signature - which is exactly the currentness the design needs. A
-            # revised DECLARATION (a SUPERSEDE) still stales the statement, as
-            # it must: the program then names a different quantity.
-            #
-            # NOT the feature, and the direction is why. A statement REALIZES a
-            # feature; it does not rest on one. Recording the feature as a
-            # premise inverted that, and s07 writing
-            # `Feature.compiled_by_statement` then staled the very statement it
-            # had just compiled - the compiler's record of success invalidating
-            # its own input. `feature` stays as the traceability link it is.
-            # A response whose `parameters` is not an object is refused at the
-            # boundary by name (the IR reads it); this only reads references and
-            # must not be the place a malformed statement dies.
-            params = s.get("parameters")
-            refs = sorted({r for expr in (params.values() if isinstance(params, dict) else [])
-                           for r in _expr_refs(expr)})
-            ops.append(Op("CREATE", "ConstructionStatement", s["id"], fields, prov,
-                          premise_refs=[s["body"]] + list(s.get("operands") or []) + refs))
         for u in parsed.get("unresolved", []):
             ops.append(Op("CREATE", "UnresolvedDecision", u["id"], {
                 "decision": u["decision"], "why_open": u["why_open"],
@@ -516,6 +574,179 @@ class S05Embodiment(Stage):
                 "kept_open_by": u.get("kept_open_by", []),
                 "blocks": u.get("blocks", [])}, prov))
         return ops
+
+    # ------------------------------------------------------------ repair
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state,
+                          parsed: Optional[Dict[str, Any]] = None) -> List[Op]:
+        """A settlement-feedback round REVISES the embodiment that stands (Unit G).
+
+        The boundary's own vocabulary, through the shared helper: a restated
+        standing id becomes a SUPERSEDE of the fields that differ, under this
+        round's reason; a stale one is invalidated and re-created; nothing is
+        re-minted beside itself and nothing is deleted.
+        """
+        from .base import REPAIR_KEY, revise_standing_operations
+        parsed = parsed or {}
+        repair = (inputs or {}).get(REPAIR_KEY) or {}
+        codes = sorted({r.get("code") for r in (repair.get("findings") or [])
+                        if isinstance(r, dict) and r.get("code")})
+        reason = "s05 embodiment revision after settlement round %s: %s" % (
+            repair.get("round"), ", ".join(codes) or "feedback")
+        withdrawals = self._declared_withdrawals(parsed, ops, inputs, state)
+        retracted = [Op("INVALIDATE", family, eid, {}, self.PROVENANCE,
+                        reason="%s | withdrawn answering %s: %s" % (reason, cause, why))
+                     for family, eid, why, cause in withdrawals]
+        return retracted + revise_standing_operations(state, ops, reason)
+
+    #: This stage's provenance, and the mark of a record it authored.
+    PROVENANCE = "s05:embodiment"
+
+    @classmethod
+    def embodiment_families(cls) -> Tuple[str, ...]:
+        """THE EMBODIMENT, by family, derived from the contract rather than
+        listed here: everything `owned_by: s05`, plus the universally ownable
+        families this stage also authors into. A hand-kept list is how a family
+        comes to be revised by one rule and snapshotted by another - Realization
+        and UnresolvedDecision were authored by `to_operations` and absent from
+        both, so a revision could neither restate nor withdraw them and the
+        branch kept a mix of two embodiments.
+        """
+        from ..state.design_state import Contracts
+        contracts = Contracts()
+        families = contracts.families
+        owned = [f for f in families if contracts.owner_of(f) == cls.stage_id]
+        return tuple(sorted(owned) + sorted(contracts.universally_ownable & set(families)))
+
+    def embodiment_snapshot(self, state, branch: Optional[str]) -> Dict[str, List[str]]:
+        """What of this branch's embodiment stands, by family and id.
+
+        ONE DEFINITION, THREE USES: it is what the repair prompt shows the model,
+        what a revision withdraws by omission, and what the loop's repeated-state
+        identity is taken over. Two of those disagreeing is a revision that
+        withdraws what the model was never shown.
+
+        THIS BRANCH WHERE THERE IS ONE: `_premises` is the membership the
+        architecture already records, and reading by family alone would take in
+        a sibling candidate's embodiment. Where no branch is named - a design
+        that has not branched, or a diagnostic reading the whole state - it is
+        every record this stage authored. Returning NOTHING there was wrong in a
+        way that mattered: the loop takes its repeated-state identity over this
+        snapshot, and a constant identity made every second round read as a
+        cycle no matter how much the embodiment had changed. The branch-only
+        safety belongs to withdrawal, which refuses outright without one, not to
+        the question "what stands".
+
+        A universally ownable family is included only where THIS stage authored
+        the record, because s05 may not speak for an Assumption another
+        responsibility wrote.
+        """
+        from ..state.design_state import Contracts
+        shared = Contracts().universally_ownable
+        out: Dict[str, List[str]] = {}
+        for family in self.embodiment_families():
+            rows = [rec["entity_id"]
+                    for rec in sorted(state.standing(family), key=lambda r: r["entity_id"])
+                    if (not branch or branch in (rec.get("_premises") or []))
+                    and not (family in shared and rec.get("_provenance") != self.PROVENANCE)]
+            if rows:
+                out[family] = rows
+        return out
+
+    def _repair_scope(self, repair: Dict[str, Any], state, snapshot_ids) -> set:
+        """WHAT THIS ROUND IS AUTHORIZED TO REMOVE.
+
+        The report named the trouble: the constraints in conflict, the
+        parameters left free, the subjects of each prerequisite finding. Those
+        ids, and the records of this branch's embodiment that REST on one of
+        them, are what a revision may retract - a constraint that cannot hold
+        goes, and so may the parameter that existed only to state it. Nothing
+        else. A round asked to settle a bore diameter has no authority over a
+        feature the report never mentioned, and would need none to answer.
+        """
+        named: set = set()
+        for row in repair.get("findings") or []:
+            if not isinstance(row, dict):
+                continue
+            named |= {row.get("constraint"), row.get("parameter")} - {None}
+            named |= {s for s in (row.get("subjects") or []) if isinstance(s, str)}
+        scope = set(named)
+        for eid in snapshot_ids:
+            rec = state.entities.get(eid) or {}
+            if named & set(rec.get("_premises") or []):
+                scope.add(eid)
+        return scope
+
+    def _declared_withdrawals(self, parsed: Dict[str, Any], ops: List[Op],
+                              inputs: Dict[str, Any], state):
+        """WITHDRAWAL IS AN ACT, AND IT IS STATED (Unit G).
+
+        An earlier version read omission as withdrawal: whatever the revised
+        response did not restate stopped standing. That made an engineering
+        decision out of a model's silence - a response that simply did not
+        mention a feature retired it, and a truncated or forgetful answer could
+        quietly demolish the parts of the embodiment nobody was asking about.
+        Withdrawal is now DECLARED and TYPED: the entity, why, and which of this
+        round's findings it answers. What the response omits keeps standing
+        exactly as it was.
+
+        Each one is checked before it is an operation: the entity must be part
+        of THIS branch's standing embodiment in a family this stage authors, the
+        stated family must be the one it actually has, the cause must be a
+        finding of this round, the report must have named it (or something it
+        rests on), and the same response may not both restate and withdraw it.
+        A withdrawal that fails any of these refuses the response rather than
+        being dropped - a repair that reaches outside its mandate is not a
+        repair to accept in part.
+        """
+        from .base import REPAIR_KEY, StageError
+
+        declared = parsed.get("withdrawals") or []
+        if not declared:
+            return ()
+        branch = (inputs or {}).get("candidate")
+        if not branch:
+            # A withdrawal retires part of ONE branch's embodiment. Without a
+            # named candidate there is nothing to confine it to, and retiring
+            # by family alone would reach into every other candidate.
+            raise StageError("this invocation names no candidate, so nothing can be withdrawn: "
+                             "a withdrawal retires part of one branch's embodiment")
+        repair = (inputs or {}).get(REPAIR_KEY) or {}
+        snapshot = self.embodiment_snapshot(state, branch)
+        family_of = {eid: family for family, ids in snapshot.items() for eid in ids}
+        scope = self._repair_scope(repair, state, family_of)
+        causes = {row.get("code") for row in repair.get("findings") or []
+                  if isinstance(row, dict)}
+        restated = {op.entity_id for op in ops}
+        out = []
+        for item in declared:
+            if not isinstance(item, dict):
+                raise StageError("a withdrawal is a record stating entity, cause and reason; "
+                                 "%r is not" % (item,))
+            eid = item.get("entity")
+            reason = str(item.get("reason") or "").strip()
+            cause = item.get("cause")
+            family = family_of.get(eid)
+            if not eid or not reason:
+                raise StageError("withdrawal %r states no entity or no reason; a record is "
+                                 "never withdrawn without saying which and why" % (item,))
+            if family is None:
+                raise StageError("withdrawal names %s, which is not part of this branch's "
+                                 "standing embodiment; only what this stage authored for this "
+                                 "selection may be withdrawn here" % eid)
+            if item.get("family") and item["family"] != family:
+                raise StageError("withdrawal calls %s a %s; it is a %s"
+                                 % (eid, item["family"], family))
+            if cause not in causes:
+                raise StageError("withdrawal of %s cites %r, which is not a finding of this "
+                                 "round (%s)" % (eid, cause, ", ".join(sorted(c for c in causes if c))))
+            if eid not in scope:
+                raise StageError("withdrawal of %s is outside this round's repair scope: the "
+                                 "report named neither it nor anything it rests on" % eid)
+            if eid in restated:
+                raise StageError("%s is both restated and withdrawn in one response; a record is "
+                                 "revised or retracted, not both" % eid)
+            out.append((family, eid, reason, cause))
+        return tuple(out)
 
     # ------------------------------------------------------------ completeness
     def completeness(self, parsed: Dict[str, Any], inputs: Dict[str, Any]) -> List[str]:
@@ -531,15 +762,13 @@ class S05Embodiment(Stage):
         out.extend(check_c2_blocking_pairs(parsed, view))
         out.extend(check_c3_limit_pairs(parsed, view))
         out.extend(check_c4_obligations_realized(parsed, view))
-        out.extend(check_c5_program_totality(parsed))
+        out.extend(check_c5_program_totality(parsed, view))
         out.extend(check_c6_units(parsed))
         out.extend(check_c7_no_parameter_cycle(parsed))
-        out.extend(check_c8_region_intrusion(parsed, view))
         out.extend(check_c9_clearance_constraints(parsed, view))
         out.extend(check_c10_no_unsolved_values(parsed))
         out.extend(check_c11_joints_realized(parsed, view))
         out.extend(check_c12_bodies_built(parsed, view))
-        out.extend(check_c13_placed_features_built(parsed, view))
         out.extend(check_c14_mating_kinds(parsed, view))
         return out
 
@@ -611,6 +840,134 @@ def render_duties(view: Dict[str, Any]) -> str:
                 duties[PRESERVE]))
 
 
+def render_joint_duties(view: Dict[str, Any]) -> str:
+    """The joints this embodiment must realize, DERIVED from the view (Unit G).
+
+    The same shape as the obligation duties: enumeration over s03's joint set,
+    resolved through s03's groups to the bodies each joint relates, with the
+    axis s03 declared and whether s04 located the frame. What must be
+    embodied is read from the topology, never from a mechanism class, and it
+    is rendered as a list rather than left as a rule to be applied.
+    """
+    from ..downstream.embodiment import AXIS_REALIZING_JOINTS
+    groups = _body_of_group(view)
+    lines = []
+    for joint in sorted(_rows(view, "Joint"), key=lambda j: j.get("entity_id") or ""):
+        kind = str(joint.get("joint_type", "")).upper()
+        if kind not in AXIS_REALIZING_JOINTS:
+            continue
+        bodies = sorted({groups.get(joint.get("parent_group")), groups.get(joint.get("child_group"))}
+                        - {None})
+        located = isinstance(joint.get("frame_origin"), list)
+        lines.append("  %s  %s about %s  %s: on EACH of %s, the feature(s) carrying this joint "
+                     "are placed with datum %s" % (
+                         joint.get("entity_id"), kind, joint.get("axis_direction"),
+                         "(frame located by s04)" if located else "(frame NOT located by s04)",
+                         ", ".join(bodies) or "no resolvable body", joint.get("entity_id")))
+    return "\n".join(lines) if lines else "  none - no axis-bearing joint is in this branch"
+
+
+#: The solver's own report, on an embodiment the gate admitted. A STRUCTURAL
+#: cause is not one of these: it arrives as a typed prerequisite finding from
+#: `downstream.embodiment`, keeps its own kind, and asks for different work.
+SETTLEMENT_INFEASIBLE = "SETTLEMENT_INFEASIBLE"
+SETTLEMENT_UNDERDETERMINED = "SETTLEMENT_UNDERDETERMINED"
+SETTLEMENT_UNSUPPORTED = "SETTLEMENT_UNSUPPORTED"
+
+
+def render_settlement_feedback(inputs: Optional[Dict[str, Any]]) -> str:
+    """What s06 found when it tried to settle the embodiment that stands, and
+    what this invocation is therefore asked to do (Unit G).
+
+    A REPAIR invocation carries the solver's report as findings: for an
+    infeasible system, the constraints that conflict and by how much; for an
+    underdetermined one, the parameters no constraint determines. The model is
+    told what stands (ids and constraints), so it revises by restating the
+    same ids - a restated id revises, a new id creates - and changes only the
+    choices or relations that the report names. Nothing here decides which.
+    """
+    from .base import REPAIR_KEY
+    repair = (inputs or {}).get(REPAIR_KEY)
+    if not isinstance(repair, dict) or not repair.get("findings"):
+        return "  none - this is the first embodiment of this selection."
+    from .base import CAUSE_PREREQUISITES
+
+    rows = [r for r in repair.get("findings") or [] if isinstance(r, dict)]
+    if repair.get("cause") == CAUSE_PREREQUISITES:
+        # STRUCTURAL, AND THE SOLVER NEVER RAN. Nothing here is a number to
+        # adjust: the design commits to something this embodiment does not
+        # contain, and until it does there is nothing to settle.
+        lines = ["  Your previous embodiment STANDS (round %s) and CANNOT BE BUILT. It is missing "
+                 "geometry the design commits to, so no settlement was attempted:"
+                 % repair.get("round")]
+        for row in rows:
+            lines.append("  - %s: %s%s" % (row.get("code"), row.get("detail"),
+                                           " [%s]" % ", ".join(row.get("subjects") or ())
+                                           if row.get("subjects") else ""))
+        lines.append("  Supply the MISSING GEOMETRY - a feature that realizes the named side of "
+                     "that interface, a feature placed at that joint, material for that body, a "
+                     "Constraint that governs that clearance. Keep everything that already "
+                     "stands. Changing a dimension answers none of these.")
+        lines += _standing_block(repair)
+        lines.append(_SNAPSHOT_RULE)
+        return "\n".join(lines)
+    lines = ["  Your previous embodiment STANDS (round %s). The solver settled it and found:"
+             % repair.get("round")]
+    for row in rows:
+        code = row.get("code")
+        if code == SETTLEMENT_INFEASIBLE:
+            lines.append("  - INFEASIBLE: constraint %s (%s) cannot hold with the others: %s"
+                         % (row.get("constraint"), row.get("expression"), row.get("detail")))
+        elif code == SETTLEMENT_UNDERDETERMINED:
+            lines.append("  - UNDERDETERMINED: parameter %s (%s) is determined by no constraint"
+                         % (row.get("parameter"), row.get("symbol")))
+        elif code == SETTLEMENT_UNSUPPORTED:
+            lines.append("  - UNSUPPORTED: constraint %s (%s) cannot be solved: %s. Rewrite it as "
+                         "a LINEAR relation over the parameters - a basis number is a constant "
+                         "with unit \"1\", never a parameter, and two parameters are never "
+                         "multiplied or divided by each other"
+                         % (row.get("constraint"), row.get("expression"), row.get("detail")))
+        else:
+            lines.append("  - %s: %s" % (code, row.get("detail")))
+    settled = repair.get("settled") or {}
+    if settled:
+        lines.append("  Values the constraints settled before the conflict: %s"
+                     % ", ".join("%s=%s" % (k, v) for k, v in sorted(settled.items())))
+    lines += _standing_block(repair)
+    lines.append("  Revise the choices or relations the report names - a different design "
+                 "choice, a relation you had wrong, a parameter you must close - keep the "
+                 "rest, and never answer a conflict by dropping a required constraint.")
+    lines.append(_SNAPSHOT_RULE)
+    return "\n".join(lines)
+
+
+#: THE ONE REVISION RULE, in the words the boundary enforces it in.
+_SNAPSHOT_RULE = (
+    "  HOW TO REVISE. Restate an id to change it - the fields that differ are revised, and a "
+    "new id creates. WHAT YOU DO NOT MENTION KEEPS STANDING UNCHANGED, so you may answer with "
+    "only the part you are changing. To RETRACT something - a relation that cannot hold, a "
+    "parameter that existed only to state it - say so explicitly:\n"
+    "    \"withdrawals\": [{\"entity\": \"<id>\", \"cause\": \"<one of the finding codes "
+    "above>\", \"reason\": \"<why this must go>\"}]\n"
+    "  A withdrawal is refused unless the report above named that entity (or something it "
+    "rests on), so it is the answer to a finding and never a general clean-up. The same id is "
+    "never both restated and withdrawn.")
+
+
+def _standing_block(repair: Dict[str, Any]) -> List[str]:
+    """What stands, by family and id - every family this stage authors, because
+    the answer is a snapshot of all of them and omission withdraws."""
+    current = repair.get("current") or {}
+    if not current:
+        return []
+    out = ["  What stands, by id (restate an id to revise it; what you do not mention is left exactly as it is):"]
+    for family in sorted(current):
+        rows = current.get(family) or []
+        if rows:
+            out.append("    %s: %s" % (family, "; ".join(rows)))
+    return out
+
+
 def render_hard_requirements(view: Dict[str, Any]) -> str:
     constraints = {r.get("entity_id"): r for r in _rows(view, "DesignConstraint")}
     lines = ["HONOUR - every hard requirement the design states:"]
@@ -673,74 +1030,17 @@ def internal_compliant_joints(view) -> Dict[str, List[Dict[str, Any]]]:
 def check_c1_interface_features(parsed, view) -> List[str]:
     """S05-C1: every Interface has a Feature on EACH participant. No exception.
 
-    A previous version admitted an exception: an Interface between two bodies
-    could skip a feature on one side if some COMPLIANT joint connected the same
-    pair. That was wrong twice.
-
-    It contradicted the ontology. Compliance is INTERNAL - between RigidGroups
-    of one body - so a joint spanning the pair was not the thing the exception
-    described; it was a malformed record, and the exception admitted it as
-    justification for omitting geometry.
-
-    And it contradicted the Joint contract's own rule, which is unconditional:
-    "A joint_type label alone is inert. A realization on each side is required
-    (INV-008)." Two bodies that touch need two features. If one of them is a
-    flexure, the flexure is geometry on its own body and gets a feature like
-    anything else.
-
-    A malformed cross-body COMPLIANT joint is now reported rather than used, so
-    the record that used to excuse a missing feature is the thing that fails.
-
-    WHAT THIS CHECK DOES NOT PROVE: that the compliant element itself exists as
-    the geometry a reduced-order beam model would consume. `compliant_element`
-    is an untyped prose field naming that geometry, and nothing canonical ties
-    it to a Feature id. Inferring it from the text would be reading a model's
-    sentence as a structural fact. That claim is NOT automatically verified and
-    is not asserted anywhere below.
+    THE CHECK ITSELF IS `embodiment.interface_realization_findings` and lives
+    with the other mandatory prerequisites, because s06's entry gate asks the
+    identical question of what stands. It was here alone once, and a branch
+    whose interface had no realizing feature was settled anyway: s05 declared
+    the incompleteness, the patch was applied as contract failures are, and the
+    downstream gate - which knew nothing of C1 - found the branch ready and
+    settled numbers for geometry that did not exist. One implementation, asked
+    at both surfaces, is what makes that impossible rather than unlikely.
     """
-    groups = _body_of_group(view)
-    out = []
-
-    for joint in _rows(view, "Joint"):
-        if str(joint.get("joint_type", "")).upper() != "COMPLIANT":
-            continue
-        parent = groups.get(joint.get("parent_group"))
-        child = groups.get(joint.get("child_group"))
-        if parent and child and parent != child:
-            out.append("S05-C1: joint %s is COMPLIANT but connects groups on "
-                       "two different bodies (%s and %s); compliance is a "
-                       "relation between rigid groups of ONE body"
-                       % (joint.get("entity_id"), parent, child))
-
-    # THE TYPED TRACE (Unit E). A feature says which interface it realizes a
-    # side of; a body merely having SOME feature proves nothing about an
-    # interface. An interface the branch does not carry may not be named - an
-    # interaction is s03's to declare - and a body the interface does not
-    # involve cannot realize a side of it.
-    interfaces = {i.get("entity_id"): i for i in _rows(view, "Interface")}
-    realized: Dict[str, Set[str]] = {}
-    for f in parsed.get("features") or []:
-        named = f.get("interface")
-        if not named:
-            continue
-        iface = interfaces.get(named)
-        if iface is None:
-            out.append("S05-C1: feature %s names interface %s, which the selected "
-                       "branch does not carry; an interaction is s03's to declare "
-                       "and none may be invented here" % (f.get("id"), named))
-            continue
-        if f.get("body") not in (iface.get("bodies") or []):
-            out.append("S05-C1: feature %s on %s names interface %s, which does "
-                       "not involve that body" % (f.get("id"), f.get("body"), named))
-            continue
-        realized.setdefault(named, set()).add(f.get("body"))
-
-    for iid, iface in sorted(interfaces.items()):
-        bodies = [b for b in (iface.get("bodies") or []) if b]
-        for body in [b for b in bodies if b not in realized.get(iid, set())]:
-            out.append("S05-C1: interface %s involves body %s and no feature "
-                       "naming that interface realizes that side" % (iid, body))
-    return out
+    return ["S05-C1: " + f.detail for f in embodiment.interface_realization_findings(
+        embodiment.rows_from_response(parsed, view))]
 
 
 def _body_of_group(view: Dict[str, Any]) -> Dict[str, str]:
@@ -893,24 +1193,10 @@ def _as_record(item: Dict[str, Any]) -> Dict[str, Any]:
     return rec
 
 
-def check_c5_program_totality(parsed) -> List[str]:
-    """S05-C5: every construction statement reads as the IR reads it - opcode,
-    arguments, operands, and every symbol it references declared.
-
-    UNIT G: THE IR'S OWN VALIDATOR, not a second walk over the same grammar.
-    The boundary refuses what this reports; this reports it under the check's
-    name before the write, with every other finding beside it.
-    """
-    declared = {p.get("id") for p in parsed.get("parameters") or [] if isinstance(p, dict)}
-    statements = {s.get("id") for s in parsed.get("construction_statements") or []
-                  if isinstance(s, dict)}
-    out = []
-    for s in parsed.get("construction_statements") or []:
-        if not isinstance(s, dict):
-            continue
-        for problem in ir.statement_record_problems(_as_record(s), declared, statements):
-            out.append("S05-C5: " + problem[len("IR: "):] if problem.startswith("IR: ") else problem)
-    return out
+def _as_record(item: Dict[str, Any]) -> Dict[str, Any]:
+    rec = dict(item)
+    rec["entity_id"] = rec.get("entity_id") or rec.get("id")
+    return rec
 
 
 def _expr_refs(expr: Any) -> Set[str]:
@@ -921,42 +1207,63 @@ def _expr_refs(expr: Any) -> Set[str]:
     return {r for a in (expr.get("args") or []) for r in _expr_refs(a)}
 
 
-def _envelope_refs(envelope: Any) -> Set[str]:
-    if not isinstance(envelope, dict):
-        return set()
-    return {r for axis in ("centre", "half_extent")
-            for node in (envelope.get(axis) or []) for r in _expr_refs(node)}
+def check_c5_program_totality(parsed, view=None) -> List[str]:
+    """S05-C5: every feature reads as the IR reads it - placement against a
+    committed datum, construction with one terminal, every symbol declared.
+
+    THE IR'S OWN VALIDATOR, not a second walk over the grammar. The boundary
+    refuses what this reports; this reports it under the check's name before
+    the write, beside every other finding.
+    """
+    from ..downstream import embodiment
+    view = view or {}
+    declared = {p.get("id") for p in parsed.get("parameters") or [] if isinstance(p, dict)}
+    rows = embodiment.rows_from_response(parsed, view)
+    datums, feature_bodies, datum_bodies, joint_axes = {}, {}, {}, {}
+    for fam in ("Joint", "Envelope", "FunctionalRegion"):
+        for rec in _rows(view, fam):
+            datums[rec.get("entity_id")] = fam
+            if fam == "Joint":
+                joint_axes[rec.get("entity_id")] = rec.get("axis_direction")
+            if fam == "Envelope" and rec.get("body"):
+                datum_bodies[rec["entity_id"]] = {rec["body"]}
+            elif fam == "FunctionalRegion":
+                datum_bodies[rec["entity_id"]] = {b for b in (rec.get("owning_bodies") or [])
+                                                  if isinstance(b, str)}
+    for rec in rows["Feature"]:
+        datums[rec["entity_id"]] = "Feature"
+        feature_bodies[rec["entity_id"]] = rec.get("body")
+    known = ir.Known(parameters=declared, datums=datums, feature_bodies=feature_bodies,
+                     datum_bodies=datum_bodies, joint_axes=joint_axes)
+    out = []
+    for rec in rows["Feature"]:
+        for problem in ir.feature_record_problems(rec, known):
+            out.append("S05-C5: " + problem[len("IR: "):] if problem.startswith("IR: ") else problem)
+    return out
 
 
 def check_c11_joints_realized(parsed, view) -> List[str]:
     """S05-C11: every axis-bearing joint is realized by ONE placed feature on
     each body it relates, along the joint's declared axis (Unit G)."""
     from ..downstream import embodiment
-    return ["S05-C11: " + p[len("EMBODIMENT: "):] for p in
-            embodiment.joint_realization_problems(embodiment.rows_from_response(parsed, view))]
+    return ["S05-C11: " + f.detail for f in embodiment.joint_realization_findings(
+        embodiment.rows_from_response(parsed, view))]
 
 
 def check_c12_bodies_built(parsed, view) -> List[str]:
-    """S05-C12: every body of the branch has a construction program with one
-    terminal statement (Unit G)."""
+    """S05-C12: every body of the branch has material - at least one ADDITIVE
+    feature - and every feature is on a body of the branch (Unit G)."""
     from ..downstream import embodiment
-    return ["S05-C12: " + p[len("EMBODIMENT: "):] for p in
-            embodiment.body_program_problems(embodiment.rows_from_response(parsed, view))]
-
-
-def check_c13_placed_features_built(parsed, view) -> List[str]:
-    """S05-C13: every placed feature is built by a statement naming it (Unit G)."""
-    from ..downstream import embodiment
-    return ["S05-C13: " + p[len("EMBODIMENT: "):] for p in
-            embodiment.placed_feature_problems(embodiment.rows_from_response(parsed, view))]
+    return ["S05-C12: " + f.detail for f in embodiment.body_material_findings(
+        embodiment.rows_from_response(parsed, view))]
 
 
 def check_c14_mating_kinds(parsed, view) -> List[str]:
     """S05-C14: a stated mating side is realized by a feature of the stated
     kind on the stated body (Unit G)."""
     from ..downstream import embodiment
-    return ["S05-C14: " + p[len("EMBODIMENT: "):] for p in
-            embodiment.mating_kind_problems(embodiment.rows_from_response(parsed, view))]
+    return ["S05-C14: " + f.detail for f in embodiment.mating_kind_findings(
+        embodiment.rows_from_response(parsed, view))]
 
 
 def _parameter_problems(parsed, created: bool) -> List[str]:
@@ -973,9 +1280,23 @@ def _parameter_problems(parsed, created: bool) -> List[str]:
 
 
 def check_c6_units(parsed) -> List[str]:
-    """S05-C6: no Parameter has a null unit. INV-004 / R-21."""
-    return ["S05-C6: " + p[len("IR: "):] for p in _parameter_problems(parsed, created=False)
-            if "declares no unit" in p]
+    """S05-C6: no Parameter has a null unit (INV-004 / R-21), and every
+    constraint relates quantities of ONE dimension - the solver's own
+    dimensional reduction, asked before the write (Unit G)."""
+    from ..downstream import solver
+    out = ["S05-C6: " + p[len("IR: "):] for p in _parameter_problems(parsed, created=False)
+           if "declares no unit" in p]
+    units = {p.get("id"): p.get("unit") for p in parsed.get("parameters") or []
+             if isinstance(p, dict) and isinstance(p.get("unit"), str) and p.get("unit")}
+    for c in parsed.get("constraints") or []:
+        expr = c.get("expression") if isinstance(c, dict) else None
+        if not isinstance(expr, dict):
+            continue
+        refs = _expr_refs(expr.get("lhs")) | _expr_refs(expr.get("rhs"))
+        if all(r in units for r in refs):
+            out += ["S05-C6: constraint %s %s" % (c.get("id"), p)
+                    for p in solver.dimension_problems(expr, units)]
+    return out
 
 
 def check_c7_no_parameter_cycle(parsed) -> List[str]:
@@ -1011,174 +1332,21 @@ def check_c7_no_parameter_cycle(parsed) -> List[str]:
     return sorted(set(out))
 
 
-def check_c8_region_intrusion(parsed, view) -> List[str]:
-    """S05-C8: no Feature intrudes into a FunctionalRegion.
-
-    A RE-RUN of s04b's occupancy against the new geometry, and deliberately the
-    same arithmetic: `aabb` and `overlaps` are imported from the s04 module that
-    already owns them rather than reimplemented, so the two stages cannot come to
-    different answers about the same boxes.
-
-    The first version of this read `intrudes_region` off the response - a key no
-    contract declares and no producer emits - so it read None and passed on
-    everything. A feature that cannot be evaluated is now reported as
-    INCOMPLETE rather than as clean: silence about occupancy is the failure mode
-    this check exists to prevent.
-    """
-    from .s04_envelope_and_motion import (aabb, excludes_occupancy,
-                                          overlaps, unknown_region_role)
-
-    # THE GRAMMAR, every feature, regions or none (Unit E). An envelope
-    # component is an expression over declared parameters and unit-bearing
-    # constants; a bare number is a dimension nobody solved, and is refused
-    # whether or not there is a region to compare it with.
-    declared = {p.get("id") for p in parsed.get("parameters") or []}
-    boxes: Dict[str, Any] = {}
-    out_grammar: List[str] = []
-    scale = _rows(view, "ReferenceScale")
-    for f in parsed.get("features") or []:
-        if f.get("envelope") is None:
-            continue
-        exprs, problems = envelope_expressions(f.get("id"), f.get("envelope"), declared)
-        out_grammar.extend(problems)
-        if exprs is not None:
-            boxes[f.get("id")] = envelope_box(exprs, scale[0] if len(scale) == 1 else None)
-
-    out_unknown: List[str] = list(out_grammar)
-    regions = []
-    for r in _rows(view, "FunctionalRegion"):
-        if unknown_region_role(r.get("role")):
-            # Not silently skipped. An undeclared role has no occupancy policy,
-            # so treating it as harmless would be deciding the policy here.
-            out_unknown.append(
-                "S05-C8: region %s declares role %r, which is not in the "
-                "declared vocabulary, so whether a feature may occupy it is "
-                "undefined" % (r.get("entity_id"), r.get("role")))
-            continue
-        volume = r.get("volume")
-        if not isinstance(volume, dict):
-            continue          # a region with no volume is s04's problem, not s05's
-        centre, half = volume.get("centre"), volume.get("half_extent")
-        if not (isinstance(centre, list) and isinstance(half, list)):
-            continue
-        regions.append((r, aabb(centre, half)))
-    if not regions:
-        return out_unknown
-
-    out = list(out_unknown)
-    for f in parsed.get("features") or []:
-        envelope = f.get("envelope")
-        centre = (envelope or {}).get("centre")
-        half = (envelope or {}).get("half_extent")
-        if not (isinstance(centre, list) and isinstance(half, list)):
-            out.append("S05-C8: feature %s declares no usable envelope, so its "
-                       "occupancy against %d declared region(s) cannot be "
-                       "evaluated" % (f.get("id"), len(regions)))
-            continue
-        box = boxes.get(f.get("id"))
-        if box is None:
-            # SYMBOLIC, OR NOT COMPARABLE WITH THE REGION'S BASIS. The
-            # envelope rests on dimensions settlement has not decided, or on a
-            # unit the s04 basis cannot convert; occupancy is re-evaluated
-            # after settlement (Unit E). Not a finding and not a pass: nothing
-            # here claims clearance.
-            continue
-        for region, region_box in regions:
-            # WHICH ROLES EXCLUDE OCCUPANCY is the contract's to say, not this
-            # check's. `excludes_occupancy` reads FunctionalRegion.role_policy,
-            # and s04b's occupancy check reads the same function - so the two
-            # stages cannot reach different answers about the same region. This
-            # was previously a tuple written out here and again in s04.
-            if not excludes_occupancy(region.get("role")):
-                continue
-            if overlaps(box, region_box):
-                out.append("S05-C8: feature %s intrudes into %s region %s"
-                           % (f.get("id"), region.get("role"),
-                              region.get("entity_id")))
-    return out
-
-
-def envelope_expressions(feature_id: Any, envelope: Any, declared: Set[str]
-                         ) -> Tuple[Optional[Dict[str, List[Any]]], List[str]]:
-    """Parse a symbolic envelope: (expressions by axis list, problems).
-
-    THE IR'S GRAMMAR, AND NOTHING BESIDE IT (Unit F): `ir.envelope_problems`
-    is the one reading of a symbolic envelope - the write boundary applies it
-    before a Feature stands, this check applies it to the response so the
-    finding carries the check's name. A bare number is refused by name; a
-    reference to an undeclared parameter is refused as C5 refuses it.
-    """
-    exprs, problems = ir.envelope_problems(feature_id, envelope, declared)
-    return exprs, ["S05-C8: %s" % p[len("IR: "):] if p.startswith("IR: ") else p
-                   for p in problems]
-
-
-def _constant_in_basis(expr: Any, scale: Optional[Dict[str, Any]]) -> Optional[float]:
-    """A constant expression as a coordinate in the s04 basis, or None.
-
-    Comparable only when the basis is ABSOLUTE and states the constant's unit:
-    one coordinate is then `per_unit` of that unit. A symbolic expression, a
-    RELATIVE basis, or a unit the basis does not state gives None - the
-    occupancy question is deferred, never answered by a conversion nobody
-    declared (the ReferenceScale rule, and Unit D's dimensional-requirement rule).
-    """
-    if expr is None or expr.const is None:
-        return None
-    if not scale or scale.get("basis") != "ABSOLUTE":
-        return None
-    absolute = scale.get("absolute") or {}
-    per_unit = absolute.get("per_unit")
-    if absolute.get("unit") != expr.unit or not isinstance(per_unit, (int, float)) \
-            or isinstance(per_unit, bool) or per_unit <= 0:
-        return None
-    return float(expr.const) / float(per_unit)
-
-
-def envelope_box(exprs: Dict[str, List[Any]], scale: Optional[Dict[str, Any]]):
-    """The numeric aabb of a fully constant, comparable envelope, else None."""
-    from .s04_envelope_and_motion import aabb
-
-    centre = [_constant_in_basis(e, scale) for e in exprs["centre"]]
-    half = [_constant_in_basis(e, scale) for e in exprs["half_extent"]]
-    if any(v is None for v in centre + half):
-        return None
-    return aabb(centre, half)
-
-
-#: The interaction kind that IS a declared clearance. From s03's own vocabulary:
-#: CONTACT, CLEARANCE, INTERFERENCE_FIT, COMPLIANT_INTERACTION.
-CLEARANCE_KINDS = ("CLEARANCE", "INTERFERENCE_FIT")
+#: s03's clearance vocabulary, re-exported from where the check lives.
+CLEARANCE_KINDS = embodiment.CLEARANCE_KINDS
 
 
 def check_c9_clearance_constraints(parsed, view) -> List[str]:
     """S05-C9: every declared clearance pair has a Constraint that names it.
 
-    Per interface and by TYPED REFERENCE. `Constraint.governs_interface` is a
-    declared reference to the Interface whose clearance the constraint expresses,
-    so the link is something production emits and DesignState validates rather
-    than something a test injects - the first version looked for `interface` and
-    `realizes` keys that no contract declares, which made the link set
-    permanently empty.
-
-    The recorded history is the argument for per-interface rather than in
-    aggregate: a clearance that was never given to the settlement loop produced a
-    BUILD FAILURE patched by hand instead of an INFEASIBILITY that triggered a
-    re-solve, and a regression rode along undetected for three revisions. One
-    constraint cannot speak for five clearances.
+    THE CHECK ITSELF is `embodiment.clearance_governance_findings`, shared with
+    s06's entry gate for the same reason S05-C1 is: a clearance nobody owns is a
+    number the settlement loop is never asked to hold, and settling a branch
+    without it produces dimensions that satisfy every constraint that exists and
+    interfere anyway.
     """
-    governed = {c.get("governs_interface")
-                for c in parsed.get("constraints") or []
-                if str(c.get("kind", "")).upper() in
-                ("CLEARANCE", "INTERFERENCE_FREE") and c.get("governs_interface")}
-    out = []
-    for iface in _rows(view, "Interface"):
-        if str(iface.get("interaction_kind", "")).upper() not in CLEARANCE_KINDS:
-            continue
-        if iface.get("entity_id") not in governed:
-            out.append("S05-C9: interface %s declares %s and no Constraint "
-                       "governs it" % (iface.get("entity_id"),
-                                       iface.get("interaction_kind")))
-    return out
+    return ["S05-C9: " + f.detail for f in embodiment.clearance_governance_findings(
+        embodiment.rows_from_response(parsed, view))]
 
 
 def check_c10_no_unsolved_values(parsed) -> List[str]:

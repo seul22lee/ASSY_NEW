@@ -97,9 +97,11 @@ authority_status:
   settlement_entry:
     class: "OPERATIONAL"
     note: >
-      Unit F. When settlement may be asked at all, and how an absent embodiment
-      is told apart from an empty system. Enforced in
-      `assy_v3/downstream/canonical_io.settlement_readiness`; explained here.
+      Unit F/G. When settlement may be asked at all, how an absent embodiment
+      is told apart from an empty system, and the mandatory prerequisites an
+      embodiment must satisfy before its numbers are settled. Enforced in
+      `assy_v3/downstream/canonical_io.settlement_readiness` over
+      `downstream.embodiment.structural_problems`; explained here.
     authoritative_for_canonical_semantics: false
   physical_closure:
     class: "OPERATIONAL"
@@ -163,16 +165,46 @@ settlement_entry:
   principle: >
     Settlement is asked FOR an embodiment. The minimum current s05 basis is
     the branch's standing construction program - at least one
-    ConstructionStatement of the committed candidate - together with every
+    Feature with construction of the committed candidate - together with every
     standing Parameter and Constraint of that branch reading as well-formed IR
     (the write boundary guarantees this for everything written since Unit F).
     Without a program there is nothing the settled numbers would build, and a
     solve over the empty system is not evidence of anything.
+  mandatory_prerequisites: >
+    Unit G. A program is not enough: the numbers may be settled only for an
+    embodiment that could be built. Every axis-bearing joint realized on each
+    body it relates; every body given material; every stated mating side
+    realized by a feature of the stated kind; every Interface of the branch
+    realized by a feature on EACH participant body; every declared CLEARANCE or
+    INTERFERENCE_FIT governed by a Constraint that names it. These are the same
+    duties s05 must satisfy before it writes (S05-C1, C9, C11, C12, C14) and
+    they are computed by ONE implementation asked at both surfaces -
+    `downstream.embodiment.structural_problems`, over canonical rows from the
+    response at s05 and from standing state at this gate. A duty enforced at one
+    surface only is a duty that does not hold: a branch whose interface had no
+    realizing feature was once declared incomplete by s05, written anyway as
+    contract failures are, found ready by a gate that knew nothing of the check,
+    and settled - numbers solved for geometry that did not exist.
+  deferral: >
+    NONE IS DECLARED. A prerequisite may be waived only by naming it here, with
+    what stands in its place and who owes the missing piece. Until this list is
+    non-empty, no caller, stage or option may settle a branch that fails one.
   not_ready: >
-    A branch with no current construction program yields `not_ready`: no
-    solver runs, nothing is written, a CONTRACT_CONDITION failure is recorded
-    against s06, and the settlement loop stops. This is the only honest
+    A branch with no current construction program, or one failing a mandatory
+    prerequisite, yields `not_ready`: no solver runs, nothing is written, a
+    CONTRACT_CONDITION failure is recorded against s06. This is the only honest
     reading of "s05 produced nothing" and it never resembles success.
+    Unit G: where the loop was given a producing stage, `not_ready` is handed to
+    the OWNER of each unmet prerequisite as a typed finding of its own kind
+    (`downstream.findings.PREREQUISITE_KINDS`, produced by the shared embodiment
+    layer), as a STRUCTURAL repair round distinct from any numerical one, and
+    the loop continues under the same repeated-state and budget termination as
+    any other report. A refusal returned as a verdict left the branch
+    unbuildable with the only stage able to repair it never asked; a refusal
+    flattened into a settlement code would have asked that stage to adjust a
+    number for missing geometry. A prerequisite owned by another stage
+    escalates rather than being routed to s05. Without a producer the loop
+    stops, as before.
   empty_system: >
     A branch whose program references no Parameter and states no Constraint
     has nothing to settle, and that is a legitimate, explicit result:
@@ -216,15 +248,48 @@ post_settlement_checks:
     never silently passed.
 
 # =====================================================================
+repeated_state_identity: >
+  Unit G. A round repeats when NOTHING CHANGED, and that is judged on typed
+  causes and the embodiment itself: the solver status, the constraint ids in
+  conflict, the parameter ids left free, the (kind, subjects) of every
+  prerequisite finding, and a digest of the standing embodiment of the branch -
+  the same snapshot s05 revises. Free-text problem strings were part of this
+  identity once, which made convergence depend on how a message was worded; and
+  causes alone called a cycle where a revision HAD changed the design and the
+  solver happened to report the same conflict.
+
 convergence_block:
   members: [s04b, s05, s06]
   name: geometric settlement loop
 
+  two_convergences:
+    rule: >
+      Unit G. STRUCTURAL CLOSURE and NUMERICAL SETTLEMENT are bounded
+      SEPARATELY, with their own budget, their own repeated-state memory and
+      their own verdict. A round is STRUCTURAL when the entry gate refused the
+      embodiment - a mandatory prerequisite is unmet, no solver ran, and what is
+      owed is geometry or a governing constraint. It is NUMERICAL when the
+      solver ran and the numbers did not hold. A phase's budget bounds the
+      REPAIRS it may ask for; the round after a repair is the check on it and is
+      always run. Returning to a structural defect after numbers have been
+      settled is not a cycle: each phase compares only against its own states.
+    why: >
+      They shared one budget, and the consequence was a WRONG VERDICT rather
+      than a slow loop: three structural rounds consumed the settlement budget
+      on a branch whose numbers had never once been solved, and the run reported
+      a settlement failure for a design that never reached settlement. Raising
+      the budget would have hidden that; only telling the two questions apart
+      answers it.
+    verdicts: >
+      STRUCTURE_UNCLOSED - the structural budget was spent and the embodiment
+      never became buildable, so no settlement was attempted. BUDGET_EXHAUSTED -
+      the solver ran and the numbers did not converge. REPEATED_STATE names the
+      phase that repeated. Neither phase may borrow the other's budget.
   termination:
     rule: >
-      Terminate on a ROUND BUDGET N, or on a REPEATED STATE, where a state is
-      the pair (unsatisfied-constraint set, changed-parameter set). A repeated
-      state is a genuine cycle and is reported as one.
+      Terminate on a PER-PHASE ROUND BUDGET N, or on a REPEATED STATE within
+      that phase. A repeated state is a genuine cycle and is reported as one;
+      what makes a state is stated in `repeated_state_identity`.
     explicitly_not: >
       NOT monotone reduction of the unsatisfied set. That rule was proposed and
       is WRONG: replay BM-003 R1 to R4 and round 1 fixes the arm-to-clevis
@@ -248,7 +313,8 @@ convergence_block:
 
   budgets:
     inner: "at most K feature alternatives per unsatisfied constraint"
-    outer: "at most N solver rounds"
+    outer: "at most N NUMERICAL settlement repair rounds (DEFAULT_ROUND_BUDGET)"
+    structural: "at most M STRUCTURAL closure repair rounds (DEFAULT_STRUCTURAL_BUDGET), spent and exhausted independently of `outer`"
     exhaustion_ladder: [feature_alternative, placement, dimension, escalate_to_s03]
     every_exhausted_alternative: "retained as a RejectedAlternative with its reason"
 
@@ -263,9 +329,11 @@ convergence_block:
       not touched." Moving the crank axis invalidates the bottom-dead-centre
       clearance check and provably not the travel check.
     on_promotion: >
-      When a PROVISIONAL placement is promoted to AUTHORITATIVE, the cone marks
-      every s04b check whose inputs moved as STALE, and those checks are re-run.
-      Unchanged checks are PRESERVED, not recomputed.
+      When s04 promotes a PROVISIONAL placement to AUTHORITATIVE (its own
+      revision act, informed by the post-settlement findings - s06 never writes
+      a joint frame), the cone marks every s04b check whose inputs moved as
+      STALE, and those checks are re-run. Unchanged checks are PRESERVED, not
+      recomputed.
 
   non_convergence:
     outcome: >

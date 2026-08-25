@@ -171,6 +171,10 @@ def carry_invocation_premises(ops: List[Op], premises: List[str]) -> List[Op]:
 #: about values the pass itself produced (Unit B), and a revision UPSTREAM of
 #: the pass whose facts its answer was reasoned from (Unit C).
 CAUSE_FINDINGS = "FINDINGS"
+#: A structural repair: the design committed to something the embodiment does
+#: not contain. Distinct from FINDINGS, where the geometry exists and the
+#: numbers do not hold - the two ask for different work and are never mixed.
+CAUSE_PREREQUISITES = "EMBODIMENT_PREREQUISITES"
 CAUSE_UPSTREAM_REVISION = "UPSTREAM_REVISION"
 
 _STANDING, _STALE = "STANDING", "STALE"
@@ -473,7 +477,7 @@ class Stage:
         return []
 
     def repair_operations(self, ops: List[Op], inputs: Dict[str, Any],
-                          state) -> List[Op]:
+                          state, parsed: Optional[Dict[str, Any]] = None) -> List[Op]:
         """What this response means when it is a REPAIR of what already stands.
 
         Called only when `inputs[REPAIR_KEY]` is present, after the ordinary
@@ -614,7 +618,7 @@ class Stage:
                     # exists and EXTEND-over-a-value into the controlled
                     # revisions the boundary accepts, with this round as the
                     # reason on every one of them.
-                    ops = self.repair_operations(ops, inputs, state)
+                    ops = self.repair_operations(ops, inputs, state, parsed)
                 missing = self.completeness(parsed, inputs)
         except StageError as exc:
             # A HOOK REFUSED THE RESPONSE ON THIS STAGE'S OWN TERMS - a revision

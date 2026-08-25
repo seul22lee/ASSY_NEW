@@ -234,10 +234,19 @@ artifact_validation:
     success by another name and never a mechanism infeasibility. A finding is
     evidence for the owner named on it.
   placement_execution: >
-    A primitive that realizes a placed feature is built in the feature's frame
-    - one rigid transform from one declared frame. s07 poses bodies only by the
-    derived law and chooses no base, no axis and no offset: the base body is the
-    root of the joint tree, deterministically.
+    A feature's construction is built in the feature's frame, derived from its
+    datum, the scale authority and the settled offset - one rigid transform
+    from s04's one spatial authority. A body is composed from its features by
+    declared polarity. s07 poses bodies only by the derived law - rotation or
+    translation about each joint's LOCATED frame, composed along the joint tree
+    from a deterministic base - and chooses no base, no axis, no offset and no
+    scale.
+  interface_judgement: >
+    Every interface is judged at the features that realize its two sides, on
+    their posed solids (an additive feature by its own solid; a subtractive one
+    - a void - by its body's material), under that interface's own expectation;
+    every body pair is judged for undeclared overlap besides. A side no feature
+    realizes is NOT_EVALUABLE, never a pass.
 
 execution_semantics:
   principle: >
@@ -268,7 +277,7 @@ deterministic_exit_checks:
   - id: S07-C5
     check: "an independent rebuild produces an identical geometry signature"
   - id: S07-C6
-    check: "on failure, the originating ConstructionStatement and its dependency cone are cited; no geometry is emitted"
+    check: "on failure, the originating feature and step are cited; no geometry is emitted"
 
 next_stage_consumer_requirement:
   consumer: s08

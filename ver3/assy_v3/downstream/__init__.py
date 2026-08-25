@@ -9,10 +9,10 @@ the confusion their contracts spend most of their length preventing.
     solver    s06 - solve, or say precisely why not
     compiler  s07 - compile faithfully, export, and fail loudly rather than repair
 """
-from .ir import (ConstructionProgram, Expr, ParameterDecl, TypedConstraint,
+from .ir import (Expr, FeatureSpec, ParameterDecl, Placement, Step, TypedConstraint,
                  OPCODES, SOLVER_STATUSES)
 
-__all__ = ["ConstructionProgram", "Expr", "ParameterDecl", "TypedConstraint",
+__all__ = ["Expr", "FeatureSpec", "ParameterDecl", "Placement", "Step", "TypedConstraint",
            "OPCODES", "SOLVER_STATUSES"]
 
 #: `canonical_io` and `execution` are imported by name rather than re-exported

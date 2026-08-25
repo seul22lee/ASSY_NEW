@@ -169,30 +169,39 @@ class TestC4ObligationsRealized(unittest.TestCase):
 
 
 class TestC5ProgramTotality(unittest.TestCase):
-    """S05-C5: every symbol the program references is declared."""
+    """S05-C5: every feature reads as the IR reads it - placement against a
+    committed datum, construction with one terminal, every symbol declared."""
+
+    VIEW = {"Envelope": [{"entity_id": "ENV-1", "body": "BOD-1"}]}
+
+    def _feature(self, radius, **extra):
+        f = {"id": "FEA-1", "body": "BOD-1", "feature_kind": "BOSS", "geometry": "x",
+             "placement": {"datum": "ENV-1", "axis": "+Z"},
+             "construction": [{"id": "c", "operation": "CYLINDER", "operands": [],
+                               "parameters": {"radius": radius, "height": MM}}]}
+        f.update(extra)
+        return f
 
     def test_a_declared_symbol_passes(self):
         parsed = {"parameters": [{"id": "PRM-1", "symbol": "r", "unit": "mm"}],
-                  "construction_statements": [
-                      {"id": "CST-1", "body": "BOD-1", "operation": "CYLINDER",
-                       "parameters": {"radius": {"ref": "PRM-1"}, "height": MM}}]}
-        self.assertEqual([], s05.check_c5_program_totality(parsed))
+                  "features": [self._feature({"ref": "PRM-1"})]}
+        self.assertEqual([], s05.check_c5_program_totality(parsed, self.VIEW))
 
     def test_an_undeclared_symbol_is_reported_before_the_kernel_sees_it(self):
-        parsed = {"parameters": [],
-                  "construction_statements": [
-                      {"id": "CST-1", "body": "BOD-1", "operation": "CYLINDER",
-                       "parameters": {"radius": {"ref": "PRM-GHOST"}, "height": MM}}]}
-        problems = s05.check_c5_program_totality(parsed)
+        parsed = {"parameters": [], "features": [self._feature({"ref": "PRM-GHOST"})]}
+        problems = s05.check_c5_program_totality(parsed, self.VIEW)
         self.assertTrue(any("PRM-GHOST" in p for p in problems), problems)
 
     def test_a_nested_reference_is_found(self):
         parsed = {"parameters": [],
-                  "construction_statements": [
-                      {"id": "CST-1", "body": "BOD-1", "operation": "BOX",
-                       "parameters": {"dx": {"op": "+", "args": [MM, {"ref": "PRM-X"}]},
-                                      "dy": MM, "dz": MM}}]}
-        self.assertTrue(any("PRM-X" in p for p in s05.check_c5_program_totality(parsed)))
+                  "features": [self._feature({"op": "+", "args": [MM, {"ref": "PRM-X"}]})]}
+        self.assertTrue(any("PRM-X" in p for p in s05.check_c5_program_totality(parsed, self.VIEW)))
+
+    def test_a_feature_placed_against_nothing_committed_is_reported(self):
+        parsed = {"parameters": [], "features": [self._feature(MM, placement={"datum": "ENV-9",
+                                                                              "axis": "+Z"})]}
+        problems = s05.check_c5_program_totality(parsed, self.VIEW)
+        self.assertTrue(any("ENV-9" in p for p in problems), problems)
 
 
 class TestC6Units(unittest.TestCase):
@@ -261,180 +270,6 @@ def region(rid, role, centre, half, bodies=("BOD-1",)):
 #: per millimetre, so a constant of v mm is the coordinate v.
 SCALE_MM = {"entity_id": "SCL-1", "basis": "ABSOLUTE",
             "absolute": {"unit": "mm", "per_unit": 1.0}}
-
-
-class TestC8RegionIntrusion(unittest.TestCase):
-    """S05-C8: real occupancy from canonical envelopes.
-
-    The previous implementation read `intrudes_region` off the response - a key
-    no contract declares and no producer emits - so it read None and passed on
-    everything. These cases use `Feature.envelope`, which is canonical, and the
-    same aabb/overlaps arithmetic s04b uses.
-    """
-
-    V = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))],
-             ReferenceScale=[SCALE_MM])
-
-    def test_the_fixture_declares_a_usable_region(self):
-        """Otherwise every case below passes for the wrong reason."""
-        volume = self.V["FunctionalRegion"][0]["volume"]
-        self.assertIn("centre", volume)
-        self.assertIn("half_extent", volume)
-
-    def test_a_feature_clearly_outside_the_region_passes(self):
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"),
-                                    envelope=box(100, 100, 100))]}
-        self.assertEqual([], s05.check_c8_region_intrusion(parsed, self.V))
-
-    def test_a_feature_clearly_intruding_is_reported(self):
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"),
-                                    envelope=box(0, 0, 0))]}
-        problems = s05.check_c8_region_intrusion(parsed, self.V)
-        self.assertTrue(any("FRG-1" in p for p in problems), problems)
-
-    def test_a_touching_boundary_is_decided_deterministically(self):
-        """Whatever the answer, it must be the SAME answer s04b would give -
-        which is why the arithmetic is imported rather than reimplemented."""
-        from ver3.assy_v3.stages.s04_envelope_and_motion import aabb, overlaps
-        touching = box(6, 0, 0)          # region half-extent 5, feature half 1
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=touching)]}
-        numbers = lambda nodes: [n["const"] for n in nodes]           # noqa: E731
-        expected = overlaps(aabb(numbers(touching["centre"]),
-                                 numbers(touching["half_extent"])),
-                            aabb([0, 0, 0], [5, 5, 5]))
-        problems = s05.check_c8_region_intrusion(parsed, self.V)
-        self.assertEqual(bool(expected), bool(problems))
-
-    def test_a_feature_without_an_envelope_is_incomplete_not_clean(self):
-        """The exact defect: silence about occupancy read as a pass."""
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
-        problems = s05.check_c8_region_intrusion(parsed, self.V)
-        self.assertTrue(any("cannot be evaluated" in p for p in problems), problems)
-
-    def test_a_support_region_permits_occupancy(self):
-        """SUPPORT is where the product meets what carries it. Contact there is
-        the POINT of the region, so reporting it would flag every design that
-        actually rests on something.
-
-        This used to use a role called GRIP, which the contract has never
-        declared - so the test was asserting a policy for a role with no
-        semantics, and the only thing it could prove was that an unknown role
-        was silently ignored.
-        """
-        v = view(FunctionalRegion=[region("FRG-2", "SUPPORT", (0, 0, 0), (5, 5, 5))],
-                 ReferenceScale=[SCALE_MM])
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
-        self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
-
-    def test_a_symbolic_envelope_is_deferred_not_judged(self):
-        """Unit E. An envelope over declared parameters rests on dimensions
-        settlement has not decided: no finding, and no claim of clearance."""
-        parsed = {"parameters": [{"id": "PRM-R", "symbol": "r", "unit": "mm"}],
-                  "features": [dict(feature("FEA-1", "BOD-1"), envelope={
-                      "centre": [mm(0), mm(0), mm(0)],
-                      "half_extent": [{"ref": "PRM-R"}, {"ref": "PRM-R"}, mm(1)]})]}
-        self.assertEqual([], s05.check_c8_region_intrusion(parsed, self.V))
-
-    def test_a_bare_number_in_an_envelope_is_refused(self):
-        """Unit E. The contradiction removed: a number nobody solved."""
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope={
-            "centre": [0, 0, 0], "half_extent": [mm(1), mm(1), mm(1)]})]}
-        problems = s05.check_c8_region_intrusion(parsed, self.V)
-        self.assertTrue(any("bare number" in p for p in problems), problems)
-        # regions or no regions: the grammar is judged either way
-        self.assertTrue(any("bare number" in p
-                            for p in s05.check_c8_region_intrusion(parsed, view())))
-
-    def test_an_undeclared_parameter_in_an_envelope_is_refused(self):
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope={
-            "centre": [mm(0), mm(0), mm(0)],
-            "half_extent": [{"ref": "PRM-NOBODY"}, mm(1), mm(1)]})]}
-        problems = s05.check_c8_region_intrusion(parsed, self.V)
-        self.assertTrue(any("PRM-NOBODY" in p for p in problems), problems)
-
-    def test_a_relative_basis_defers_a_constant_envelope(self):
-        """A constant in millimetres against a region in a RELATIVE basis is not
-        comparable; nothing here invents the scale s04 left free."""
-        v = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (5, 5, 5))],
-                 ReferenceScale=[{"entity_id": "SCL-1", "basis": "RELATIVE"}])
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
-        self.assertEqual([], s05.check_c8_region_intrusion(parsed, v))
-
-    def test_the_basis_factor_scales_a_constant_into_the_region_frame(self):
-        """Ten millimetres per coordinate: a 100 mm centre is coordinate 10,
-        which lies inside a region of half-extent 20 at the origin."""
-        v = view(FunctionalRegion=[region("FRG-1", "ACCESS", (0, 0, 0), (20, 20, 20))],
-                 ReferenceScale=[{"entity_id": "SCL-1", "basis": "ABSOLUTE",
-                                  "absolute": {"unit": "mm", "per_unit": 10.0}}])
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(100, 0, 0))]}
-        problems = s05.check_c8_region_intrusion(parsed, v)
-        self.assertTrue(any("FRG-1" in p for p in problems), problems)
-
-    def test_an_undeclared_role_is_reported_rather_than_ignored(self):
-        """An undeclared role has no occupancy policy. Passing it would be
-        deciding the policy here, in a check, by omission."""
-        v = view(FunctionalRegion=[region("FRG-9", "GRIP", (0, 0, 0), (5, 5, 5))],
-                 ReferenceScale=[SCALE_MM])
-        parsed = {"features": [dict(feature("FEA-1", "BOD-1"), envelope=box(0, 0, 0))]}
-        problems = s05.check_c8_region_intrusion(parsed, v)
-        self.assertTrue(any("not in the declared vocabulary" in p
-                            for p in problems), problems)
-
-    def test_no_canonical_prose_makes_a_blanket_exclusion_claim(self):
-        """The contract may not say something the role policy contradicts.
-
-        It said "No Feature may intrude into a FunctionalRegion" while
-        role_policy declares SUPPORT does not exclude occupancy - so the contract
-        asserted two things at once, and a reader could take either as
-        authoritative. Checked against the policy rather than against a fixed
-        sentence: if a role that excludes occupancy is ever added or removed,
-        this asks the question again instead of matching yesterday's wording.
-        """
-        import os
-        from . import _paths
-        permissive = [role for role, policy
-                      in (self.role_policy() or {}).items()
-                      if not policy.get("excludes_occupancy")]
-        self.assertTrue(permissive,
-                        "no role permits occupancy, so a blanket exclusion "
-                        "claim would be true and this guard is meaningless")
-        for name in ("DESIGN_STATE_CONTRACT.yaml",
-                     os.path.join("stages", "S05_CONTRACT.yaml")):
-            with self.subTest(contract=name):
-                with open(os.path.join(_paths.REPO_ROOT, "ver3", "contracts",
-                                       name)) as handle:
-                    body = handle.read()
-                for blanket in ("No Feature may intrude into a FunctionalRegion",
-                                "no Feature intrudes into a FunctionalRegion"):
-                    self.assertNotIn(
-                        blanket, body,
-                        "%s claims every FunctionalRegion excludes Features, "
-                        "which role_policy contradicts for %s"
-                        % (name, ", ".join(sorted(permissive))))
-
-    def role_policy(self):
-        from . import _paths
-        contract = _paths.contract("DESIGN_STATE_CONTRACT.yaml")
-        families = dict(contract["entity_families"])
-        families.update(contract["assurance_families"])
-        return families["FunctionalRegion"].get("role_policy") or {}
-
-    def test_both_stages_read_the_same_occupancy_policy(self):
-        """s04b and S05-C8 each used to carry their own tuple of roles. Two
-        copies of a rule are two rules, and nothing made them agree."""
-        import inspect
-        from ver3.assy_v3.stages import s04_envelope_and_motion as s04
-        for module in (s04, s05):
-            with self.subTest(module=module.__name__):
-                source = inspect.getsource(module)
-                self.assertNotIn('("ACCESS", "APERTURE", "KEEP_OUT")', source,
-                                 "an occupancy role list is hard-coded again")
-        self.assertTrue(s04.excludes_occupancy("KEEP_OUT"))
-        self.assertFalse(s04.excludes_occupancy("SUPPORT"))
-
-    def test_no_regions_declared_means_nothing_to_intrude(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
-        self.assertEqual([], s05.check_c8_region_intrusion(parsed, view()))
 
 
 class TestC9ClearanceConstraints(unittest.TestCase):
@@ -662,9 +497,6 @@ class TestS05ProducesCanonicalNames(unittest.TestCase):
             "constraints": [{"id": "CON-1", "kind": "ENVELOPE",
                              "expression": {"relation": "==", "lhs": {"ref": "PRM-1"},
                                             "rhs": MM}, "parameters": ["PRM-1"]}],
-            "construction_statements": [
-                {"id": "CST-1", "body": "BOD-1", "operation": "BOX",
-                 "parameters": {"dx": MM, "dy": MM, "dz": MM}}],
         }
         ops = S05Embodiment().to_operations(parsed)
         by_family = {o.entity_type: o for o in ops}
@@ -691,8 +523,6 @@ class TestS05ProducesCanonicalNames(unittest.TestCase):
                   "parameters": [{"id": "PRM-1", "symbol": "r", "unit": "mm"}],
                   "constraints": [{"id": "CON-1", "kind": "ENVELOPE",
                                    "expression": {}, "parameters": []}],
-                  "construction_statements": [
-                      {"id": "CST-1", "body": "B", "operation": "BOX", "parameters": {}}],
                   "unresolved": [{"id": "S5U-1", "decision": "d", "why_open": "w",
                                   "alternatives_kind": "FREE_TEXT"}]}
         ops = S05Embodiment().to_operations(parsed)
@@ -785,8 +615,8 @@ class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
 
     def test_the_audit_found_the_checks(self):
         """Otherwise the loop below iterates over nothing and proves nothing."""
-        self.assertEqual(14, len(self.reads),
-                         "expected fourteen checks; the AST scan found %d"
+        self.assertEqual(12, len(self.reads),
+                         "expected twelve checks; the AST scan found %d"
                          % len(self.reads))
 
     def test_every_family_a_check_reads_is_granted_to_s05(self):
@@ -830,13 +660,11 @@ class TestTheStageIsJudgedOnWhatItWasAsked(unittest.TestCase):
         "check_c5_program_totality": ("parameter", "construction program"),
         "check_c6_units": ("unit",),
         "check_c7_no_parameter_cycle": ("parameter",),
-        "check_c8_region_intrusion": ("functional region", "envelope"),
         "check_c9_clearance_constraints": ("clearance", "governs_interface"),
         "check_c10_no_unsolved_values": ("value",),
         # Unit G: CAD-constructibility
         "check_c11_joints_realized": ("joint", "placement"),
-        "check_c12_bodies_built": ("every body", "construction program"),
-        "check_c13_placed_features_built": ("placed feature",),
+        "check_c12_bodies_built": ("every body", "stock"),
         "check_c14_mating_kinds": ("mating",),
     }
 

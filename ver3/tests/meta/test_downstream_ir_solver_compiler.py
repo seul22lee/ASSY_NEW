@@ -64,30 +64,29 @@ class TestIRRefusesMalformedInput(unittest.TestCase):
 
     def test_an_unknown_opcode_is_refused(self):
         with self.assertRaises(ir.IRError):
-            ir.Statement.parse({"entity_id": "CST-1", "body": "BOD-1",
-                                "operation": "LOFT", "parameters": {}})
+            ir.Step.parse({"id": "s1", "operation": "LOFT", "parameters": {}})
 
     def test_a_primitive_missing_a_required_parameter_is_refused(self):
         with self.assertRaises(ir.IRError):
-            ir.Statement.parse({"entity_id": "CST-1", "body": "BOD-1",
-                                "operation": "BOX",
-                                "parameters": {"dx": MM(1), "dy": MM(1)}})
+            ir.Step.parse({"id": "s1", "operation": "BOX",
+                           "parameters": {"dx": MM(1), "dy": MM(1)}})
 
     def test_a_rotate_without_an_axis_is_refused(self):
-        """s07 may not choose an axis (R-24), so the statement must carry one."""
+        """s07 may not choose an axis (R-24), so the step must carry one."""
         with self.assertRaises(ir.IRError):
-            ir.Statement.parse({"entity_id": "CST-1", "body": "BOD-1",
-                                "operation": "ROTATE", "operands": ["CST-0"],
-                                "parameters": {"angle": {"const": 90, "unit": "deg"}}})
+            ir.Step.parse({"id": "s1", "operation": "ROTATE", "operands": ["s0"],
+                           "parameters": {"angle": {"const": 90, "unit": "deg"}}})
 
     def test_a_forward_reference_is_reported_not_reordered(self):
-        prog = ir.ConstructionProgram.parse([
-            {"entity_id": "CST-2", "body": "B", "operation": "CUT",
-             "operands": ["CST-1", "CST-3"], "parameters": {}},
-            {"entity_id": "CST-1", "body": "B", "operation": "BOX",
-             "parameters": {"dx": MM(1), "dy": MM(1), "dz": MM(1)}},
-        ])
-        self.assertTrue(prog.ordering_problems())
+        """A feature's steps consume EARLIER steps; the reader does not reorder."""
+        with self.assertRaises(ir.IRError):
+            ir.FeatureSpec.parse({
+                "entity_id": "FEA-1", "body": "B", "feature_kind": "STOCK",
+                "placement": {"datum": "ENV-1", "axis": "+Z"},
+                "construction": [
+                    {"id": "s2", "operation": "CUT", "operands": ["s1", "s3"], "parameters": {}},
+                    {"id": "s1", "operation": "BOX",
+                     "parameters": {"dx": MM(1), "dy": MM(1), "dz": MM(1)}}]})
 
 
 class TestSolverSemantics(unittest.TestCase):
@@ -296,20 +295,35 @@ class TestSolverSemantics(unittest.TestCase):
         self.assertNotEqual(ir.FEASIBLE, r.solver_status)
 
 
-def _cut_program():
-    """A body built by cutting a bore from a block. Body frame only."""
-    return ir.ConstructionProgram.parse([
-        {"entity_id": "CST-0001", "body": "BOD-0001", "operation": "BOX",
-         "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}},
-        {"entity_id": "CST-0002", "body": "BOD-0001", "operation": "CYLINDER",
-         "feature": "FEA-0001",
-         "parameters": {"radius": REF("PRM-0003"), "height": MM(30)}},
-        {"entity_id": "CST-0003", "body": "BOD-0001", "operation": "TRANSLATE",
-         "operands": ["CST-0002"],
-         "parameters": {"dx": MM(20), "dy": MM(15), "dz": MM(-5)}},
-        {"entity_id": "CST-0004", "body": "BOD-0001", "operation": "CUT",
-         "operands": ["CST-0001", "CST-0003"], "parameters": {}},
-    ])
+def _cut_features():
+    """A body built as a STOCK block with a BORE removed. Unit G: the block and
+    the bore are FEATURES, each with its own construction; the body is the
+    additive fused with the subtractive. Frames are the compiler's input here
+    (derived from datums in production): the block at the identity, the bore
+    at (20, 15, -5)."""
+    from ver3.assy_v3.downstream.kinematics import Frame
+    stock = ir.FeatureSpec.parse({
+        "entity_id": "FEA-0001", "body": "BOD-0001", "feature_kind": "STOCK",
+        "placement": {"datum": "ENV-0001", "axis": "+Z"},
+        "construction": [{"id": "block", "operation": "BOX",
+                          "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}}]})
+    bore = ir.FeatureSpec.parse({
+        "entity_id": "FEA-0002", "body": "BOD-0001", "feature_kind": "BORE",
+        "placement": {"datum": "FEA-0001", "offset": [MM(20), MM(15), MM(-5)], "axis": "+Z"},
+        "construction": [{"id": "hole", "operation": "CYLINDER",
+                          "parameters": {"radius": REF("PRM-0003"), "height": MM(30)}}]})
+    frames = {"FEA-0001": Frame(), "FEA-0002": Frame.from_axis((20.0, 15.0, -5.0), "+Z")}
+    return [stock, bore], frames
+
+
+def _polarity():
+    from ver3.assy_v3.downstream.embodiment import polarity_table
+    return polarity_table()
+
+
+def _compile(values, out_dir=None, features=None):
+    specs, frames = _cut_features()
+    return compiler.compile_embodiment(features or specs, values, frames, _polarity(), out_dir=out_dir)
 
 
 @unittest.skipUnless(KERNEL, "OpenCascade kernel absent")
@@ -319,7 +333,7 @@ class TestCompilerBuildsAndChecks(unittest.TestCase):
     VALUES = {"PRM-0003": 6.0}
 
     def test_a_valid_program_compiles_to_one_connected_solid(self):
-        r = compiler.compile_program(_cut_program(), self.VALUES)
+        r = _compile(self.VALUES)
         self.assertTrue(r.ok, r.problems)
         body = r.bodies[0]
         self.assertTrue(body.is_valid)
@@ -328,48 +342,46 @@ class TestCompilerBuildsAndChecks(unittest.TestCase):
 
     def test_the_cut_actually_removed_material(self):
         """Otherwise 'it compiled' would be true of a program that did nothing."""
-        r = compiler.compile_program(_cut_program(), self.VALUES)
+        r = _compile(self.VALUES)
         self.assertLess(r.bodies[0].volume, 40 * 30 * 20)
 
     def test_a_missing_parameter_fails_and_emits_no_geometry(self):
         """R-24. The compiler does not supply the number the kernel wants."""
-        r = compiler.compile_program(_cut_program(), {})
+        r = _compile({})
         self.assertFalse(r.ok)
-        self.assertEqual("CST-0002", r.failed_statement)
+        self.assertEqual("FEA-0002", r.failed_feature)
         self.assertEqual([], r.bodies)
 
-    def test_a_failure_cites_the_dependency_cone(self):
-        """S07-C6: the failing statement is rarely the wrong one."""
-        prog = _cut_program()
-        r = compiler.compile_program(prog, {})
-        self.assertIn("CST-0002", r.dependency_cone)
+    def test_a_failure_cites_the_feature_and_its_step(self):
+        """S07-C6: the failure names what did not build."""
+        r = _compile({})
+        self.assertEqual(("FEA-0002", "hole"), (r.failed_feature, r.failed_step))
 
     def test_a_non_positive_dimension_fails_rather_than_clamping(self):
-        r = compiler.compile_program(_cut_program(), {"PRM-0003": 0.0})
+        r = _compile({"PRM-0003": 0.0})
         self.assertFalse(r.ok)
         self.assertEqual([], r.bodies)
 
     def test_a_disconnected_result_violates_c2(self):
         """Two separated blocks are not a body, and the check says so."""
-        prog = ir.ConstructionProgram.parse([
-            {"entity_id": "CST-1", "body": "B", "operation": "BOX",
-             "parameters": {"dx": MM(5), "dy": MM(5), "dz": MM(5)}},
-            {"entity_id": "CST-2", "body": "B", "operation": "BOX",
-             "parameters": {"dx": MM(5), "dy": MM(5), "dz": MM(5)}},
-            {"entity_id": "CST-3", "body": "B", "operation": "TRANSLATE",
-             "operands": ["CST-2"],
-             "parameters": {"dx": MM(50), "dy": MM(0), "dz": MM(0)}},
-            {"entity_id": "CST-4", "body": "B", "operation": "UNION",
-             "operands": ["CST-1", "CST-3"], "parameters": {}},
-        ])
-        r = compiler.compile_program(prog, {})
+        from ver3.assy_v3.downstream.kinematics import Frame
+        spec = ir.FeatureSpec.parse({
+            "entity_id": "FEA-1", "body": "B", "feature_kind": "STOCK",
+            "placement": {"datum": "ENV-1", "axis": "+Z"},
+            "construction": [
+                {"id": "a", "operation": "BOX", "parameters": {"dx": MM(5), "dy": MM(5), "dz": MM(5)}},
+                {"id": "b", "operation": "BOX", "parameters": {"dx": MM(5), "dy": MM(5), "dz": MM(5)}},
+                {"id": "c", "operation": "TRANSLATE", "operands": ["b"],
+                 "parameters": {"dx": MM(50), "dy": MM(0), "dz": MM(0)}},
+                {"id": "d", "operation": "UNION", "operands": ["a", "c"], "parameters": {}}]})
+        r = compiler.compile_embodiment([spec], {}, {"FEA-1": Frame()}, _polarity())
         self.assertFalse(r.ok)
         self.assertTrue(any("S07-C2" in p for p in r.problems), r.problems)
 
     def test_exports_round_trip_within_the_declared_tolerances(self):
         """S07-C3 and S07-C4, measured rather than asserted."""
         with tempfile.TemporaryDirectory() as d:
-            r = compiler.compile_program(_cut_program(), self.VALUES, out_dir=d)
+            r = _compile(self.VALUES, out_dir=d)
             self.assertTrue(r.ok, r.problems)
             for body, delta in r.roundtrip["brep"].items():
                 self.assertLessEqual(delta, compiler.BREP_VOLUME_TOLERANCE, body)
@@ -382,25 +394,27 @@ class TestCompilerBuildsAndChecks(unittest.TestCase):
 
     def test_an_independent_rebuild_reproduces_the_signature(self):
         """S07-C5."""
-        ok, a, b = compiler.independent_rebuild_matches(_cut_program(), self.VALUES)
+        specs, frames = _cut_features()
+        ok, a, b = compiler.independent_rebuild_matches(specs, self.VALUES, frames, _polarity())
         self.assertTrue(ok)
         self.assertEqual(a, b)
 
     def test_the_signature_changes_when_the_geometry_does(self):
         """A signature that never moves would certify nothing."""
-        a = compiler.compile_program(_cut_program(), {"PRM-0003": 6.0}).signature
-        b = compiler.compile_program(_cut_program(), {"PRM-0003": 7.0}).signature
+        a = _compile({"PRM-0003": 6.0}).signature
+        b = _compile({"PRM-0003": 7.0}).signature
         self.assertNotEqual(a["signature_sha256"], b["signature_sha256"])
 
-    def test_statements_map_to_the_features_they_realize(self):
-        r = compiler.compile_program(_cut_program(), self.VALUES)
-        self.assertEqual({"CST-0002": "FEA-0001"}, r.bodies[0].statement_map)
+    def test_features_compose_the_body_by_declared_polarity(self):
+        r = _compile(self.VALUES)
+        self.assertEqual({"FEA-0001": "ADDITIVE", "FEA-0002": "SUBTRACTIVE"}, r.bodies[0].feature_map)
+        self.assertEqual({"FEA-0001", "FEA-0002"}, set(r.bodies[0].feature_shapes))
 
     def test_the_signature_is_taken_before_export(self):
         """STEP is an exchange artifact and never the authoritative source."""
         with tempfile.TemporaryDirectory() as d:
-            exported = compiler.compile_program(_cut_program(), self.VALUES, out_dir=d)
-            native = compiler.compile_program(_cut_program(), self.VALUES)
+            exported = _compile(self.VALUES, out_dir=d)
+            native = _compile(self.VALUES)
         self.assertEqual(native.signature["signature_sha256"],
                          exported.signature["signature_sha256"])
 

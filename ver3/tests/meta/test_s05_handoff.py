@@ -45,8 +45,7 @@ from .test_s7_hard_requirement_timing import _Timing                    # noqa: 
 from .test_s7_lifecycle import STALE, STANDING, _code                  # noqa: E402
 from .test_selection_to_embodiment_seam import FixedProvider            # noqa: E402
 
-S05_FAMILIES = ("Feature", "Realization", "Parameter", "Constraint",
-                "ConstructionStatement")
+S05_FAMILIES = ("Feature", "Realization", "Parameter", "Constraint")
 NYE, VIO = s07.NOT_YET_EVALUABLE, s07.VIOLATED
 PRE, DOWN = s07.PRE_SELECTION, s07.DOWNSTREAM
 
@@ -64,15 +63,17 @@ SYMBOLIC = {"centre": [mm(0), mm(0), mm(0)],
             "half_extent": [ref("PRM-0001"), ref("PRM-0001"), mm(2)]}
 
 
-def embodiment_from(view, *, cite=(), envelope=None, feature_kind="FACE",
-                    occupancy=None):
+def embodiment_from(view, *, cite=(), feature_kind="FACE", occupancy=None):
     """A contract-valid embodiment of whatever branch the VIEW shows.
 
-    Built from the projection - the bodies, the interfaces, the blocking
-    relations, the clearances - so the same helper embodies either candidate
-    and nothing here knows which is selected. Realizations cite only what the
-    caller says; the duty split is the thing under test. Ids are minted past
-    the namespace occupancy the view reports, as a model is told to.
+    Built from the projection - the bodies and their envelopes, the joints, the
+    interfaces, the blocking relations, the clearances - so the same helper
+    embodies either candidate and nothing here knows which is selected. Every
+    body gets a STOCK at its envelope; every interface side a feature placed
+    against that stock; every axis-bearing joint a BORE placed AT the joint on
+    each body it relates (Unit G). Realizations cite only what the caller says;
+    the duty split is the thing under test. Ids are minted past the namespace
+    occupancy the view reports, as a model is told to.
     """
     taken = {fam: set(ids) for fam, ids in (occupancy or {}).items()}
 
@@ -80,37 +81,64 @@ def embodiment_from(view, *, cite=(), envelope=None, feature_kind="FACE",
         while "%s%04d" % (prefix, n) in taken.get(family, set()):
             n += 1
         return n
+
+    prm = "PRM-%04d" % free("PRM-", "Parameter", 1)
     bodies = [b["entity_id"] for b in view.get("Body") or []]
-    features, n = [], 0
+    envelope_of = {e.get("body"): e["entity_id"] for e in view.get("Envelope") or []}
     group_body = {g["entity_id"]: g.get("body") for g in view.get("RigidGroup") or []}
     limit_bodies = set()
     for rel in view.get("ConstraintRelation") or []:
         if rel.get("blocked_dofs"):
             limit_bodies |= {b for b in (rel.get("provider_body"),
                                          group_body.get(rel.get("retained_group"))) if b}
+
+    features, n, stock_of = [], 0, {}
+    for body in bodies:
+        n = free("FEA-", "Feature", n + 1)
+        fid = "FEA-%04d" % n
+        stock_of[body] = fid
+        features.append({"id": fid, "body": body, "feature_kind": "STOCK",
+                         "geometry": "the block of %s" % body,
+                         "placement": {"datum": envelope_of.get(body, "ENV-%s" % body[4:]),
+                                       "axis": "+Z"},
+                         "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                                           "parameters": {"dx": ref(prm), "dy": mm(10), "dz": mm(4)}}]})
+
+    def placed(body, kind, geometry, **extra):
+        nonlocal n
+        n = free("FEA-", "Feature", n + 1)
+        f = {"id": "FEA-%04d" % n, "body": body, "feature_kind": kind, "geometry": geometry,
+             "placement": {"datum": stock_of[body], "offset": [mm(0), mm(0), mm(4)], "axis": "+Z"},
+             "construction": [{"id": "face", "operation": "BOX", "operands": [],
+                               "parameters": {"dx": ref(prm), "dy": mm(10), "dz": mm(1)}}]}
+        f.update(extra)
+        features.append(f)
+        return f
+
     for iface in view.get("Interface") or []:
         for body in iface.get("bodies") or []:
-            n = free("FEA-", "Feature", n + 1)
-            features.append({"id": "FEA-%04d" % n, "body": body,
-                             "feature_kind": "STOP" if body in limit_bodies else feature_kind,
-                             "geometry": "the face that meets the other body",
-                             "interface": iface["entity_id"],
-                             "envelope": envelope or SYMBOLIC})
-    for body in bodies:
-        if not any(f["body"] == body for f in features):
-            n = free("FEA-", "Feature", n + 1)
-            features.append({"id": "FEA-%04d" % n, "body": body, "feature_kind": "FACE",
-                             "geometry": "a datum face", "envelope": envelope or SYMBOLIC})
+            if body in stock_of:
+                placed(body, "STOP" if body in limit_bodies else feature_kind,
+                       "the face that meets the other body", interface=iface["entity_id"])
     for body in limit_bodies - {f["body"] for f in features if f["feature_kind"] == "STOP"}:
-        n = free("FEA-", "Feature", n + 1)
-        features.append({"id": "FEA-%04d" % n, "body": body, "feature_kind": "STOP",
-                         "geometry": "the stop face", "envelope": envelope or SYMBOLIC})
-    prm = "PRM-%04d" % free("PRM-", "Parameter", 1)
-    symbolic = envelope or {"centre": [mm(0), mm(0), mm(0)],
-                            "half_extent": [ref(prm), ref(prm), mm(2)]}
-    for f in features:
-        if f["envelope"] is SYMBOLIC:
-            f["envelope"] = symbolic
+        if body in stock_of:
+            placed(body, "STOP", "the stop face")
+    for joint in view.get("Joint") or []:
+        if str(joint.get("joint_type", "")).upper() in ("FIXED", "COMPLIANT"):
+            continue
+        if str(joint.get("axis_direction") or "").strip().upper() not in s05.ir.SIGNED_AXES:
+            continue
+        for body in sorted({group_body.get(joint.get("parent_group")),
+                            group_body.get(joint.get("child_group"))} - {None}):
+            if body not in stock_of:
+                continue
+            n = free("FEA-", "Feature", n + 1)
+            features.append({"id": "FEA-%04d" % n, "body": body, "feature_kind": "BORE",
+                             "geometry": "the bore that carries the joint axis",
+                             "placement": {"datum": joint["entity_id"]},
+                             "construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                                               "parameters": {"radius": ref(prm), "height": mm(4)}}]})
+
     k = free("CON-", "Constraint", 1)
     constraints = [{"id": "CON-%04d" % k, "kind": "DIMENSIONAL", "parameters": [prm],
                     "expression": {"relation": ">=", "lhs": ref(prm), "rhs": mm(0.75)}}]
@@ -122,45 +150,6 @@ def embodiment_from(view, *, cite=(), envelope=None, feature_kind="FACE",
                                 "governs_interface": iface["entity_id"],
                                 "expression": {"relation": ">=", "lhs": ref(prm),
                                                "rhs": mm(0.1)}})
-    # UNIT G. A CAD-CONSTRUCTIBLE embodiment: every axis-bearing joint is
-    # realized on each body it relates by ONE placed feature naming it, along
-    # the joint's declared axis, and every placed feature is built by a
-    # statement naming it; every body ends in a single terminal. Derived from
-    # the view's joints and groups, so it embodies whatever branch is shown.
-    joint_features = {}
-    for joint in view.get("Joint") or []:
-        if str(joint.get("joint_type", "")).upper() in ("FIXED", "COMPLIANT"):
-            continue
-        axis = str(joint.get("axis_direction") or "").strip().upper()
-        if axis not in s05.ir.SIGNED_AXES:
-            continue
-        for body in sorted({group_body.get(joint.get("parent_group")),
-                            group_body.get(joint.get("child_group"))} - {None}):
-            n = free("FEA-", "Feature", n + 1)
-            fid = "FEA-%04d" % n
-            features.append({"id": fid, "body": body, "feature_kind": "BORE",
-                             "geometry": "the bore that carries the joint axis",
-                             "joint": joint["entity_id"],
-                             "placement": {"origin": [mm(0), mm(0), mm(0)], "axis": axis},
-                             "envelope": envelope or symbolic})
-            joint_features.setdefault(body, []).append(fid)
-    statements, c = [], 0
-    for body in bodies:
-        c = free("CST-", "ConstructionStatement", c + 1)
-        base = "CST-%04d" % c
-        statements.append({"id": base, "body": body, "operation": "BOX",
-                           "operands": [],
-                           "parameters": {"dx": ref(prm), "dy": mm(10), "dz": mm(4)}})
-        for fid in joint_features.get(body, []):
-            c = free("CST-", "ConstructionStatement", c + 1)
-            bore = "CST-%04d" % c
-            statements.append({"id": bore, "body": body, "operation": "CYLINDER",
-                               "operands": [], "feature": fid,
-                               "parameters": {"radius": ref(prm), "height": mm(4)}})
-            c = free("CST-", "ConstructionStatement", c + 1)
-            statements.append({"id": "CST-%04d" % c, "body": body, "operation": "UNION",
-                               "operands": [base, bore], "parameters": {}})
-            base = "CST-%04d" % c
     r = free("RLZ-", "Realization", 1)
     realizations = [{"id": "RLZ-%04d" % r, "addresses_obligations": list(cite),
                      "participating_features": [features[0]["id"]],
@@ -168,8 +157,7 @@ def embodiment_from(view, *, cite=(), envelope=None, feature_kind="FACE",
                     ] if cite else []
     return {"features": features, "realizations": realizations,
             "parameters": [{"id": prm, "symbol": "t", "unit": "mm"}],
-            "constraints": constraints, "construction_statements": statements,
-            "unresolved": []}
+            "constraints": constraints, "unresolved": []}
 
 
 class _Handoff(_Timing):
@@ -432,7 +420,7 @@ class TestUpstreamIsFrozen(_Handoff):
                 self.assertTrue(self.refused(state, [op]))
         # and the embodiment itself writes nothing but its own families
         out, _ex, _p, _pr = self.embody(state)
-        self.assertEqual({"Feature", "Parameter", "Constraint", "ConstructionStatement"},
+        self.assertEqual({"Feature", "Parameter", "Constraint"},
                          {op.entity_type for op in out.patch.operations})
 
     def test_21_the_human_remains_the_only_chooser(self):
@@ -577,6 +565,10 @@ class TestInteractionTrace(_Handoff):
 class TestSpatialBridge(_Handoff):
 
     def test_14_a_relative_extent_is_never_a_dimension(self):
+        """s04's arrangement is RELATIVE here. Nothing the embodiment writes is
+        a number copied from it: every placement names a datum and an offset in
+        the kernel unit, every constant is unit-bearing, every dimension a
+        declared parameter without a value."""
         state, _c, _d = self.committed()
         scale = state.entities["SCL-CND-A"]
         self.assertEqual("RELATIVE", scale["basis"], "the probe is not probing")
@@ -585,22 +577,25 @@ class TestSpatialBridge(_Handoff):
         for p in state.standing("Parameter"):
             self.assertNotIn("value", p)
             self.assertEqual("DECLARED", p["status"])
-        # every constant embodiment states is typed and unit-bearing, and in a
-        # RELATIVE basis none of them is comparable with an s04 extent - so no
-        # s04 number can have become a dimension by conversion
         for c in state.standing("Constraint"):
             for node in (c["expression"]["lhs"], c["expression"]["rhs"]):
                 self.assertIsInstance(node, dict)
         for f in state.standing("Feature"):
-            exprs, problems = s05.envelope_expressions(
-                f["entity_id"], f["envelope"], {p["entity_id"] for p in state.standing("Parameter")})
-            self.assertEqual([], problems)
-            self.assertIsNone(s05.envelope_box(exprs, scale))
-        # a constant in millimetres cannot be placed in a RELATIVE basis
-        self.assertIsNone(s05._constant_in_basis(s05.ir.Expr.parse(mm(5)), scale))
-        self.assertIsNone(s05.envelope_box(
-            {"centre": [s05.ir.Expr.parse(mm(0))] * 3,
-             "half_extent": [s05.ir.Expr.parse(mm(1))] * 3}, scale))
+            placement = f["placement"]
+            self.assertIn(placement["datum"], state.entities, "placed against something committed")
+            self.assertNotIn("origin", placement, "no absolute position")
+            for node in placement.get("offset") or []:
+                self.assertIsInstance(node, dict)
+            for step in f["construction"]:
+                for node in step["parameters"].values():
+                    self.assertIsInstance(node, dict)
+        # and without a scale authority nothing in mm is placed against the
+        # arrangement: the derivation fails closed rather than reading the
+        # relative numbers as millimetres
+        from ver3.assy_v3.downstream import canonical_io
+        per_unit, how, frames, _notes = canonical_io.scale_and_frames(state, "CND-A")
+        self.assertIsNone(per_unit)
+        self.assertEqual({}, frames)
 
     def test_15_an_embodiment_with_unsolved_symbols_is_representable(self):
         state, _c, _d = self.committed()
@@ -608,16 +603,11 @@ class TestSpatialBridge(_Handoff):
         self.assertTrue(ex.patch_applied)
         self.assertEqual([], list(out.declared_incompleteness or []))
         for f in state.standing("Feature"):
-            env = f["envelope"]
-            self.assertEqual(SYMBOLIC, env)
-            for node in env["centre"] + env["half_extent"]:
-                self.assertIsInstance(node, dict)
-            # Unit F: the parameters an envelope names ARE premises - a revised
-            # declaration stales the geometry stated in it; the settlement of
-            # the value does not (owner rule, proven in the settlement gate
-            # tests).
-            self.assertIn("PRM-0001", f["_premises"],
-                          "the declaration an envelope rests on is a premise")
+            self.assertIn(f["placement"]["datum"], f["_premises"],
+                          "the datum a feature is placed against is a premise")
+            if any("PRM-0001" in json.dumps(step) for step in f["construction"]):
+                self.assertIn("PRM-0001", f["_premises"],
+                              "the declaration a construction reads is a premise")
         self.assertEqual([], [p for p in state.standing("Parameter") if "value" in p])
 
     def test_16_the_numeric_envelope_contradiction_is_gone_from_production(self):
@@ -627,19 +617,20 @@ class TestSpatialBridge(_Handoff):
         self.assertNotIn("so its occupancy can be checked against the regions the design "
                          "reserved", instructions)
         fams = Contracts().families
-        self.assertIn("never a bare number", " ".join(fams["Feature"]["rules"]))
-        bare = {"features": [{"id": "FEA-1", "body": "BOD-1", "feature_kind": "FACE",
-                              "geometry": "x", "envelope": {"centre": [0, 0, 0],
-                                                            "half_extent": [1, 1, 1]}}]}
-        self.assertTrue(any("bare number" in p for p in
-                            s05.check_c8_region_intrusion(bare, {})))
+        self.assertIn("never states an absolute position", " ".join(fams["Feature"]["rules"]))
+        self.assertNotIn("envelope", fams["Feature"]["required_fields"] + fams["Feature"]["optional_fields"])
+        bare = {"parameters": [],
+                "features": [{"id": "FEA-1", "body": "BOD-1", "feature_kind": "STOCK",
+                              "geometry": "x", "placement": {"datum": "ENV-1", "offset": [0, 0, 0],
+                                                             "axis": "+Z"},
+                              "construction": [{"id": "b", "operation": "BOX", "operands": [],
+                                                "parameters": {"dx": mm(1), "dy": mm(1), "dz": mm(1)}}]}]}
+        self.assertTrue(any("bare number" in p for p in s05.check_c5_program_totality(
+            bare, {"Envelope": [{"entity_id": "ENV-1", "body": "BOD-1"}]})))
         s05c = _paths.load_yaml(_paths.CONTRACTS + "/stages/S05_CONTRACT.yaml")
         self.assertIn("never a bare number", json.dumps(s05c["post_selection_handoff"]))
 
 
-# =====================================================================
-# E6 - the debt s05 owes
-# =====================================================================
 class TestHardRequirementDebt(_Handoff):
 
     def test_17_s05_receives_exactly_the_debt_it_owes(self):

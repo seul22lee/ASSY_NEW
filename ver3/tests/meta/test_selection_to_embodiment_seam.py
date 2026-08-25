@@ -39,14 +39,22 @@ def _ref(p):
 
 
 EMBODIMENT = {
-    # Unit E: the feature names the interface it realizes, and its envelope is
-    # symbolic - unit-bearing constants here, never bare numbers.
-    "features": [{"id": "FEA-0001", "body": "BOD-0001", "feature_kind": "BORE",
-                  "geometry": "axial bore", "interface": "IFC-0001",
-                  "envelope": {"centre": [_mm(20.0), _mm(15.0), _mm(10.0)],
-                               "half_extent": [_mm(6.0), _mm(6.0), _mm(10.0)]}}],
+    # Unit E/G: the feature names the interface it realizes; it is placed
+    # against an s04 commitment (the body's envelope, then the stock) and owns
+    # its construction. Unit-bearing constants only, never bare numbers.
+    "features": [
+        {"id": "FEA-0001", "body": "BOD-0001", "feature_kind": "STOCK",
+         "geometry": "the enclosure block",
+         "placement": {"datum": "ENV-0001", "axis": "+Z"},
+         "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                           "parameters": {"dx": _mm(40), "dy": _mm(30), "dz": _mm(20)}}]},
+        {"id": "FEA-0002", "body": "BOD-0001", "feature_kind": "BORE",
+         "geometry": "axial bore", "interface": "IFC-0001",
+         "placement": {"datum": "FEA-0001", "offset": [_mm(20), _mm(15), _mm(-5)], "axis": "+Z"},
+         "construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                           "parameters": {"radius": _ref("PRM-0003"), "height": _mm(30)}}]}],
     "realizations": [{"id": "RLZ-0001", "addresses_obligations": ["OBL-0001"],
-                      "participating_features": ["FEA-0001"],
+                      "participating_features": ["FEA-0002"],
                       "verification_predicate":
                           "the bore admits the retained member"}],
     "parameters": [{"id": "PRM-0001", "symbol": "pin_r", "unit": "mm"},
@@ -62,17 +70,6 @@ EMBODIMENT = {
          "expression": {"relation": "==", "lhs": _ref("PRM-0003"),
                         "rhs": {"op": "+", "args": [_ref("PRM-0001"),
                                                     _ref("PRM-0002")]}}}],
-    "construction_statements": [
-        {"id": "CST-0001", "body": "BOD-0001", "operation": "BOX", "operands": [],
-         "parameters": {"dx": _mm(40), "dy": _mm(30), "dz": _mm(20)}},
-        {"id": "CST-0002", "body": "BOD-0001", "operation": "CYLINDER",
-         "operands": [], "feature": "FEA-0001",
-         "parameters": {"radius": _ref("PRM-0003"), "height": _mm(30)}},
-        {"id": "CST-0003", "body": "BOD-0001", "operation": "TRANSLATE",
-         "operands": ["CST-0002"],
-         "parameters": {"dx": _mm(20), "dy": _mm(15), "dz": _mm(-5)}},
-        {"id": "CST-0004", "body": "BOD-0001", "operation": "CUT",
-         "operands": ["CST-0001", "CST-0003"], "parameters": {}}],
     "unresolved": [],
 }
 
@@ -155,7 +152,9 @@ class SeamFixture(_fixtures.StateBuilder, unittest.TestCase):
         self.add(state, "s03", "AssemblyStep", "ASM-0001", A)
         self.add(state, "s04", "ReferenceScale", "SCL-0001", A, basis="ABSOLUTE",
                  absolute={"unit": "mm", "per_unit": 1.0})
-        self.add(state, "s04", "Envelope", "ENV-0001", A)
+        self.add(state, "s04", "Envelope", "ENV-0001", A, body="BOD-0001",
+                 extent={"centre": [0.0, 0.0, 0.0], "half_extent": [20.0, 15.0, 10.0]},
+                 frame="world", maturity="PROVISIONAL")
         if with_motion:
             self.add(state, "s04", "State", "STA-0001", A)
             self.add(state, "s04", "Transition", "TRN-0001", A)
@@ -293,7 +292,7 @@ class TestEveryAuthoredFactRestsOnTheChoice(SeamFixture):
     def test_the_invocation_actually_authored_something(self):
         """Otherwise the loops below iterate over nothing."""
         creates = [o for o in self.outcome.patch.operations if o.kind == "CREATE"]
-        self.assertGreaterEqual(len(creates), 11)
+        self.assertGreaterEqual(len(creates), 9)
 
     def test_every_created_entity_rests_on_the_selected_candidate(self):
         for op in self.outcome.patch.operations:

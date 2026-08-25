@@ -61,6 +61,16 @@ class _TwoBranchState(_fixtures.StateBuilder, unittest.TestCase):
                {"instance_identity": "part %s" % suffix, "role": "shell",
                 "created_by_stage": "s03"}, "s03:topology",
                premise_refs=[branch])])
+        # Unit G: the s04 commitments the embodiment is placed against - a scale
+        # and the body's envelope - on this branch.
+        self._commit(state, "s04", [
+            Op("CREATE", "ReferenceScale", "SCL-%s" % suffix,
+               {"basis": "ABSOLUTE", "absolute": {"unit": "mm", "per_unit": 1.0}},
+               "s04:arrangement", premise_refs=[branch]),
+            Op("CREATE", "Envelope", "ENV-%s" % suffix,
+               {"body": body, "extent": {"centre": [0, 0, 0], "half_extent": [30, 5, 2]},
+                "frame": "world", "maturity": "PROVISIONAL"},
+               "s04:arrangement", premise_refs=[branch, "SCL-%s" % suffix])])
         self._commit(state, "s05", [
             Op("CREATE", "Parameter", "PRM-%s" % suffix,
                {"symbol": "w", "unit": "mm", "status": "DECLARED"},
@@ -71,13 +81,14 @@ class _TwoBranchState(_fixtures.StateBuilder, unittest.TestCase):
                                "lhs": {"ref": "PRM-%s" % suffix},
                                "rhs": {"const": float(width), "unit": "mm"}}},
                "s05:embodiment", premise_refs=[branch, "PRM-%s" % suffix]),
-            Op("CREATE", "ConstructionStatement", "CST-%s" % suffix,
-               {"body": body, "operation": "BOX",
-                "operands": [],
-                "parameters": {"dx": {"ref": "PRM-%s" % suffix},
-                               "dy": {"const": 10.0, "unit": "mm"},
-                               "dz": {"const": 4.0, "unit": "mm"}}},
-               "s05:embodiment", premise_refs=[branch, body])])
+            Op("CREATE", "Feature", "FEA-%s" % suffix,
+               {"body": body, "feature_kind": "STOCK", "geometry": "the block",
+                "placement": {"datum": "ENV-%s" % suffix, "axis": "+Z"},
+                "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                                  "parameters": {"dx": {"ref": "PRM-%s" % suffix},
+                                                 "dy": {"const": 10.0, "unit": "mm"},
+                                                 "dz": {"const": 4.0, "unit": "mm"}}}]},
+               "s05:embodiment", premise_refs=[branch, body, "ENV-%s" % suffix, "PRM-%s" % suffix])])
 
     def two_branches(self, selected):
         state = DesignState(run_id="branches")
@@ -99,8 +110,8 @@ class TestTheFixtureReallyContainsBothBranches(_TwoBranchState):
         state = self.two_branches("CND-A")
         ids = {r["entity_id"] for r in state.standing("Parameter")}
         self.assertEqual({"PRM-A", "PRM-B"}, ids)
-        ids = {r["entity_id"] for r in state.standing("ConstructionStatement")}
-        self.assertEqual({"CST-A", "CST-B"}, ids)
+        ids = {r["entity_id"] for r in state.standing("Feature")}
+        self.assertEqual({"FEA-A", "FEA-B"}, ids)
 
     def test_an_unfiltered_read_really_would_see_both(self):
         """The defect this guards against, demonstrated on the low-level API.

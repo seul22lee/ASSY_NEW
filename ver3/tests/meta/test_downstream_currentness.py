@@ -46,28 +46,26 @@ REF = lambda i: {"ref": i}                                       # noqa: E731
 
 
 def s05_response():
+    """A stock block at the body's envelope and a bore placed against it. The
+    construction is the features' own (Unit G)."""
     return {
-        "features": [{"id": "FEA-1", "body": "BOD-1", "feature_kind": "BORE",
-                      "geometry": "axial bore"}],
+        "features": [
+            {"id": "FEA-1", "body": "BOD-1", "feature_kind": "STOCK", "geometry": "the block",
+             "placement": {"datum": "ENV-1", "axis": "+Z"},
+             "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                               "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}}]},
+            {"id": "FEA-2", "body": "BOD-1", "feature_kind": "BORE", "geometry": "axial bore",
+             "placement": {"datum": "FEA-1", "offset": [MM(20), MM(15), MM(-5)], "axis": "+Z"},
+             "construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                               "parameters": {"radius": REF("PRM-R"), "height": MM(30)}}]}],
         "realizations": [{"id": "RLZ-1", "addresses_obligations": ["OBL-1"],
-                          "participating_features": ["FEA-1"],
+                          "participating_features": ["FEA-2"],
                           "verification_predicate": "the bore admits the pin"}],
         "parameters": [{"id": "PRM-R", "symbol": "r", "unit": "mm"}],
         "constraints": [{"id": "CON-R", "kind": "DIMENSIONAL",
                          "parameters": ["PRM-R"],
                          "expression": {"relation": "==", "lhs": REF("PRM-R"),
                                         "rhs": MM(6)}}],
-        "construction_statements": [
-            {"id": "CST-1", "body": "BOD-1", "operation": "BOX", "operands": [],
-             "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}},
-            {"id": "CST-2", "body": "BOD-1", "operation": "CYLINDER",
-             "operands": [], "feature": "FEA-1",
-             "parameters": {"radius": REF("PRM-R"), "height": MM(30)}},
-            {"id": "CST-3", "body": "BOD-1", "operation": "TRANSLATE",
-             "operands": ["CST-2"],
-             "parameters": {"dx": MM(20), "dy": MM(15), "dz": MM(-5)}},
-            {"id": "CST-4", "body": "BOD-1", "operation": "CUT",
-             "operands": ["CST-1", "CST-3"], "parameters": {}}],
     }
 
 
@@ -87,8 +85,18 @@ class _Chain(unittest.TestCase):
                 "scope": "UNIVERSAL", "satisfiable_at": "s05",
                 "evidence_route": "MOBILITY_ANALYSIS", "route_available": True},
                "s02:derivation")]))
+        # The s04 commitments the embodiment is placed against (Unit G).
+        self.assertEqual([], self.apply("s04", [
+            Op("CREATE", "ReferenceScale", "SCL-1",
+               {"basis": "ABSOLUTE", "absolute": {"unit": "mm", "per_unit": 1.0}},
+               "s04:arrangement"),
+            Op("CREATE", "Envelope", "ENV-1",
+               {"body": "BOD-1", "extent": {"centre": [0, 0, 0], "half_extent": [20, 15, 10]},
+                "frame": "world", "maturity": "PROVISIONAL"},
+               "s04:arrangement", premise_refs=["SCL-1"])]))
         self.assertEqual([], self.apply(
-            "s05", S05Embodiment().to_operations(s05_response())))
+            "s05", S05Embodiment().to_operations(
+                s05_response(), {"consumer_view": {"ReferenceScale": [{"entity_id": "SCL-1"}]}})))
         progression = Progression()
         ex.execute_settlement(self.state, progression)
         _result, execution = ex.execute_compilation(self.state, progression)
@@ -117,7 +125,7 @@ class TestACleanChainIsCurrent(_Chain):
 
     def test_a_clean_chain_is_entirely_standing(self):
         for eid in ("BOD-1", "OBL-1", "FEA-1", "RLZ-1", "PRM-R", "CON-R",
-                    "CST-1", "CST-2", "CST-3", "CST-4", self.signature):
+                    "FEA-2", self.signature):
             with self.subTest(entity=eid):
                 self.assertEqual("STANDING", self.validity(eid))
 
@@ -151,7 +159,7 @@ class TestUpstreamChangeStalesDownstream(_Chain):
             Op("SUPERSEDE", "Body", "BOD-1", {"role": "frame"},
                "s03:topology", reason="the body's role changed")]))
         self.assertEqual("STALE", self.validity("FEA-1"))
-        self.assertEqual("STALE", self.validity("CST-2"))
+        self.assertEqual("STALE", self.validity("FEA-2"))
         self.assertEqual("STALE", self.validity(self.signature))
 
     def test_an_obligation_change_stales_the_realization(self):
@@ -162,13 +170,26 @@ class TestUpstreamChangeStalesDownstream(_Chain):
                "s02:derivation", reason="the obligation was sharpened")]))
         self.assertEqual("STALE", self.validity("RLZ-1"))
 
-    def test_a_statement_change_stales_the_geometry(self):
-        """ConstructionStatement -> compiled artifact."""
+    def test_a_construction_change_stales_the_geometry(self):
+        """Feature construction -> compiled artifact."""
         self.assertEqual([], self.apply("s05", [
-            Op("SUPERSEDE", "ConstructionStatement", "CST-2",
-               {"parameters": {"radius": REF("PRM-R"), "height": MM(45)}},
+            Op("SUPERSEDE", "Feature", "FEA-2",
+               {"construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                                  "parameters": {"radius": REF("PRM-R"), "height": MM(45)}}]},
                "s05:embodiment", reason="the bore is deeper")]))
         self.assertEqual("STALE", self.validity(self.signature))
+
+    def test_a_moved_datum_stales_the_feature_placed_against_it(self):
+        """s04 arrangement -> s05 placement -> s07 geometry: move the envelope
+        the stock is placed at, and the stock, the bore against it and the
+        geometry all lose standing."""
+        self.assertEqual([], self.apply("s04", [
+            Op("SUPERSEDE", "Envelope", "ENV-1",
+               {"extent": {"centre": [5, 0, 0], "half_extent": [20, 15, 10]}},
+               "s04:arrangement", reason="the block moved")]))
+        for eid in ("FEA-1", "FEA-2", self.signature):
+            with self.subTest(entity=eid):
+                self.assertEqual("STALE", self.validity(eid))
 
     def test_staleness_is_dependency_local_not_global(self):
         """A change must not withdraw standing from everything indiscriminately.
@@ -180,7 +201,7 @@ class TestUpstreamChangeStalesDownstream(_Chain):
             Op("SUPERSEDE", "Obligation", "OBL-1",
                {"statement": "sharpened"}, "s02:derivation", reason="r")])
         self.assertEqual("STALE", self.validity("RLZ-1"))
-        self.assertEqual("STANDING", self.validity("CST-2"))
+        self.assertEqual("STANDING", self.validity("FEA-2"))
         self.assertEqual("STANDING", self.validity(self.signature))
 
 
@@ -254,9 +275,9 @@ class TestIntegratedDevelopmentChain(unittest.TestCase):
         """The traceability chain, read from the trace rather than asserted."""
         realization = self.by_id["s05"]["realization_graph"][0]
         self.assertIn("OBL-0001", realization["addresses_obligations"])
-        self.assertIn("FEA-0001", realization["participating_features"])
+        self.assertIn("FEA-0002", realization["participating_features"])
         signature = self.by_id["s07"]["signatures"][0]
-        self.assertEqual("FEA-0001", signature["feature_map"]["CST-0002"])
+        self.assertEqual("BOD-0001", signature["feature_map"]["FEA-0002"])
         body = signature["compiled_bodies"][0]
         self.assertTrue(body["single_connected_solid"])
         self.assertGreater(body["volume"], 0)
@@ -290,50 +311,41 @@ class TestIntegratedDevelopmentChain(unittest.TestCase):
                 self.assertNotIn(banned, blob)
 
 
-class TestSpatialFactsRestOnTheirFrame(unittest.TestCase):
-    """A Feature carrying an envelope rests on the basis it is expressed in.
+class TestAFeatureRestsOnItsDatumAndTheScale(unittest.TestCase):
+    """A feature is placed relative to an s04 commitment, and rests on it.
 
-    s04 already states the rule for its own coordinates: "withdraw the basis and
-    the numbers mean nothing." `Feature.envelope` is the same shape in the same
-    frame - it is what S05-C8 compares against a FunctionalRegion volume - and it
-    was premised only on its body. A revised ReferenceScale therefore left every
-    feature envelope looking current while its numbers had silently changed
-    meaning, and C8 would have re-run the intrusion test on coordinates that no
-    longer said what they used to.
-
-    The premise is conditional on ACTUALLY carrying an envelope: a feature with
-    no coordinates does not rest on the frame, and premising it anyway would
-    stale geometry a change of basis cannot affect.
+    s04 states the rule for its own coordinates: "withdraw the basis and the
+    numbers mean nothing." A feature placed against a joint frame, an envelope
+    or a region inherits that: the datum and the scale every datum coordinate
+    is stated in are premises, so a moved joint or a revised basis withdraws
+    standing from the geometry placed against them (Unit G).
     """
 
-    def _ops(self, envelope):
+    def _feature(self, placement):
         from ver3.assy_v3.stages.s05_embodiment import S05Embodiment
         stage = S05Embodiment()
-        feature = {"id": "FEA-1", "body": "BOD-1", "feature_kind": "FACE",
-                   "geometry": "a face"}
-        if envelope is not None:
-            feature["envelope"] = envelope
+        feature = {"id": "FEA-1", "body": "BOD-1", "feature_kind": "STOCK", "geometry": "a block",
+                   "placement": placement,
+                   "construction": [{"id": "b", "operation": "BOX", "operands": [],
+                                     "parameters": {"dx": MM(1), "dy": MM(1), "dz": MM(1)}}]}
         view = {"ReferenceScale": [{"entity_id": "SCL-CND-0001"}]}
-        ops = stage.to_operations({"features": [feature]},
-                                  {stage.context_key: view})
+        ops = stage.to_operations({"features": [feature]}, {stage.context_key: view})
         return [o for o in ops if o.entity_id == "FEA-1"][0]
 
     def test_the_fixture_supplies_a_scale_to_depend_on(self):
-        """Otherwise both assertions below compare against an absent premise."""
-        op = self._ops({"centre": [0, 0, 0], "half_extent": [1, 1, 1]})
+        op = self._feature({"datum": "ENV-1", "axis": "+Z"})
         self.assertIn("BOD-1", op.premise_refs)
 
-    def test_an_envelope_rests_on_the_reference_scale(self):
-        op = self._ops({"centre": [0, 0, 0], "half_extent": [1, 1, 1]})
+    def test_a_placement_rests_on_its_datum_and_on_the_reference_scale(self):
+        op = self._feature({"datum": "ENV-1", "axis": "+Z"})
+        self.assertIn("ENV-1", op.premise_refs)
         self.assertIn("SCL-CND-0001", op.premise_refs,
-                      "the envelope's coordinates are expressed in this basis; "
-                      "without the premise a revised basis leaves them current")
+                      "the datum's coordinates are expressed in this basis; without the "
+                      "premise a revised basis leaves the placement current")
 
-    def test_a_feature_without_an_envelope_does_not(self):
-        op = self._ops(None)
-        self.assertNotIn("SCL-CND-0001", op.premise_refs,
-                         "a feature with no coordinates does not rest on the "
-                         "frame, and staling it would be a false dependency")
+    def test_a_joint_datum_is_a_premise_too(self):
+        op = self._feature({"datum": "JNT-1"})
+        self.assertIn("JNT-1", op.premise_refs)
 
 
 class TestGovernsInterfaceIsADependency(unittest.TestCase):

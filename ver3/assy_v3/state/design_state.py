@@ -519,9 +519,33 @@ class DesignState:
             if kind:
                 from ..downstream import ir as _ir
                 if ir_known is None:
-                    ir_known = (prospective.declared_ids("Parameter"),
-                                prospective.declared_ids("ConstructionStatement"))
-                problems.extend(_ir.record_problems(kind, record, *ir_known,
+                    # UNIT G. What a record may refer to, from the state the
+                    # patch would leave: declared parameters; the s04 spatial
+                    # datums a feature may be placed against (joints, envelopes,
+                    # regions) and the features of the same body; and which
+                    # body each envelope / region / feature belongs to.
+                    datums, feature_bodies, datum_bodies, joint_axes = {}, {}, {}, {}
+                    for fam in ("Joint", "Envelope", "FunctionalRegion", "Feature"):
+                        for rec in prospective.declared_records(fam):
+                            did = rec["entity_id"]
+                            datums[did] = fam
+                            if fam == "Joint":
+                                joint_axes[did] = rec.get("axis_direction")
+                            if fam == "Feature":
+                                feature_bodies[did] = rec.get("body")
+                            elif fam == "Envelope" and rec.get("body"):
+                                datum_bodies[did] = {rec["body"]}
+                            elif fam == "FunctionalRegion":
+                                datum_bodies[did] = {b for b in (rec.get("owning_bodies") or [])
+                                                     if isinstance(b, str)}
+                    units = {rec["entity_id"]: rec.get("unit")
+                             for rec in prospective.declared_records("Parameter")
+                             if isinstance(rec.get("unit"), str) and rec.get("unit")}
+                    ir_known = _ir.Known(parameters=prospective.declared_ids("Parameter"),
+                                         datums=datums, feature_bodies=feature_bodies,
+                                         datum_bodies=datum_bodies, joint_axes=joint_axes,
+                                         units=units)
+                problems.extend(_ir.record_problems(kind, record, ir_known,
                                                     created=eid in created_here))
         return problems
 
@@ -1409,6 +1433,13 @@ class _Prospective:
         from half a patch is answering about a state that will never exist.
         """
         return self._ok
+
+    def declared_records(self, family: str) -> List[Dict[str, Any]]:
+        """The records DECLARED in this family after the patch (present, not
+        withdrawn), whatever their currentness."""
+        return [r for r in self._twin.family(family)
+                if r.get("_validity", ValidityStatus.STANDING.value)
+                != ValidityStatus.INVALIDATED.value]
 
     def declared_ids(self, family: str) -> Set[str]:
         """The ids DECLARED in this family after the patch: present and not

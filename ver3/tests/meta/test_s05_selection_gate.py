@@ -64,7 +64,7 @@ class CountingProvider:
 
 
 _EMPTY_RESPONSE = {"features": [], "realizations": [], "parameters": [],
-                   "constraints": [], "construction_statements": [],
+                   "constraints": [],
                    "unresolved": []}
 
 

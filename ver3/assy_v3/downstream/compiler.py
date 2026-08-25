@@ -38,8 +38,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from .ir import (AXIS_VECTORS, ConstructionProgram, Expr, IRError, Placement,
-                 Statement, dependency_cone)
+from .ir import AXIS_VECTORS, Expr, FeatureSpec, IRError, Step
 from .kinematics import Frame
 
 #: S07-C3. Absolute, in mm3, and declared by the contract rather than tuned.
@@ -99,7 +98,11 @@ class CompiledBody:
     solid_count: int
     single_connected_solid: bool
     bbox: Tuple[float, float, float, float, float, float]
-    statement_map: Dict[str, str] = field(default_factory=dict)
+    #: UNIT G. feature id -> polarity, for every feature composed into this body,
+    #: and each feature's own solid, so an interface can be judged at the feature
+    #: that realizes it rather than at the whole body.
+    feature_map: Dict[str, str] = field(default_factory=dict)
+    feature_shapes: Dict[str, Any] = field(default_factory=dict)
     shape: Any = None
 
     def as_record(self) -> Dict[str, Any]:
@@ -107,7 +110,7 @@ class CompiledBody:
                 "is_valid": self.is_valid, "solid_count": self.solid_count,
                 "single_connected_solid": self.single_connected_solid,
                 "bbox": list(self.bbox),
-                "statement_map": dict(sorted(self.statement_map.items()))}
+                "feature_map": dict(sorted(self.feature_map.items()))}
 
 
 @dataclass
@@ -115,8 +118,9 @@ class CompileResult:
     ok: bool
     bodies: List[CompiledBody] = field(default_factory=list)
     problems: List[str] = field(default_factory=list)
-    failed_statement: Optional[str] = None
-    dependency_cone: List[str] = field(default_factory=list)
+    #: UNIT G. On failure: the feature and its step that did not build.
+    failed_feature: Optional[str] = None
+    failed_step: Optional[str] = None
     signature: Optional[Dict[str, Any]] = None
     exports: Dict[str, Any] = field(default_factory=dict)
     roundtrip: Dict[str, Any] = field(default_factory=dict)
@@ -128,8 +132,7 @@ class CompileResult:
         return {"ok": self.ok,
                 "bodies": [b.as_record() for b in self.bodies],
                 "problems": list(self.problems),
-                "failed_statement": self.failed_statement,
-                "dependency_cone": list(self.dependency_cone),
+                "failed_feature": self.failed_feature, "failed_step": self.failed_step,
                 "signature": self.signature, "exports": dict(self.exports),
                 "roundtrip": dict(self.roundtrip), "artifact": self.artifact}
 
@@ -187,46 +190,52 @@ def placed(K, shape, frame: Optional[Frame]):
     return K["BRepBuilderAPI_Transform"](shape, trsf_of(K, frame), True).Shape()
 
 
-def _build_statement(K, stmt: Statement, values: Dict[str, float],
-                     built: Dict[str, Any], frames: Dict[str, Frame]):
-    """One opcode to one shape. No opcode consults anything but its own inputs.
+def trsf_of(K, frame: Frame):
+    """A derived Frame as the kernel's rigid transform. Nothing is re-decided."""
+    trsf = K["gp_Trsf"]()
+    r, t = frame.r, frame.t
+    trsf.SetValues(r[0][0], r[0][1], r[0][2], t[0],
+                   r[1][0], r[1][1], r[1][2], t[1],
+                   r[2][0], r[2][1], r[2][2], t[2])
+    return trsf
 
-    UNIT G. A PRIMITIVE THAT REALIZES A PLACED FEATURE IS BUILT IN THAT
-    FEATURE'S FRAME (`frames`, derived from Feature.placement with the settled
-    values): its canonical Z is the placement axis, its origin the placement
-    origin. That is the whole of placement - one transform, from one declared
-    frame, applied by the kernel. TRANSLATE and ROTATE stay moves in the body
-    frame.
-    """
-    p = {k: resolve(v, values) for k, v in stmt.parameters.items()}
-    op = stmt.operation
-    frame = frames.get(stmt.feature) if stmt.feature else None
+
+def placed(K, shape, frame: Optional[Frame]):
+    if frame is None:
+        return shape
+    return K["BRepBuilderAPI_Transform"](shape, trsf_of(K, frame), True).Shape()
+
+
+def _build_step(K, step: Step, values: Dict[str, float], built: Dict[str, Any]):
+    """One opcode to one shape, in the feature's own frame. No opcode consults
+    anything but its own inputs."""
+    p = {k: resolve(v, values) for k, v in step.parameters.items()}
+    op = step.operation
     if op == "BOX":
         if min(p["dx"], p["dy"], p["dz"]) <= 0:
-            raise IRError("BOX %s has a non-positive dimension" % stmt.entity_id)
-        return placed(K, K["BRepPrimAPI_MakeBox"](
-            K["gp_Pnt"](0, 0, 0), p["dx"], p["dy"], p["dz"]).Shape(), frame)
+            raise IRError("BOX %s has a non-positive dimension" % step.step_id)
+        return K["BRepPrimAPI_MakeBox"](K["gp_Pnt"](0, 0, 0), p["dx"], p["dy"], p["dz"]).Shape()
     if op == "CYLINDER":
         if p["radius"] <= 0 or p["height"] <= 0:
-            raise IRError("CYLINDER %s has a non-positive dimension" % stmt.entity_id)
-        return placed(K, K["BRepPrimAPI_MakeCylinder"](p["radius"], p["height"]).Shape(), frame)
+            raise IRError("CYLINDER %s has a non-positive dimension" % step.step_id)
+        return K["BRepPrimAPI_MakeCylinder"](p["radius"], p["height"]).Shape()
     if op == "SPHERE":
         if p["radius"] <= 0:
-            raise IRError("SPHERE %s has a non-positive radius" % stmt.entity_id)
-        return placed(K, K["BRepPrimAPI_MakeSphere"](p["radius"]).Shape(), frame)
+            raise IRError("SPHERE %s has a non-positive radius" % step.step_id)
+        return K["BRepPrimAPI_MakeSphere"](p["radius"]).Shape()
     if op == "TRANSLATE":
         trsf = K["gp_Trsf"]()
         trsf.SetTranslation(K["gp_Vec"](p["dx"], p["dy"], p["dz"]))
-        return K["BRepBuilderAPI_Transform"](built[stmt.operands[0]], trsf, True).Shape()
+        return K["BRepBuilderAPI_Transform"](built[step.operands[0]], trsf, True).Shape()
     if op == "ROTATE":
         import math
-        d = AXIS_VECTORS["+" + stmt.axis]
+        d = AXIS_VECTORS["+" + step.axis]
         trsf = K["gp_Trsf"]()
         trsf.SetRotation(K["gp_Ax1"](K["gp_Pnt"](0, 0, 0), K["gp_Dir"](*d)),
                          math.radians(p["angle"]))
-        return K["BRepBuilderAPI_Transform"](built[stmt.operands[0]], trsf, True).Shape()
-    shape = built[stmt.operands[0]]
-    for operand in stmt.operands[1:]:
+        return K["BRepBuilderAPI_Transform"](built[step.operands[0]], trsf, True).Shape()
+    shape = built[step.operands[0]]
+    for operand in step.operands[1:]:
         other = built[operand]
         if op == "UNION":
             algo = K["BRepAlgoAPI_Fuse"](shape, other)
@@ -235,10 +244,127 @@ def _build_statement(K, stmt: Statement, values: Dict[str, float],
         else:
             algo = K["BRepAlgoAPI_Common"](shape, other)
         if not algo.IsDone():
-            raise IRError("%s %s: the kernel did not complete the boolean"
-                          % (op, stmt.entity_id))
+            raise IRError("%s %s: the kernel did not complete the boolean" % (op, step.step_id))
         shape = algo.Shape()
     return shape
+
+
+class BuildFailure(IRError):
+    """A step of a feature did not build. Carries WHICH step, so the failure
+    cites the feature and the step rather than a guess from a message."""
+
+    def __init__(self, feature: str, step: str, cause: Exception):
+        super().__init__("%s.%s: %s" % (feature, step, cause))
+        self.feature, self.step, self.cause = feature, step, cause
+
+
+def build_feature(K, spec: FeatureSpec, values: Dict[str, float], frame: Frame):
+    """The feature's solid, in the world: its steps in its own frame, then the
+    one derived transform."""
+    built: Dict[str, Any] = {}
+    for step in spec.steps:
+        try:
+            built[step.step_id] = _build_step(K, step, values, built)
+        except (IRError, KeyError, RuntimeError) as exc:
+            raise BuildFailure(spec.entity_id, step.step_id, exc)
+    return placed(K, built[spec.terminal], frame)
+
+
+ADDITIVE = "ADDITIVE"
+SUBTRACTIVE = "SUBTRACTIVE"
+
+
+def compile_embodiment(features: Sequence[FeatureSpec], values: Dict[str, float],
+                       frames: Dict[str, Frame], polarity: Dict[str, str],
+                       out_dir: Optional[str] = None) -> CompileResult:
+    """Build every feature in its derived frame, compose every body from its
+    features by declared polarity, measure, export, and check the round trips.
+
+    UNIT G. A body is the union of its ADDITIVE features with its SUBTRACTIVE
+    features removed, in id order within each polarity. On the first feature
+    that cannot be built this returns with the feature and its step and with
+    NO geometry emitted (S07-C6 as control flow). A feature with no derived
+    frame is not built at the origin: it is the failure it is.
+    """
+    try:
+        K = kernel()
+    except KernelUnavailable as exc:
+        return CompileResult(ok=False, problems=[str(exc)])
+    if not features:
+        # The hash of nothing is not evidence (Unit F); an embodiment with no
+        # feature has nothing to compile and says so.
+        return CompileResult(ok=False, problems=["no feature to compile; nothing gives any body "
+                                                 "material"])
+    result = CompileResult(ok=True)
+    by_body: Dict[str, List[FeatureSpec]] = {}
+    for f in sorted(features, key=lambda x: x.entity_id):
+        by_body.setdefault(f.body, []).append(f)
+    for body, specs in sorted(by_body.items()):
+        shapes: Dict[str, Any] = {}
+        fmap: Dict[str, str] = {}
+        for spec in specs:
+            pol = polarity.get(spec.kind)
+            if pol not in (ADDITIVE, SUBTRACTIVE):
+                return _fail(result, spec.entity_id, None,
+                             "feature kind %s of %s has no declared polarity" % (spec.kind, spec.entity_id))
+            frame = frames.get(spec.entity_id)
+            if frame is None:
+                return _fail(result, spec.entity_id, None,
+                             "feature %s has no derived frame; nothing is built at the origin instead"
+                             % spec.entity_id)
+            try:
+                shapes[spec.entity_id] = build_feature(K, spec, values, frame)
+            except BuildFailure as exc:
+                return _fail(result, exc.feature, exc.step, str(exc))
+            fmap[spec.entity_id] = pol
+        additive = [fid for fid in sorted(fmap) if fmap[fid] == ADDITIVE]
+        subtractive = [fid for fid in sorted(fmap) if fmap[fid] == SUBTRACTIVE]
+        if not additive:
+            return _fail(result, None, None,
+                         "body %s has no additive feature; nothing gives it material" % body)
+        shape = shapes[additive[0]]
+        for fid in additive[1:]:
+            algo = K["BRepAlgoAPI_Fuse"](shape, shapes[fid])
+            if not algo.IsDone():
+                return _fail(result, fid, None, "UNION of %s into %s did not complete" % (fid, body))
+            shape = algo.Shape()
+        for fid in subtractive:
+            algo = K["BRepAlgoAPI_Cut"](shape, shapes[fid])
+            if not algo.IsDone():
+                return _fail(result, fid, None, "CUT of %s from %s did not complete" % (fid, body))
+            shape = algo.Shape()
+        volume, count, valid, bbox = _measure(K, shape)
+        result.bodies.append(CompiledBody(
+            body_id=body, volume=volume, is_valid=valid, solid_count=count,
+            single_connected_solid=(count == 1), bbox=bbox, feature_map=fmap,
+            feature_shapes=shapes, shape=shape))
+
+    # ---- S07-C1 / C2 -------------------------------------------------
+    for b in result.bodies:
+        if not b.is_valid or b.volume <= 0:
+            result.ok = False
+            result.problems.append(
+                "S07-C1: body %s is not a valid solid with positive volume "
+                "(valid=%s volume=%g)" % (b.body_id, b.is_valid, b.volume))
+        if not b.single_connected_solid:
+            result.ok = False
+            result.problems.append(
+                "S07-C2: body %s compiled to %d solids; a body must be a single "
+                "connected solid" % (b.body_id, b.solid_count))
+    result.signature = geometry_signature(result.bodies)
+    if out_dir and result.ok:
+        _export_and_check(K, result, out_dir)
+    return result
+
+
+def _fail(result: CompileResult, feature: Optional[str], step: Optional[str], problem: str
+          ) -> CompileResult:
+    result.ok = False
+    result.failed_feature = feature
+    result.failed_step = step
+    result.problems.append(problem)
+    result.bodies = []                       # no geometry is emitted on failure
+    return result
 
 
 def _measure(K, shape) -> Tuple[float, int, bool, Tuple[float, ...]]:
@@ -253,101 +379,6 @@ def _measure(K, shape) -> Tuple[float, int, bool, Tuple[float, ...]]:
     box = K["Bnd_Box"]()
     K["BRepBndLib"].Add_s(shape, box)
     return props.Mass(), n, bool(valid), tuple(box.Get())
-
-
-def feature_frames(placements: Dict[str, Any], values: Dict[str, float]
-                   ) -> Dict[str, Frame]:
-    """Feature id -> its frame, from the placement grammar and settled values.
-
-    A placement that does not resolve raises with the parameter it is missing:
-    a feature whose frame nobody settled is not built at the origin instead.
-    """
-    out: Dict[str, Frame] = {}
-    for fid, node in sorted((placements or {}).items()):
-        if node is None:
-            continue
-        placement = node if isinstance(node, Placement) else \
-            Placement.parse(node, "feature %s placement" % fid)
-        origin = tuple(resolve(e, values) for e in placement.origin)
-        out[fid] = Frame.from_axis(origin, placement.axis)
-    return out
-
-
-def compile_program(program: ConstructionProgram, values: Dict[str, float],
-                    out_dir: Optional[str] = None,
-                    placements: Optional[Dict[str, Any]] = None) -> CompileResult:
-    """Build every body, measure it, export it, and check the round trips.
-
-    On the first statement that cannot be compiled this returns immediately with
-    the statement and its dependency cone, and with NO geometry emitted - which
-    is S07-C6 stated as control flow rather than as a promise.
-
-    `placements`: Feature id -> placement node (Feature.placement) for the
-    features the program's statements realize; a primitive is built in its
-    feature's frame (Unit G).
-    """
-    ordering = program.ordering_problems()
-    if ordering:
-        return CompileResult(ok=False, problems=ordering,
-                             failed_statement=ordering[0].split()[0],
-                             dependency_cone=[])
-    try:
-        K = kernel()
-    except KernelUnavailable as exc:
-        return CompileResult(ok=False, problems=[str(exc)])
-
-    result = CompileResult(ok=True)
-    built: Dict[str, Any] = {}
-    try:
-        frames = feature_frames(placements or {}, values)
-    except IRError as exc:
-        return CompileResult(ok=False, problems=["placement: %s" % exc])
-    for body in program.bodies():
-        stmts = program.for_body(body)
-        terminal = program.terminal_of(body)
-        if terminal is None:
-            result.ok = False
-            result.problems.append(
-                "body %s has no single terminal statement; the program does not "
-                "say which result IS the body" % body)
-            return result
-        smap: Dict[str, str] = {}
-        for stmt in stmts:
-            try:
-                shape = _build_statement(K, stmt, values, built, frames)
-            except (IRError, KeyError, RuntimeError) as exc:
-                result.ok = False
-                result.failed_statement = stmt.entity_id
-                result.dependency_cone = dependency_cone(program, stmt.entity_id)
-                result.problems.append("%s: %s" % (stmt.entity_id, exc))
-                result.bodies = []          # no geometry is emitted on failure
-                return result
-            built[stmt.entity_id] = shape
-            if stmt.feature:
-                smap[stmt.entity_id] = stmt.feature
-        volume, count, valid, bbox = _measure(K, built[terminal])
-        result.bodies.append(CompiledBody(
-            body_id=body, volume=volume, is_valid=valid, solid_count=count,
-            single_connected_solid=(count == 1), bbox=bbox,
-            statement_map=smap, shape=built[terminal]))
-
-    # ---- S07-C1 / C2 -------------------------------------------------
-    for b in result.bodies:
-        if not b.is_valid or b.volume <= 0:
-            result.ok = False
-            result.problems.append(
-                "S07-C1: body %s is not a valid solid with positive volume "
-                "(valid=%s volume=%g)" % (b.body_id, b.is_valid, b.volume))
-        if not b.single_connected_solid:
-            result.ok = False
-            result.problems.append(
-                "S07-C2: body %s compiled to %d solids; a body must be a single "
-                "connected solid" % (b.body_id, b.solid_count))
-
-    result.signature = geometry_signature(result.bodies)
-    if out_dir and result.ok:
-        _export_and_check(K, result, out_dir)
-    return result
 
 
 def geometry_signature(bodies: Sequence[CompiledBody]) -> Dict[str, Any]:
@@ -410,11 +441,12 @@ def _export_and_check(K, result: CompileResult, out_dir: str) -> None:
     result.roundtrip = rt
 
 
-def independent_rebuild_matches(program: ConstructionProgram,
-                                values: Dict[str, float]) -> Tuple[bool, str, str]:
+def independent_rebuild_matches(features: Sequence[FeatureSpec], values: Dict[str, float],
+                                frames: Dict[str, Frame], polarity: Dict[str, str]
+                                ) -> Tuple[bool, str, str]:
     """S07-C5. Compile twice and compare signatures taken from native shapes."""
-    a = compile_program(program, values)
-    b = compile_program(program, values)
+    a = compile_embodiment(features, values, frames, polarity)
+    b = compile_embodiment(features, values, frames, polarity)
     sa = (a.signature or {}).get("signature_sha256", "")
     sb = (b.signature or {}).get("signature_sha256", "")
     return (bool(sa) and sa == sb), sa, sb

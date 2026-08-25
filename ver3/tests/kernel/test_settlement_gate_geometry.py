@@ -24,7 +24,7 @@ class TestSettledChainCompiles(_Embodied):
         self.assertTrue(execution.patch_applied)
         signature = self.state.entities[execution.evidence_id]
         self.assertTrue(signature["_premises"])
-        self.assertIn("CST-1", signature["_premises"])
+        self.assertIn("FEA-1", signature["_premises"])
         self.assertIn("PRM-W", signature["_premises"])
         self.assertEqual(1, len(result.bodies))
 

@@ -52,23 +52,42 @@ def equals(cid, lhs, rhs, params):
               "s05:embodiment")
 
 
-def body(state, bid="BOD-0001"):
-    return apply(state, "s03", [Op("CREATE", "Body", bid,
-                                   {"instance_identity": bid, "role": "shell",
-                                    "created_by_stage": "s03"}, "s03:topology")])
+def body(state, bid="BOD-0001", branch=None, scale="SCL-0001"):
+    """A body AND the s04 commitments an embodiment is placed against: one
+    ABSOLUTE scale in the kernel unit (created once) and the body's envelope."""
+    prem = [branch] if branch else []
+    problems = apply(state, "s03", [Op("CREATE", "Body", bid,
+                                       {"instance_identity": bid, "role": "shell",
+                                        "created_by_stage": "s03"}, "s03:topology",
+                                       premise_refs=prem)])
+    if problems:
+        return problems
+    ops = []
+    if scale not in state.entities:
+        ops.append(Op("CREATE", "ReferenceScale", scale,
+                      {"basis": "ABSOLUTE", "absolute": {"unit": "mm", "per_unit": 1.0}},
+                      "s04:arrangement", premise_refs=prem))
+    ops.append(Op("CREATE", "Envelope", "ENV-%s" % bid[4:],
+                  {"body": bid, "extent": {"centre": [0, 0, 0], "half_extent": [20, 15, 10]},
+                   "frame": "world", "maturity": "PROVISIONAL"},
+                  "s04:arrangement", premise_refs=[scale] + prem))
+    return apply(state, "s04", ops)
 
 
-def box(sid, bid, dx, dy=None, dz=None, premises=()):
-    """A construction statement: THE MINIMUM EMBODIMENT BASIS (Unit F).
+def stock(fid, bid, dx, dy=None, dz=None, premises=()):
+    """The body's STOCK feature: THE MINIMUM EMBODIMENT BASIS (Unit F/G).
 
-    Settlement is asked FOR a program; a state with parameters and constraints
-    and nothing to build is `not_ready`, not an empty problem that solved. Every
-    settlement fixture therefore carries a body and one statement.
+    Settlement is asked FOR an embodiment; a state with parameters and
+    constraints and nothing to build is `not_ready`, not an empty problem that
+    solved. Every settlement fixture therefore carries a body and one feature
+    that gives it material, placed at the body's envelope.
     """
-    return Op("CREATE", "ConstructionStatement", sid,
-              {"body": bid, "operation": "BOX", "operands": [],
-               "parameters": {"dx": dx, "dy": dy or MM(10), "dz": dz or MM(4)}},
-              "s05:embodiment", premise_refs=[bid] + list(premises))
+    return Op("CREATE", "Feature", fid,
+              {"body": bid, "feature_kind": "STOCK", "geometry": "the block",
+               "placement": {"datum": "ENV-%s" % bid[4:], "axis": "+Z"},
+               "construction": [{"id": "block", "operation": "BOX", "operands": [],
+                                 "parameters": {"dx": dx, "dy": dy or MM(10), "dz": dz or MM(4)}}]},
+              "s05:embodiment", premise_refs=[bid, "ENV-%s" % bid[4:]] + list(premises))
 
 
 class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
@@ -84,7 +103,7 @@ class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
                    ["PRM-0001", "PRM-0002", "PRM-0003"]),
             equals("CON-0002", REF("PRM-0001"), MM(4), ["PRM-0001"]),
             equals("CON-0003", REF("PRM-0002"), MM(2), ["PRM-0002"]),
-            box("CST-0001", "BOD-0001", REF("PRM-0003"))]))
+            stock("FEA-0001", "BOD-0001", REF("PRM-0003"), premises=["PRM-0003"])]))
 
     def test_a_feasible_settlement_is_written_with_its_evidence(self):
         report, execution = ex.execute_settlement(self.state, Progression())
@@ -118,7 +137,8 @@ class TestSettlementWritesOnlyWhatItMay(unittest.TestCase):
         state = DesignState(run_id="free")
         self.assertEqual([], body(state))
         self.assertEqual([], apply(state, "s05", [
-            param("PRM-0009", "free"), box("CST-0009", "BOD-0001", REF("PRM-0009"))]))
+            param("PRM-0009", "free"), stock("FEA-0009", "BOD-0001", REF("PRM-0009"),
+                                             premises=["PRM-0009"])]))
         report, execution = ex.execute_settlement(state, Progression())
         self.assertEqual(ir.UNDERDETERMINED, report.solver_status)
         self.assertFalse(execution.patch_applied)
@@ -160,7 +180,7 @@ class TestBoundedConvergence(unittest.TestCase):
         state = DesignState(run_id="conv")
         self.assertEqual([], body(state))
         ops = [param("PRM-A", "a"), param("PRM-B", "b"),
-               box("CST-AB", "BOD-0001", REF("PRM-A"), REF("PRM-B"))]
+               stock("FEA-AB", "BOD-0001", REF("PRM-A"), REF("PRM-B"), premises=["PRM-A", "PRM-B"])]
         if determined:
             ops += [
                 equals("CON-1", {"op": "+", "args": [REF("PRM-A"), REF("PRM-B")]},
@@ -231,10 +251,7 @@ class TestBranchIsolation(unittest.TestCase):
                                     candidate("CND-B", "STORED_ENERGY")]))
         for branch, pid, value in (("CND-A", "PRM-A1", 10), ("CND-B", "PRM-B1", 99)):
             bid = "BOD-%s" % branch[-1]
-            self.assertEqual([], apply(self.state, "s03", [
-                Op("CREATE", "Body", bid,
-                   {"instance_identity": bid, "role": "shell", "created_by_stage": "s03"},
-                   "s03:topology", premise_refs=[branch])]))
+            self.assertEqual([], body(self.state, bid, branch=branch, scale="SCL-%s" % branch[-1]))
             self.assertEqual([], apply(self.state, "s05", [
                 Op("CREATE", "Parameter", pid,
                    {"symbol": "w", "unit": "mm", "status": ir.DECLARED},
@@ -244,7 +261,7 @@ class TestBranchIsolation(unittest.TestCase):
                     "expression": {"relation": "==", "lhs": REF(pid),
                                    "rhs": MM(value)}},
                    "s05:embodiment", premise_refs=[branch]),
-                box("CST-%s" % pid, bid, REF(pid), premises=[branch])]))
+                stock("FEA-%s" % pid, bid, REF(pid), premises=[branch, pid])]))
 
     def test_a_branch_reads_only_its_own_parameters(self):
         self.assertEqual(["PRM-A1"],
@@ -276,26 +293,13 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
         self.assertEqual([], apply(self.state, "s05", [
             param("PRM-R", "boss_r"),
             equals("CON-R", REF("PRM-R"), MM(6), ["PRM-R"]),
-            Op("CREATE", "Feature", "FEA-0001",
-               {"body": "BOD-0001", "feature_kind": "BORE", "geometry": "axial bore"},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-0001",
-               {"body": "BOD-0001", "operation": "BOX", "operands": [],
-                "parameters": {"dx": MM(40), "dy": MM(30), "dz": MM(20)}},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-0002",
-               {"body": "BOD-0001", "operation": "CYLINDER", "operands": [],
-                "feature": "FEA-0001",
-                "parameters": {"radius": REF("PRM-R"), "height": MM(30)}},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-0003",
-               {"body": "BOD-0001", "operation": "TRANSLATE", "operands": ["CST-0002"],
-                "parameters": {"dx": MM(20), "dy": MM(15), "dz": MM(-5)}},
-               "s05:embodiment"),
-            Op("CREATE", "ConstructionStatement", "CST-0004",
-               {"body": "BOD-0001", "operation": "CUT",
-                "operands": ["CST-0001", "CST-0003"], "parameters": {}},
-               "s05:embodiment")]))
+            stock("FEA-0001", "BOD-0001", MM(40), MM(30), MM(20)),
+            Op("CREATE", "Feature", "FEA-0002",
+               {"body": "BOD-0001", "feature_kind": "BORE", "geometry": "axial bore",
+                "placement": {"datum": "FEA-0001", "offset": [MM(20), MM(15), MM(-5)], "axis": "+Z"},
+                "construction": [{"id": "hole", "operation": "CYLINDER", "operands": [],
+                                  "parameters": {"radius": REF("PRM-R"), "height": MM(30)}}]},
+               "s05:embodiment", premise_refs=["BOD-0001", "FEA-0001", "PRM-R"])]))
 
     def test_the_chain_compiles_and_registers_a_signature(self):
         p = Progression()
@@ -319,16 +323,17 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
         ex.execute_settlement(self.state, p)
         _result, execution = ex.execute_compilation(self.state, p)
         signature = self.state.entities[execution.evidence_id]
-        self.assertEqual("FEA-0001", signature["feature_map"]["CST-0002"])
+        self.assertEqual("BOD-0001", signature["feature_map"]["FEA-0002"])
         compiled = {b["body_id"]: b for b in signature["compiled_bodies"]}
         self.assertTrue(compiled["BOD-0001"]["is_valid"])
+        self.assertEqual("SUBTRACTIVE", compiled["BOD-0001"]["feature_map"]["FEA-0002"])
 
     def test_a_successful_compile_stales_nothing_upstream(self):
         """The defect that moved these facts onto the signature."""
         p = Progression()
         ex.execute_settlement(self.state, p)
         ex.execute_compilation(self.state, p)
-        for eid in ("BOD-0001", "FEA-0001", "CST-0002", "CST-0004"):
+        for eid in ("BOD-0001", "FEA-0001", "FEA-0002"):
             with self.subTest(entity=eid):
                 self.assertEqual("STANDING",
                                  self.state.entities[eid].get("_validity", "STANDING"))
@@ -343,14 +348,10 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
         state = DesignState(run_id="unsolved")
         self.assertEqual([], body(state))
         self.assertEqual([], apply(state, "s05", [
-            param("PRM-X", "r"),
-            Op("CREATE", "ConstructionStatement", "CST-1",
-               {"body": "BOD-0001", "operation": "CYLINDER", "operands": [],
-                "parameters": {"radius": REF("PRM-X"), "height": MM(5)}},
-               "s05:embodiment")]))
+            param("PRM-X", "r"), stock("FEA-1", "BOD-0001", REF("PRM-X"), premises=["PRM-X"])]))
         result, execution = ex.execute_compilation(state, Progression())
         self.assertFalse(result.ok)
-        self.assertIsNone(result.failed_statement, "the kernel was asked")
+        self.assertIsNone(result.failed_feature, "the kernel was asked")
         self.assertTrue(any("PRM-X" in p and "no standing settled value" in p
                             for p in result.problems), result.problems)
         self.assertFalse(execution.patch_applied)
@@ -358,11 +359,7 @@ class TestCompilationFromCanonicalState(unittest.TestCase):
     def test_a_failed_compile_registers_no_artifact(self):
         state = DesignState(run_id="nofact")
         self.assertEqual([], body(state))
-        apply(state, "s05", [
-            Op("CREATE", "ConstructionStatement", "CST-1",
-               {"body": "BOD-0001", "operation": "BOX", "operands": [],
-                "parameters": {"dx": MM(-1), "dy": MM(1), "dz": MM(1)}},
-               "s05:embodiment")])
+        self.assertEqual([], apply(state, "s05", [stock("FEA-1", "BOD-0001", MM(-1), MM(1), MM(1))]))
         result, execution = ex.execute_compilation(state, Progression())
         self.assertFalse(result.ok)
         self.assertIsNone(execution.evidence_id)

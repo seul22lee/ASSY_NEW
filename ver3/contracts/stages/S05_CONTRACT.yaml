@@ -213,7 +213,8 @@ clearance_constraint_rule:
     s06's settlement against it is what makes the fit established or not.
 
 owned_decisions:
-  creates: [Feature, Realization, Constraint, Parameter, ConstructionStatement, UnresolvedDecision]
+  creates: [Feature, Realization, Constraint, Parameter, UnresolvedDecision]
+  # Unit G: construction is Feature.construction; no separate family is created.
   # Unit E. Nothing today. Body, Joint and Interface list s05 among their
   # extendable_by, and none declares an s05-writable field in
   # extendable_fields, which is what the write boundary enforces; the producer
@@ -239,23 +240,46 @@ prohibited_decisions:
 
 construction_frame_rule:
   principle: >
-    Every ConstructionStatement is expressed in the OWNING BODY'S OWN FRAME.
-    World placement never appears in the construction program.
+    Every construction step is expressed in ITS FEATURE'S OWN FRAME, and the
+    feature is placed relative to an s04 datum. No absolute position appears
+    anywhere in an embodiment (Unit G).
   why: >
-    s07 receives only the program and the parameters. If placement were in the
-    program, s07 would be compiling a world layout and would need State - which
-    contradicts s04's ownership of State and reopens the input contradiction the
-    derived pose law closed. Bodies compile in body frames; poses are applied
-    downstream from located joint frames and joint coordinates.
+    s04's arrangement frame is the one spatial authority: joint frames,
+    envelopes and regions are committed there, and every body frame coincides
+    with it at zero joint coordinates. A feature that named a position of its
+    own would be a second truth about where things are; a feature placed
+    against a datum inherits s04's, and s07 derives every transform - and
+    every pose, from located joint frames and joint coordinates - from that
+    one authority and the settled scale.
+
+construction_polarity_rule:
+  principle: >
+    A feature's construction builds ITS OWN POSITIVE SOLID; its KIND decides
+    whether that solid is added to the body or removed from it. The composition
+    is the body's, performed after every feature is built, and is never written
+    as a step (Unit G).
+  csg_is_feature_local: >
+    CUT, UNION and INTERSECT shape a feature's own solid out of two or more of
+    its OWN earlier steps - a bore with a relief, a boss with a flat - and each
+    therefore requires at least two operands. A SUBTRACTIVE feature that writes
+    a one-operand CUT is asking a feature-local operation to reach the body: the
+    body is not an operand, no step may name it, and its kind has already said
+    it is removed. The arity is not relaxed for it; such a step is refused at
+    the write boundary, which is where a live round lost a whole embodiment to
+    one malformed step.
+  one_statement: >
+    `downstream.ir.CONSTRUCTION_SEMANTICS` is the text; the s05 language renders
+    it and `downstream.compiler` executes it. Nothing restates it in prose.
 
 structured_outputs:
   # Canonical names (DESIGN_STATE_CONTRACT). `interface` is the typed trace to
-  # the s03 Interface a feature realizes; `envelope` is symbolic (Unit E).
-  Feature: [entity_id, body, feature_kind, geometry, interface, envelope]
+  # the s03 Interface a feature realizes; `placement` is relative to an s04
+  # datum (a joint datum on the joint's axis IS the realization); `construction` is
+  # the feature's own (Unit G).
+  Feature: [entity_id, body, feature_kind, geometry, interface, placement, construction]
   Realization: [entity_id, addresses_obligations, participating_features, verification_predicate]
   Constraint: [entity_id, expression, parameters, kind, governs_interface]
   Parameter: [entity_id, symbol, unit, status]
-  ConstructionStatement: [entity_id, body, operation, operands, parameters, feature, axis]
   UnresolvedDecision: [entity_id, decision, why_open, alternatives, alternatives_kind, kept_open_by, blocks]
 
 roi_rule: >
@@ -353,27 +377,51 @@ ir_authority:
 
 placement_rule:
   placement: >
-    A feature that is somewhere carries `placement`: `origin`, three expressions
-    in the body frame in the kernel length unit, and `axis`, its own axis as a
-    signed body axis. Every body frame is parallel to the arrangement frame at
-    zero joint coordinates, so the axis a feature names and the axis_direction
-    s03 declared for a joint are the same words for the same direction. The
-    feature frame has Z along the axis, X along the canonical perpendicular; s07
-    builds the primitives that realize the feature in that frame. No world
-    coordinate is ever asked of the model; no pose is ever authored.
+    A feature carries `placement` RELATIVE TO AN S04 COMMITMENT: a `datum` - a
+    Joint (its located frame), the body's Envelope (its centre), a
+    FunctionalRegion (its centre) or another feature of the same body - an
+    `offset` of three expressions in the kernel length unit along the
+    arrangement axes, and, unless the datum is a joint, its own `axis` as a
+    signed arrangement axis. s04's arrangement frame is the one spatial
+    authority; every body frame coincides with it at zero joint coordinates;
+    no absolute position is ever stated and no pose is ever authored. The
+    feature frame has Z along its axis, origin at datum x scale + offset, X
+    along the canonical perpendicular; s07 builds the feature's construction in
+    that frame.
+  construction: >
+    A feature OWNS its construction - ordered steps in its own frame, one
+    unconsumed step being its solid - and a body is its ADDITIVE features fused
+    with its SUBTRACTIVE features removed, by the polarity the design-state
+    contract declares per kind. No construction exists that a feature does not
+    own; placement, role, dimensions and construction trace to one record.
   joint_realization: >
-    Every axis-bearing joint is realized on EACH body it relates by exactly one
-    placed feature naming it in `joint`, along the joint's declared axis. Those
-    two placements and s04's joint coordinates are what the pose law is derived
-    from (`downstream/kinematics`), which is the derivation the S04 and S07
-    contracts always said existed.
+    Every axis-bearing joint is realized on EACH body it relates by at least
+    one feature placed AT that joint AND LYING ON ITS AXIS - the joint is the
+    feature's datum and the placement is the realization; no second field
+    restates it. A slide may be carried by rails, guides and stops: several
+    features at one joint on one body are several realizations. ON ITS AXIS is
+    load-bearing: a joint datum locates without orienting, so a feature may sit
+    at the joint with an axis of its own, and such a feature is positioned by
+    the joint without embodying it. Counting it would let a branch report a
+    hinge realized while the bore that makes it a hinge is missing. Poses are derived from the located
+    joint frames and s04's joint coordinates (`downstream/kinematics`), which
+    is the derivation the S04 and S07 contracts always said existed; the
+    realizing features say what geometry carries the joint, never where it is.
+  scale: >
+    In a RELATIVE basis the design has no absolute size until something states
+    one. s05 may declare ONE Parameter with `role: SCALE` (kernel length units
+    per basis unit); s06 settles it only from constraints that rest on a stated
+    bound. s04's ReferenceScale is never written for it. Without an ABSOLUTE
+    scale or a settled SCALE parameter, nothing in kernel units can be placed
+    against the arrangement and s07 refuses.
   complete_means_constructible: >
-    An embodiment is complete when CAD can be built from it: every body has a
-    program with one terminal; every axis-bearing joint is realized on both
-    sides; every placed feature is built by a statement naming it; every mating
-    side s04 stated is of the stated kind. S05-C11..C14 ask this of the
-    response; s06's entry gate asks the same of what stands. Neither names a
-    mechanism class.
+    An embodiment is complete when CAD can be built from it: every feature
+    reads (placement against a committed datum, construction with one
+    terminal, every symbol declared); every body has material (an additive
+    feature); every axis-bearing joint is realized on both sides; every mating
+    side s04 stated is of the stated kind. S05-C5, C11, C12 and C14 ask this
+    of the response; s06's entry gate asks the same of what stands. Neither
+    names a mechanism class.
 
 allowed_unresolved:
   - "embodiment alternatives"
@@ -408,6 +456,69 @@ deterministic_exit_checks:
     check: "every declared clearance and interference-free pair has a Constraint"
   - id: S05-C10
     check: "no Parameter value is set without a cited solver artifact"
+  - id: S05-C11
+    check: "every axis-bearing joint is realized on EACH body it relates by at least one feature whose placement datum is that joint"
+  - id: S05-C12
+    check: "every body of the branch has material - at least one ADDITIVE feature"
+  - id: S05-C14
+    check: "a mating side s04 stated is realized by a feature of the stated kind"
+
+mandatory_prerequisites_shared_with_s06: >
+  Unit G. S05-C1, C9, C11, C12 and C14 are not this stage's private exit
+  criteria: they are the mandatory prerequisites of ANY embodiment, and s06's
+  entry gate asks the identical questions of what stands. There is one
+  implementation - `downstream.embodiment.structural_problems`, over canonical
+  rows - and both surfaces call it, so a duty cannot be enforced here and absent
+  there. It was: these checks ran only over this stage's response, an
+  incomplete embodiment was written anyway (declared incompleteness is recorded
+  as a contract failure, not a refusal to write), and the downstream gate found
+  the branch ready and settled numbers for an interface no feature realized.
+
+settlement_revision:
+  the_branch_embodiment: >
+    Unit G. THE EMBODIMENT OF A BRANCH is one set, in EVERY family this stage
+    authors - Constraint, Feature, Parameter and Realization, which it owns, and
+    the universally ownable families (UnresolvedDecision, Assumption,
+    RejectedAlternative) for the records whose provenance is s05's. The set is
+    derived from `owned_by` in DESIGN_STATE_CONTRACT plus `universally_ownable`,
+    never hand-listed, and ONE function produces it for all three uses: what the
+    repair prompt shows by id, what a withdrawal may name, and what the loop's
+    repeated-state identity is taken over. A hand-kept list is how Realization
+    and UnresolvedDecision came to be authored by the stage yet governed by
+    neither rule, leaving a branch holding a mix of two embodiments. Every
+    record of it carries the selected candidate and the SelectionDecision as
+    premises, stamped on every CREATE by `carry_invocation_premises`, which is
+    what makes branch membership readable at all.
+  restatement: >
+    A restated id revises by SUPERSEDE of the fields that differ; a new id
+    creates; AN ID THE RESPONSE DOES NOT MENTION KEEPS STANDING, unchanged. A
+    revision may therefore answer with only the part it is changing.
+  withdrawal: >
+    RETRACTION IS AN ACT AND IT IS DECLARED. A repair response may carry
+    `withdrawals: [{entity, cause, reason}]`, and only that retires a record -
+    by INVALIDATE, under the round's reason together with the stated one.
+    Omission never retires anything: reading silence as withdrawal made an
+    engineering decision out of a model's forgetfulness, where a response that
+    simply did not mention a feature demolished it. Each withdrawal is checked
+    before it becomes an operation - the entity belongs to THIS branch's
+    embodiment in a family this stage authors, the stated family is the one it
+    has, the cause is a finding OF THIS ROUND, the report named the entity or
+    something it rests on (the authorized repair scope), and no id is both
+    restated and withdrawn. A withdrawal failing any of these REFUSES THE
+    RESPONSE; a repair reaching outside its mandate is not accepted in part.
+    Withdrawal is what lets an infeasibility converge - a revision able only to
+    change or add left the conflicting constraint standing, the solver read the
+    same conflicting set, and the loop halted having changed nothing. Nothing is
+    deleted; the withdrawn record stays as history.
+  two_repairs: >
+    A STRUCTURAL repair and a NUMERICAL one are distinct and never mixed. A
+    structural round carries typed prerequisite findings (cause
+    EMBODIMENT_PREREQUISITES) - the design commits to geometry the embodiment
+    does not contain, the solver was not run, and the answer is the missing
+    feature or constraint, never an adjusted dimension. A numerical round
+    carries the solver's own report (cause FINDINGS) - the geometry exists and
+    the numbers do not hold. A prerequisite finding owned by another stage (a
+    malformed Joint is s03's record) is not routed here at all; it escalates.
 
 next_stage_consumer_requirement:
   consumer: s06

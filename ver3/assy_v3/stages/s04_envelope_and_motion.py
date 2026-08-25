@@ -462,7 +462,8 @@ class S04AEnvelopeAndReach(Stage):
                                    contact_pairs=_contact_pairs_text(inputs["consumer_view"]))
                 + repair_context_text(inputs, self.REPAIR_MAY_REVISE))
 
-    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state,
+                          parsed=None) -> List[Op]:
         """A repaired arrangement REVISES the arrangement that stands.
 
         The scale is kept: a repair that changed the basis would be a new
@@ -1809,7 +1810,8 @@ class S04BPlacementAndMotion(Stage):
     #: superseded in place by the generic rule; the three below are s04's own.
     REALIZATION = ("State", "Transition", "SweptVolume")
 
-    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state) -> List[Op]:
+    def repair_operations(self, ops: List[Op], inputs: Dict[str, Any], state,
+                          parsed=None) -> List[Op]:
         """A repaired realization RETIRES the one that stands and re-creates it.
 
         The coordinates, the paths and the occupancies of one answer are one

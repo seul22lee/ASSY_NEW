@@ -171,7 +171,7 @@ multi_owner_exceptions:
 # no resolver code is edited.
 # UNIT F. TWO FAMILY-LEVEL DECLARATIONS THE WRITE BOUNDARY READS.
 #
-#   ir_validation: parameter | constraint | statement | envelope
+#   ir_validation: parameter | constraint | feature
 #     The record (or its envelope field) is read by the deterministic
 #     downstream's one grammar, `assy_v3/downstream/ir.py`, before it may
 #     enter standing state. References resolve against the state the patch
@@ -181,7 +181,7 @@ multi_owner_exceptions:
 #     family is evidence concluded from other records and a premise-less
 #     record could never go stale.
 family_declarations_read_by_the_boundary:
-  ir_validation: [parameter, constraint, statement, feature]
+  ir_validation: [parameter, constraint, feature]
   requires_premises: [true]
 
 semantic_role_vocabulary:
@@ -584,15 +584,23 @@ entity_families:
     optional_fields: [frame_origin, mode, direction, required_travel,
                       allowable_travel, actuation, compliant_element,
                       root_interface, activation_window]
-    fields_owned_by_s04b: [located_frame]
+    # Unit G: the field that exists and is read is `frame_origin`; `located_frame`
+    # was a name no code produced or consumed.
+    fields_owned_by_s04b: [frame_origin]
     rules:
       - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
       - "axis_direction is a unit vector in a named frame, and is owned by s03."
       - >
-        The located FRAME is owned by s04b at PROVISIONAL maturity and promoted
-        to AUTHORITATIVE by s06. s03 cannot know where an axis is: BM-002's crank
-        axis height was determined by a pin-boss radius that is an s05 feature
-        dimension, and fixing it at s03 is CHG-01.
+        The located FRAME (`frame_origin`, in the ReferenceScale basis) is
+        owned by s04b at PROVISIONAL maturity and is THE placement authority as
+        located: s05 places the features that realize the joint AT it, and s07
+        derives every pose from it (Unit G). s06 settles parameters and never
+        writes it. A settled embodiment that cannot stand where the frame is
+        located is a typed finding routed to s04, whose revision - not a
+        downstream write - is what promotes the frame to AUTHORITATIVE. s03
+        cannot know where an axis is: BM-002's crank axis height was determined
+        by a pin-boss radius that is an s05 feature dimension, and fixing it at
+        s03 is CHG-01.
       - "The joint graph must be SIMULATION-COMPLETE: projectable into a multibody model without re-derivation."
     # ENFORCED. `compliant_variant` below states the same rule in prose and has
     # done since D-2; prose is not consumed by the write boundary, so a
@@ -864,35 +872,83 @@ entity_families:
     # nothing infers it from prose or from the body alone, S05-C1 demands one
     # per participating body per interface, and the interface is a premise of
     # the feature so a revised interface stales the geometry that realized it.
-    optional_fields: [envelope, interface, placement, joint]
-    # UNIT G. `feature` covers the envelope AND the placement: both are read by
-    # the one grammar in downstream/ir before a Feature stands.
+    optional_fields: [interface]
+    # UNIT G. The whole feature - placement, construction, references - is read
+    # by the one grammar in downstream/ir (`FeatureSpec`) before it stands.
     ir_validation: feature
     field_semantics:
-      envelope:
-        kind: spatial
-        frame: ReferenceScale
-      # UNIT G. THE ONE PLACEMENT REPRESENTATION. Where the feature is and which
-      # way it points, in the OWNING BODY'S frame: `origin` three expressions in
-      # the kernel length unit, `axis` a signed body axis (+X..-Z). The body
-      # frame is parallel to the arrangement frame at zero joint coordinates,
-      # so this axis and a Joint.axis_direction name the same direction. s07
-      # builds the primitives realizing this feature in this frame; poses are
-      # derived from placements (downstream.kinematics), never authored.
+      # UNIT G. THE ONE PLACEMENT REPRESENTATION, RELATIVE TO WHAT S04
+      # COMMITTED. A feature is located by a `datum` - a Joint (the located
+      # joint frame: frame_origin and axis_direction), the body's Envelope (its
+      # centre), a FunctionalRegion (its centre) or another feature of the same
+      # body (its frame) - plus an `offset` of three expressions in the kernel
+      # length unit along the arrangement axes, and an `axis`, the feature's own
+      # axis as a signed arrangement axis.
+      # A DATUM LOCATES; AN AXIS ORIENTS - two facts, and the datum settles only
+      # the first. An omitted axis is taken from the datum: at a joint it is the
+      # joint's axis_direction (what a bore, a pin or a bearing wants), against
+      # an envelope or a region - a box in the arrangement frame - it is the
+      # arrangement's +Z, and against another feature it is inherited. A feature
+      # at a joint MAY state a different axis, meaning "located by this joint,
+      # oriented otherwise": a face whose normal crosses the hinge line, a snap
+      # arm projecting across it. Refusing that was an over-constraint.
+      # What it costs is that a joint datum is no longer by itself a
+      # realization: a joint is realized only by a feature placed at it that
+      # LIES ON ITS AXIS (downstream.embodiment.joint_realization_findings), so
+      # a feature merely positioned by the joint cannot discharge the duty to
+      # embody it.
+      # There is no independent origin: s04's arrangement frame is the world,
+      # every body frame coincides with it at zero joint coordinates, and s07
+      # derives every transform from the datum, the scale authority and the
+      # settled offsets. Poses are derived (downstream.kinematics), never
+      # authored.
       placement:
-        kind: spatial
-        frame: Body
-      # UNIT G. The joint whose axis this feature realizes on its body - the
-      # bore, the pin, the rail, the guide. One feature per (joint, body); the
-      # feature's placement axis must equal the joint's axis_direction, and its
-      # origin locates the joint frame in that body (the located frame the Joint
-      # rules say s05's feature dimensions determine).
-      joint:
-        kind: reference
-        target: Joint
-        cardinality: one
-        resolvable: false
-        referent_population: COMMITTED_BRANCH
+        kind: record
+        record_field_semantics:
+          datum:
+            kind: reference
+            target: [Joint, Envelope, FunctionalRegion, Feature]
+            cardinality: one
+            resolvable: false
+            referent_population: COMMITTED_BRANCH
+            required: true
+          offset:
+            kind: expression_triple
+            unit: kernel_length
+          axis:
+            kind: enum
+            values: ["+X", "-X", "+Y", "-Y", "+Z", "-Z"]
+      # UNIT G. THE CONSTRUCTION IS THE FEATURE'S. An ordered list of steps in
+      # the feature's own frame - an opcode from downstream/ir, its named
+      # parameters as expressions, operands naming EARLIER steps of this same
+      # feature by their local id - whose one unconsumed step IS the feature's
+      # solid. A body is the union of its ADDITIVE features with its
+      # SUBTRACTIVE features removed (`feature_kind_polarity`); nothing else
+      # builds a body, and no construction exists that no feature owns.
+      construction:
+        kind: record_list
+        record_field_semantics:
+          id:
+            kind: local_id
+            required: true
+          operation:
+            kind: enum
+            required: true
+          operands:
+            kind: local_reference_list
+          # required by the opcode, not by the record: a combining step takes
+          # none, and `downstream/ir.Step` refuses a primitive that omits one
+          parameters:
+            kind: expression_map
+          axis:
+            kind: enum
+            values: ["X", "Y", "Z"]
+      # UNIT G. A feature REALIZES A JOINT by being placed at it: its datum is
+      # the joint. There is no second field saying so - a `joint` reference
+      # beside a joint datum restated the placement, and the two could
+      # disagree. Every axis-bearing joint needs at least one feature placed at
+      # it on each body it relates (rails, guides and stops may all carry a
+      # slide); `downstream.embodiment` derives that from the placements.
       body:
         kind: reference
         target: Body
@@ -910,11 +966,20 @@ entity_families:
         # read by s05 (it was a code tuple) - a superset of the mating kinds
         # Interface.mating_geometry names, so an interface's inner/outer feature
         # is checkable against the feature that realizes it, by the same words.
-        values: [BOSS, LUG, PIN, SHAFT, DOWEL, BORE, HOLE, BEARING, GUIDE, SLOT,
+        # STOCK is the base material of a body - the plate, the block, the
+        # shell - which is a feature like any other, and the one every body
+        # needs at least one of.
+        values: [STOCK, BOSS, LUG, PIN, SHAFT, DOWEL, BORE, HOLE, BEARING, GUIDE, SLOT,
                  RAIL, FACE, RIB, SHOULDER, STOP, CLEARANCE_POCKET, SNAP_ARM, KEEPER]
+    # UNIT G. What a kind does to its body. Declared once; the compiler composes
+    # a body from it and s05 tells the model the same words.
+    feature_kind_polarity:
+      ADDITIVE: [STOCK, BOSS, LUG, PIN, SHAFT, DOWEL, RAIL, FACE, RIB, SHOULDER, STOP,
+                 SNAP_ARM, KEEPER]
+      SUBTRACTIVE: [BORE, HOLE, BEARING, GUIDE, SLOT, CLEARANCE_POCKET]
     owned_by: s05
     purpose: "A named geometric feature on a body that participates in an interaction."
-    required_fields: [entity_id, body, feature_kind, geometry]
+    required_fields: [entity_id, body, feature_kind, geometry, placement, construction]
     rules:
       - "OCCT/CAD face indices are never a persistent identity."
       - >
@@ -923,9 +988,27 @@ entity_families:
         selected branch does not carry, and it never creates one: an interaction
         is s03's to declare (Unit E).
       - >
-        An envelope component is an expression, never a bare number. What a
-        feature's material occupies is stated in the dimensions embodiment
-        declares; the numbers are settlement's (Unit E).
+        A feature is placed RELATIVE TO AN S04 COMMITMENT (a joint frame, the
+        body's envelope, a region) or to another feature of its body, by an
+        offset in the kernel length unit; it never states an absolute
+        position, and s04's frames stay the authority (Unit G).
+      - >
+        A feature OWNS its construction: the steps that build its solid, in its
+        own frame. A body is its additive features fused with its subtractive
+        features removed. There is no construction a feature does not own
+        (Unit G).
+      - >
+        THE FEATURE'S SOLID IS POSITIVE MATERIAL - the shape of the thing
+        itself, whatever its polarity. A bore is constructed AS a cylinder; it
+        is `feature_kind` that removes it. The add-or-remove is performed at the
+        BODY, after every feature is built, and is never a step. CUT, UNION and
+        INTERSECT are FEATURE-LOCAL CSG over two or more of the feature's OWN
+        earlier steps, so each requires at least two operands; a SUBTRACTIVE
+        feature may not write CUT to mean "remove this from the body", because
+        the body is not an operand and no step may name it. Stated once in
+        `downstream.ir.CONSTRUCTION_SEMANTICS`, rendered into the s05 language
+        from there, and executed by `downstream.compiler.compile_embodiment`
+        (Unit G).
 
   Realization:
     field_semantics:
@@ -1093,10 +1176,14 @@ entity_families:
     # Declared, because an extendable field must be a field the family HAS.
     # Optional because a Parameter is authored before it is settled: s05 declares
     # it with no value, and s06 fills these two or the parameter stays free.
-    optional_fields: [value, solved_by, lower, upper]
+    optional_fields: [value, solved_by, lower, upper, role]
     rules:
       - "unit is MANDATORY. 'dimensionless' is explicit. A null unit is a schema error (INV-004)."
       - "A value without a cited solver artifact is not settled (S05-C10, R-23)."
+    field_semantics:
+      role:
+        kind: enum
+        values: [SCALE]
 
   Constraint:
     semantic_roles: [embodiment_settlement]
@@ -1126,13 +1213,24 @@ entity_families:
     # A typed reference instead: the Constraint points at the Interface whose
     # clearance it expresses. Direction chosen so the constraint - the later,
     # derived thing - carries the reference, as every other derived family does.
-    optional_fields: [settlement, governs_interface]
+    optional_fields: [settlement, governs_interface, basis]
     field_semantics:
       governs_interface:
         kind: reference
         target: Interface
         cardinality: one
         resolvable: false
+      # UNIT G. WHAT A CONSTRAINT RESTS ON. An embodiment is a set of design
+      # choices, and a system s06 can settle is one every construction-critical
+      # parameter is closed in - by a GEOMETRIC_RELATION to other parameters,
+      # by a STATED_BOUND (a hard requirement, a rule the design names), or by
+      # a DESIGN_CHOICE the embodiment stage makes and says so. The choice is
+      # s05's and stays visible as a choice; s06 solves and never chooses;
+      # s07 builds only what is settled. A RELATIVE arrangement's scale is
+      # closed the same way. Unmarked constraints are read as relations.
+      basis:
+        kind: enum
+        values: [GEOMETRIC_RELATION, STATED_BOUND, DESIGN_CHOICE]
 
   UnresolvedDecision:
     semantic_roles: [open_item]
@@ -1624,6 +1722,16 @@ entity_families:
     optional_fields:
       - absolute
       - note
+    # UNIT G. THE SCALE AUTHORITY. In an ABSOLUTE basis `absolute.per_unit` is
+    # how many kernel length units one basis unit is worth. In a RELATIVE basis
+    # the design has no absolute size until something states one: s05 may
+    # declare ONE Parameter with `role: SCALE` (unit: the kernel length unit,
+    # meaning kernel units per basis unit); s06 settles it only from
+    # constraints that rest on a stated bound - never by guessing. This record
+    # is not touched by that declaration: s04's basis stays s04's, and the
+    # scale is s05's own declared parameter. Until one of the two exists,
+    # nothing in kernel units can be placed against the arrangement, and s07
+    # refuses.
     rules:
       - "A coordinate has no meaning without the basis it is expressed in, so this is a representational premise of every s04 spatial commitment."
       - "basis RELATIVE with absolute null is a legitimate, honest value. It is not a defect and must not be defaulted to a number."
@@ -1887,9 +1995,12 @@ geometric_authority:
       A check declares the minimum maturity of its inputs. Running below it is a
       SCHEMA_FAILURE, not a warning.
     worked_case: >
-      A joint frame placement is created PROVISIONAL at s04b and promoted to
-      AUTHORITATIVE at s06, because its value depends on a feature envelope that
-      does not exist at s04b (BM-002 CHG-01).
+      A joint frame placement is created PROVISIONAL at s04b, consumed as the
+      placement authority by s05 and s07, checked against the settled
+      embodiment after s06, and promoted to AUTHORITATIVE by s04's own
+      revision - because its value can depend on a feature dimension that does
+      not exist at s04b (BM-002 CHG-01), and moving it is s04's decision, not
+      the solver's.
 
   derived_not_stored:
     principle: >
@@ -1909,12 +2020,15 @@ geometric_authority:
           ownership of State and Transition. Deriving it removes the s07 input
           contradiction entirely.
         derived_by: >
-          downstream/kinematics (Unit G): the joint frame in each body is the
-          placement of the feature that realizes the joint there
-          (Feature.joint + Feature.placement, s05); the relative pose across a
-          joint is parent-frame . motion(q) . child-frame^-1 with q from
-          State.joint_coordinates (s04); the base body is the root of the
-          joint tree. Nothing is stored; every pose is recomputed from these.
+          downstream/kinematics (Unit G): every body frame coincides with the
+          arrangement frame at zero joint coordinates; a joint's motion is a
+          rotation (REVOLUTE) or translation (PRISMATIC) about its LOCATED
+          frame - Joint.frame_origin x scale, along Joint.axis_direction - by q
+          from State.joint_coordinates; a body's pose is the composition of
+          those motions along the joint tree from a deterministic base. Nothing
+          is stored; every pose is recomputed from s04's frames and the scale
+          authority (an ABSOLUTE ReferenceScale or a settled Parameter of role
+          SCALE).
       - what: "support"
         derived_from: "an Interface of contact kind appearing in a LoadPath"
       - what: "reaction"
@@ -2438,47 +2552,9 @@ assurance_families:
         and a Constraint's provenance must cite a Requirement, an Obligation, a
         feature envelope or a LoadCase - NEVER a Witness.
 
-  ConstructionStatement:
-    field_semantics:
-      body:
-        kind: reference
-        target: Body
-        cardinality: one
-        resolvable: false
-      feature:
-        kind: reference
-        target: Feature
-        cardinality: one
-        resolvable: false
-      # AN AXIS NAME, not a direction vector. ROTATE turns about one of the
-      # owning body's own axes, so the value is X, Y or Z and carries no frame of
-      # its own - the frame is the body's, by the construction frame rule. A
-      # spatial declaration here would claim a coordinate this field never holds.
-      axis:
-        kind: enum
-    owned_by: s05
-    # UNIT F. Read by the construction grammar at the boundary: an opcode from
-    # the closed vocabulary with its required parameters as expressions over
-    # standing Parameters and unit-bearing constants, operands that name
-    # standing statements, an axis where ROTATE needs one. The execution
-    # semantics of every opcode and the kernel's units are declared once, in
-    # `downstream.ir.OPCODE_SEMANTICS`; s07 executes them and decides nothing.
-    ir_validation: statement
-    purpose: "One step of the ConstructionProgram that Stage 07 compiles."
-    # UNIT G: `body` is REQUIRED. The reader always refused a statement with
-    # no owning body; the contract listed it optional and the two disagreed.
-    required_fields: [entity_id, body, operation, operands, parameters]
-    # Declared so state can hold them. `body` is what the construction frame rule
-    # implies - a statement is expressed in the OWNING body's own frame, so there
-    # is an owning body - and s07 refuses a statement it cannot attribute to one.
-    # The COMPILER requires it; storage does not, and the required_fields above
-    # are left as authored rather than widened to suit an implementation.
-    # `axis` is required by ROTATE and by nothing else; `feature` links the step
-    # to the Feature it realizes, which is what makes geometry traceable upstream.
-    optional_fields: [axis, feature]
-    rules:
-      - "Stage 07 compiles these or fails, preserving the originating statement (INV-006)."
-      - "Expressed in the owning body's own frame. World placement never appears in a construction program."
+  # UNIT G: the ConstructionStatement family is RETIRED. Construction is a
+  # feature's own (`Feature.construction`); a body is composed from its
+  # features by kind polarity. No family carries construction beside a feature.
 
   GeometrySignature:
     owned_by: s07

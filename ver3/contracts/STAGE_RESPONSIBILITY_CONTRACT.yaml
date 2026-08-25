@@ -2003,7 +2003,6 @@ stages:
     - Realization
     - Parameter
     - Constraint
-    - ConstructionStatement
     - UnresolvedDecision
     prohibited_decisions:
     - Creating a Body, RigidGroup or Joint; s05 extends s03's by id (INV-001, R-19)
@@ -2014,7 +2013,7 @@ stages:
       s05/s06 loop safe without a sequential barrier (R-23)
     - Changing topology, DOF disposition, interaction kinds, load paths or assembly order;
       those escalate to s03
-    - Expressing a ConstructionStatement in any frame but the owning body's own
+    - Placing a feature anywhere but relative to an s04 datum (a joint frame, the body's envelope, a region) or another feature of its body; construction is expressed in the feature's own frame
     # UNIT E. The post-selection boundary.
     - Embodying any candidate but the one the standing SelectionDecision names,
       accepting a branch from a caller, or reading a comparison, a ranking or a

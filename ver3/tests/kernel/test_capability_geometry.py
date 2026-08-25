@@ -29,17 +29,23 @@ def const(value, unit="mm"):
 
 
 def stmt(eid, operation, operands=(), body="BOD-1", axis=None, **params):
-    record = {"entity_id": eid, "operation": operation,
-              "operands": list(operands), "parameters": dict(params),
-              "body": body}
+    """One construction step. Unit G: steps are a FEATURE'S; the whole
+    sequence here is one STOCK feature of one body, built at the identity."""
+    record = {"id": eid, "operation": operation,
+              "operands": list(operands), "parameters": dict(params)}
     if axis:
         record["axis"] = axis
     return record
 
 
-def compile_body(records, values=None):
-    return compiler.compile_program(ir.ConstructionProgram.parse(records),
-                                    dict(values or {}))
+def compile_body(records, values=None, body="BOD-1"):
+    from ver3.assy_v3.downstream.embodiment import polarity_table
+    from ver3.assy_v3.downstream.kinematics import Frame
+    spec = ir.FeatureSpec(entity_id="FEA-1", body=body, kind="STOCK",
+                          placement=ir.Placement.parse({"datum": "ENV-1", "axis": "+Z"}),
+                          steps=tuple(ir.Step.parse(r) for r in records))
+    return compiler.compile_embodiment([spec], dict(values or {}), {"FEA-1": Frame()},
+                                       polarity_table())
 
 
 class TestTheKernelIsReallyHere(unittest.TestCase):

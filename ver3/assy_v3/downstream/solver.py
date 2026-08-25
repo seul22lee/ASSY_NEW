@@ -421,3 +421,26 @@ def solve(parameters: Sequence[ParameterDecl],
 
     report.solver_status = FEASIBLE
     return report
+
+
+def dimension_problems(expression: Dict[str, Any], units: Dict[str, str]) -> List[str]:
+    """UNIT G. Do the two sides of a relation reduce to ONE dimension?
+
+    The one reading of a dimension is this module's linear reduction, so the
+    write boundary asks it here rather than keeping a second unit algebra. A
+    formulation this solver cannot reduce for another reason (a product of
+    unknowns, a division by an unknown) is not a dimensional defect and is
+    reported at settlement, not here.
+    """
+    try:
+        lhs = reduce_expr(Expr.parse(expression.get("lhs")), units)
+        rhs = reduce_expr(Expr.parse(expression.get("rhs")), units)
+    except DimensionError as exc:
+        return ["combines dimensions it cannot: %s" % exc]
+    except IRError:
+        return []
+    if lhs.dim != rhs.dim and not (lhs.is_constant() and lhs.const == 0.0) \
+            and not (rhs.is_constant() and rhs.const == 0.0):
+        return ["relates %s to %s; a relation holds between quantities of one dimension"
+                % (dim_str(lhs.dim), dim_str(rhs.dim))]
+    return []

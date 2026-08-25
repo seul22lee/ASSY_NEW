@@ -154,6 +154,10 @@ class ParameterDecl:
     value: Optional[float] = None
     lower: Optional[float] = None
     upper: Optional[float] = None
+    #: UNIT G. What the parameter IS for the arrangement: "SCALE" - kernel
+    #: length units per basis unit - is the one role, and the one scale
+    #: authority s05 may declare for a RELATIVE basis.
+    role: Optional[str] = None
     solved_by: Optional[str] = None
 
     @staticmethod
@@ -171,7 +175,8 @@ class ParameterDecl:
             entity_id=record["entity_id"], symbol=record.get("symbol") or "",
             unit=str(unit), status=status, value=record.get("value"),
             lower=record.get("lower"), upper=record.get("upper"),
-            solved_by=record.get("solved_by"))
+            solved_by=record.get("solved_by"),
+            role=(str(record.get("role")).upper() if record.get("role") else None))
 
 
 @dataclass(frozen=True)
@@ -247,13 +252,42 @@ OPCODE_SEMANTICS = {
     "CYLINDER": "the solid of radius r, axis +Z of the frame from z=0 to z=height, "
                 "centred on the frame origin in X and Y",
     "SPHERE": "the solid of radius r centred on the frame origin",
-    "TRANSLATE": "the operand moved by (dx, dy, dz) in the body frame",
+    "TRANSLATE": "the operand moved by (dx, dy, dz) in the feature frame; an omitted "
+                 "component is zero",
     "ROTATE": "the operand rotated by angle (degrees) about the named body axis "
               "through the frame origin",
-    "UNION": "the operands fused",
-    "CUT": "the first operand with every later operand removed",
+    "UNION": "the operands fused - all of them steps of THIS feature",
+    "CUT": "the first operand with every later operand removed - all of them steps of THIS "
+           "feature; never the body, which no step names",
     "INTERSECT": "the common volume of the operands",
 }
+
+#: UNIT G. WHAT A FEATURE'S CONSTRUCTION IS, and what it is NOT.
+#:
+#: THE ONE STATEMENT OF IT. `compiler.build_feature` executes the steps and
+#: `compile_embodiment` composes bodies by polarity; s05 is shown this text and
+#: the contracts point at it, so the language the model writes in, the boundary
+#: enforces, and the kernel executes are one language.
+#:
+#: The distinction it draws is the one a subtractive feature gets wrong: a bore
+#: is A CYLINDER, positively constructed, and it is its KIND that removes it
+#: from the body. Writing CUT inside it to mean "take this out of the body" asks
+#: a feature-local operation to reach the body, which no step can do - the body
+#: is not an operand and is never in scope. Such a step is malformed however it
+#: is written, and a single-operand CUT is refused on arity before its intent
+#: can even be read.
+CONSTRUCTION_SEMANTICS = (
+    "A FEATURE'S CONSTRUCTION BUILDS ITS OWN SOLID, and that solid is ALWAYS POSITIVE "
+    "material - the shape of the thing itself. A bore is the cylinder that will be removed, "
+    "constructed as a cylinder; a boss is the cylinder that will be added, constructed the "
+    "same way. WHETHER IT IS ADDED OR REMOVED IS ITS KIND, not a step: the body is the union "
+    "of its ADDITIVE features with its SUBTRACTIVE features removed, and that composition "
+    "happens at the BODY, after every feature is built. "
+    "CUT, UNION and INTERSECT are FEATURE-LOCAL CSG: they shape this feature's own solid out "
+    "of two or more of ITS OWN earlier steps - a bore with a relief, a boss with a flat. Each "
+    "needs at least two operands, because that is what combining two solids means. A "
+    "SUBTRACTIVE feature must NOT write CUT to mean \"remove this from the body\": the body "
+    "is not an operand, no step may name it, and its kind has already said so.")
 #: What each opcode parameter IS, so a value in the wrong unit is refused
 #: rather than fed to a kernel that assumes millimetres and degrees.
 OPCODE_PARAMETER_KINDS = {
@@ -290,37 +324,13 @@ def axis_vector(axis: Any) -> Optional[Tuple[float, float, float]]:
     return AXIS_VECTORS.get(axis.strip().upper())
 
 
-# ==========================================================================
-# UNIT G. PLACEMENT - a feature's own frame, stated in its body's frame.
-#
-# THE ONE PLACEMENT REPRESENTATION. A feature that realizes a joint side, an
-# interface side or any located geometry says WHERE it is and WHICH WAY it
-# points: `origin` - three expressions in the body frame, in the kernel length
-# unit - and `axis`, the feature's own axis (a bore's, a pin's, a slide's, a
-# stop face's normal) as a signed body axis. Nothing here is a number invented
-# in a world frame, and nothing is a pose: poses are DERIVED from placements
-# and s04's joint coordinates by `downstream.kinematics`, exactly as the
-# contracts say the pose law is derived and never authored.
-#
-# THE FRAME CONVENTION, stated once and consumed by s05's prompt, s06's checks
-# and s07's kernel calls alike:
-#   - every body frame is PARALLEL to the arrangement (world) frame in the pose
-#     where every joint coordinate is zero - s04's arrangement itself - so a
-#     body axis token and the joint axis token s03 declared name the same
-#     direction, and the two are comparable by name;
-#   - a feature frame has Z along `axis`, origin at `origin`, and X along the
-#     CANONICAL PERPENDICULAR of the axis (`frame_axes`): a rule, so that no
-#     second orientation choice is asked of anyone;
-#   - s07 builds a primitive that realizes a placed feature IN THAT FRAME;
-#     TRANSLATE and ROTATE remain moves within the body frame.
-# ==========================================================================
 def frame_axes(axis: str) -> Tuple[Tuple[float, float, float], Tuple[float, float, float],
                                    Tuple[float, float, float]]:
     """(x, y, z) unit vectors of the frame whose Z is the named axis.
 
-    X is the canonical perpendicular - the next body axis in cyclic order
-    (Z->X, X->Y, Y->Z), positive - and Y completes a right-handed frame. One
-    rule, so the orientation of a placed primitive is never a decision.
+    X is the canonical perpendicular - the next arrangement axis in cyclic
+    order (Z->X, X->Y, Y->Z), positive - and Y completes a right-handed frame.
+    One rule, so the orientation of a placed primitive is never a decision.
     """
     z = axis_vector(axis)
     if z is None:
@@ -331,185 +341,213 @@ def frame_axes(axis: str) -> Tuple[Tuple[float, float, float], Tuple[float, floa
     return x, y, z
 
 
+# ==========================================================================
+# UNIT G. PLACEMENT - where a feature is, RELATIVE TO WHAT S04 COMMITTED.
+#
+# THE ONE SPATIAL AUTHORITY is s04's arrangement frame: joint frames
+# (frame_origin + axis_direction), body envelopes, functional regions, all in
+# the ReferenceScale basis. Every body frame COINCIDES with that frame at zero
+# joint coordinates. A feature is placed by naming a DATUM in that authority -
+# a Joint, the body's Envelope, a FunctionalRegion, or another feature of the
+# same body - plus an `offset` (three expressions in the kernel length unit,
+# along the arrangement axes) and its own `axis`. A joint datum's axis IS the
+# joint's declared axis_direction: stating it is redundant and must agree;
+# stating a different one is a second truth and is refused. An envelope or a
+# region is an axis-aligned box in the arrangement frame, so its frame IS the
+# arrangement frame: a feature placed against one that names no axis takes
+# the arrangement's +Z. A feature placed against another feature inherits
+# that feature's axis unless it names its own.
+#
+# The feature frame: origin = datum point x scale + offset; Z along the axis;
+# X along the canonical perpendicular (`frame_axes`). The scale - kernel units
+# per basis unit - is the ReferenceScale's authority (ABSOLUTE per_unit, or a
+# settled scale parameter), resolved by downstream.kinematics; nothing here
+# reads a number that was not committed or settled.
+# ==========================================================================
+DATUM_FAMILIES = ("Joint", "Envelope", "FunctionalRegion", "Feature")
+
+
 @dataclass(frozen=True)
 class Placement:
-    origin: Tuple[Expr, Expr, Expr]
-    axis: str
+    datum: str
+    offset: Tuple[Expr, Expr, Expr]
+    axis: Optional[str] = None            # None: taken from the joint datum
 
     @staticmethod
     def parse(node: Any, where: str = "placement") -> "Placement":
         if not isinstance(node, dict):
             raise IRError("%s is not an object" % where)
-        origin = node.get("origin")
-        if not isinstance(origin, list) or len(origin) != 3:
-            raise IRError("%s origin is not three expressions" % where)
+        datum = node.get("datum")
+        if not isinstance(datum, str) or not datum.strip():
+            raise IRError("%s names no datum; a feature is placed relative to a joint, "
+                          "its body's envelope, a region or another feature" % where)
+        raw = node.get("offset")
+        if raw is None:
+            raw = [{"const": 0.0, "unit": KERNEL_LENGTH_UNIT}] * 3
+        if not isinstance(raw, list) or len(raw) != 3:
+            raise IRError("%s offset is not three expressions" % where)
         exprs = []
-        for index, component in enumerate(origin):
+        for index, component in enumerate(raw):
             if isinstance(component, bool) or isinstance(component, (int, float)):
-                raise IRError("%s origin[%d] is a bare number (%r); a coordinate is a "
+                raise IRError("%s offset[%d] is a bare number (%r); a coordinate is a "
                               "declared parameter or a unit-bearing constant"
                               % (where, index, component))
             exprs.append(Expr.parse(component))
         axis = node.get("axis")
-        if axis_vector(axis) is None:
+        if axis is not None and axis_vector(axis) is None:
             raise IRError("%s axis %r is not one of %s" % (where, axis, list(SIGNED_AXES)))
-        unknown = sorted(set(node) - {"origin", "axis"})
+        unknown = sorted(set(node) - {"datum", "offset", "axis"})
         if unknown:
             raise IRError("%s carries %s, which a placement does not have" % (where, unknown))
-        return Placement(origin=(exprs[0], exprs[1], exprs[2]), axis=axis.strip().upper())
+        return Placement(datum=datum.strip(), offset=(exprs[0], exprs[1], exprs[2]),
+                         axis=axis.strip().upper() if isinstance(axis, str) else None)
 
     def refs(self) -> Set[str]:
-        return {r for e in self.origin for r in e.refs()}
+        return {r for e in self.offset for r in e.refs()}
 
 
-def placement_problems(where: str, node: Any, known_parameters: Set[str]) -> List[str]:
-    try:
-        placement = Placement.parse(node, where)
-    except IRError as exc:
-        return ["IR: %s" % exc]
-    return ["IR: %s references %s, which no standing Parameter declares" % (where, ref)
-            for ref in sorted(placement.refs()) if ref not in known_parameters]
-
-
+# ==========================================================================
+# UNIT G. CONSTRUCTION IS THE FEATURE'S. A feature carries the ordered steps
+# that build its solid, in its own frame; the one step nothing consumes IS the
+# feature. A body is composed from its features by kind polarity (declared in
+# the contract): additive features fused, subtractive features removed. There
+# is no construction a feature does not own, so placement, role, dimensions
+# and construction trace to one record.
+# ==========================================================================
 @dataclass(frozen=True)
-class Statement:
-    """One construction step, in its owning body's frame."""
+class Step:
+    """One construction step of a feature, in the feature's frame."""
 
-    entity_id: str
-    body: str
+    step_id: str
     operation: str
     operands: Tuple[str, ...]
     parameters: Dict[str, Expr]
     axis: Optional[str] = None
-    feature: Optional[str] = None
 
     @staticmethod
-    def parse(record: Dict[str, Any]) -> "Statement":
+    def parse(record: Dict[str, Any], where: str = "step") -> "Step":
+        if not isinstance(record, dict):
+            raise IRError("%s is not an object" % where)
+        sid = record.get("id")
+        if not isinstance(sid, str) or not sid.strip():
+            raise IRError("%s has no id" % where)
         op = record.get("operation")
         if op not in OPCODES:
-            raise IRError("ConstructionStatement %s operation %r is not in the "
-                          "opcode vocabulary %s"
-                          % (record.get("entity_id"), op, sorted(OPCODES)))
+            raise IRError("%s %s operation %r is not in the opcode vocabulary %s"
+                          % (where, sid, op, sorted(OPCODES)))
         operands = tuple(record.get("operands") or ())
+        if any(not isinstance(o, str) for o in operands):
+            raise IRError("%s %s operands must be step ids" % (where, sid))
         if op in COMBINING and len(operands) < 2:
-            raise IRError("%s %s combines %d operands; it needs at least two"
-                          % (op, record.get("entity_id"), len(operands)))
+            raise IRError("%s %s: %s combines %d operands; it needs at least two"
+                          % (where, sid, op, len(operands)))
         if op in TRANSFORMING and len(operands) != 1:
-            raise IRError("%s %s transforms %d operands; it needs exactly one"
-                          % (op, record.get("entity_id"), len(operands)))
+            raise IRError("%s %s: %s transforms %d operands; it needs exactly one"
+                          % (where, sid, op, len(operands)))
         if op not in COMBINING and op not in TRANSFORMING and operands:
-            raise IRError("%s %s is a primitive and takes no operands"
-                          % (op, record.get("entity_id")))
-        raw = record.get("parameters") or {}
+            raise IRError("%s %s: %s is a primitive and takes no operands" % (where, sid, op))
+        raw = record.get("parameters")
+        if raw is None:
+            raw = {}
         if not isinstance(raw, dict):
-            raise IRError("ConstructionStatement %s parameters is not an object"
-                          % record.get("entity_id"))
+            raise IRError("%s %s parameters is not an object of named expressions"
+                          % (where, sid))
         params = {k: Expr.parse(v) for k, v in raw.items()}
+        if op == "TRANSLATE":
+            # A move along one axis is written with that component alone: an
+            # omitted translation component is the identity along its axis -
+            # the typed zero - not a dimension anyone left undecided.
+            for k in OPCODES[op]:
+                params.setdefault(k, Expr(const=0.0, unit=KERNEL_LENGTH_UNIT))
         missing = [k for k in OPCODES[op] if k not in params]
         if missing:
-            raise IRError("%s %s omits required parameter(s) %s"
-                          % (op, record.get("entity_id"), missing))
+            raise IRError("%s %s: %s omits required parameter(s) %s" % (where, sid, op, missing))
+        extra = sorted(set(params) - set(OPCODES[op]))
+        if extra:
+            raise IRError("%s %s: %s takes no parameter %s" % (where, sid, op, extra))
         axis = record.get("axis")
         if op == "ROTATE" and axis not in AXES:
-            raise IRError("ROTATE %s declares axis %r; it must be one of %s"
-                          % (record.get("entity_id"), axis, list(AXES)))
-        body = record.get("body")
-        if not body:
-            raise IRError("ConstructionStatement %s names no owning body"
-                          % record.get("entity_id"))
-        return Statement(entity_id=record["entity_id"], body=body, operation=op,
-                         operands=operands, parameters=params, axis=axis,
-                         feature=record.get("feature"))
+            raise IRError("%s %s: ROTATE declares axis %r; it must be one of %s"
+                          % (where, sid, axis, list(AXES)))
+        return Step(step_id=sid.strip(), operation=op, operands=operands, parameters=params,
+                    axis=axis)
 
     def refs(self) -> Set[str]:
         return {r for e in self.parameters.values() for r in e.refs()}
 
 
-@dataclass
-class ConstructionProgram:
-    """The ordered statements for one design, grouped by the body they build.
+@dataclass(frozen=True)
+class FeatureSpec:
+    """A Feature record as the deterministic downstream reads it: role,
+    placement and construction, one record, one grammar."""
 
-    NOT a new DesignState family. It is the READING of the ConstructionStatement
-    records that already exist, ordered by their declared dependencies - so there
-    is one authority for what the program is, and it is the state.
-    """
-
-    statements: List[Statement] = field(default_factory=list)
+    entity_id: str
+    body: str
+    kind: str
+    placement: Placement
+    steps: Tuple[Step, ...]
+    interface: Optional[str] = None
 
     @staticmethod
-    def parse(records: Sequence[Dict[str, Any]]) -> "ConstructionProgram":
-        return ConstructionProgram([Statement.parse(r) for r in records])
+    def parse(record: Dict[str, Any]) -> "FeatureSpec":
+        eid = record.get("entity_id") or record.get("id")
+        where = "feature %s" % eid
+        body = record.get("body")
+        if not isinstance(body, str) or not body:
+            raise IRError("%s names no body" % where)
+        kind = record.get("feature_kind")
+        if not isinstance(kind, str) or not kind:
+            raise IRError("%s names no feature_kind" % where)
+        placement = Placement.parse(record.get("placement"), "%s placement" % where)
+        raw_steps = record.get("construction")
+        if not isinstance(raw_steps, list) or not raw_steps:
+            raise IRError("%s has no construction; a feature that builds nothing is not "
+                          "an embodiment" % where)
+        steps = []
+        seen: Set[str] = set()
+        for index, raw in enumerate(raw_steps):
+            step = Step.parse(raw, "%s step[%d]" % (where, index))
+            if step.step_id in seen:
+                raise IRError("%s repeats step id %s" % (where, step.step_id))
+            for operand in step.operands:
+                if operand not in seen:
+                    raise IRError("%s step %s consumes %s, which is not an earlier step of "
+                                  "this feature" % (where, step.step_id, operand))
+            seen.add(step.step_id)
+            steps.append(step)
+        consumed = {o for st in steps for o in st.operands}
+        finals = [st.step_id for st in steps if st.step_id not in consumed]
+        if len(finals) != 1:
+            raise IRError("%s has %d unconsumed steps (%s); exactly one result IS the feature"
+                          % (where, len(finals), ", ".join(finals)))
+        return FeatureSpec(entity_id=str(eid), body=body, kind=kind.strip().upper(),
+                           placement=placement, steps=tuple(steps),
+                           interface=record.get("interface") or None)
 
-    def bodies(self) -> List[str]:
-        seen: List[str] = []
-        for s in self.statements:
-            if s.body not in seen:
-                seen.append(s.body)
-        return seen
+    @property
+    def terminal(self) -> str:
+        consumed = {o for st in self.steps for o in st.operands}
+        return next(st.step_id for st in self.steps if st.step_id not in consumed)
 
-    def for_body(self, body: str) -> List[Statement]:
-        return [s for s in self.statements if s.body == body]
-
-    def parameter_refs(self) -> Set[str]:
-        return {r for s in self.statements for r in s.refs()}
-
-    def ordering_problems(self) -> List[str]:
-        """Statements whose operands are not already built, and cycles.
-
-        A compiler that tolerated a forward reference would be choosing an
-        evaluation order, which is a decision s07 does not own.
-        """
-        problems: List[str] = []
-        for body in self.bodies():
-            built: Set[str] = set()
-            for s in self.for_body(body):
-                for operand in s.operands:
-                    if operand not in built:
-                        problems.append(
-                            "%s references %s before it is built" % (s.entity_id, operand))
-                built.add(s.entity_id)
-        return problems
-
-    def terminal_of(self, body: str) -> Optional[str]:
-        """The statement whose result IS the body: the one nothing consumes."""
-        stmts = self.for_body(body)
-        consumed = {o for s in stmts for o in s.operands}
-        finals = [s.entity_id for s in stmts if s.entity_id not in consumed]
-        return finals[-1] if len(finals) == 1 else None
-
-
-def dependency_cone(program: ConstructionProgram, entity_id: str) -> List[str]:
-    """Everything the named statement rests on, transitively.
-
-    S07-C6 requires a compile failure to cite the originating statement AND its
-    dependency cone, because a statement that fails is rarely the statement that
-    is wrong.
-    """
-    by_id = {s.entity_id: s for s in program.statements}
-    seen: List[str] = []
-    frontier = [entity_id]
-    while frontier:
-        cur = frontier.pop()
-        if cur in seen or cur not in by_id:
-            continue
-        seen.append(cur)
-        frontier.extend(by_id[cur].operands)
-    return seen
+    def refs(self) -> Set[str]:
+        out = set(self.placement.refs())
+        for st in self.steps:
+            out |= st.refs()
+        return out
 
 
 # ==========================================================================
-# UNIT F. RECORD VALIDATORS - the grammar as a write-boundary check.
+# UNIT F/G. RECORD VALIDATORS - the grammar as a write-boundary check.
 #
-# `Expr.parse`, `TypedConstraint.parse` and `Statement.parse` RAISE, which is
+# `Expr.parse`, `TypedConstraint.parse` and `FeatureSpec.parse` RAISE, which is
 # right for a reader that has been handed a record and cannot go on. A boundary
 # that decides whether a record may enter standing state needs the same grammar
 # as a list of problems, so these wrap the parsers and add what a parser cannot
-# know: whether a reference names a Parameter that exists, whether an operand
-# names a statement that exists, whether a listed parameter is one the
-# expression uses. ONE grammar, two surfaces; nothing below re-decides what a
-# node means.
+# know: whether a reference names a Parameter that exists, whether a datum is a
+# committed spatial record, whether a listed parameter is one the expression
+# uses. ONE grammar, two surfaces; nothing below re-decides what a node means.
 # ==========================================================================
-IR_VALIDATION_KINDS = ("parameter", "constraint", "statement", "feature")
+IR_VALIDATION_KINDS = ("parameter", "constraint", "feature")
 
 
 def parameter_record_problems(record: Dict[str, Any], created: bool = False) -> List[str]:
@@ -540,6 +578,10 @@ def parameter_record_problems(record: Dict[str, Any], created: bool = False) -> 
         b = record.get(bound)
         if b is not None and (isinstance(b, bool) or not isinstance(b, (int, float))):
             out.append("IR: Parameter %s %s %r is not a number" % (eid, bound, b))
+    role = record.get("role")
+    if role is not None and str(role).upper() == "SCALE" and unit != KERNEL_LENGTH_UNIT:
+        out.append("IR: Parameter %s declares role SCALE in %r; a scale is kernel length units "
+                   "(%s) per basis unit" % (eid, unit, KERNEL_LENGTH_UNIT))
     return out
 
 
@@ -552,8 +594,12 @@ def _expression_problems(where: str, node: Any, known: Set[str]) -> List[str]:
             for ref in sorted(expr.refs()) if ref not in known]
 
 
-def constraint_record_problems(record: Dict[str, Any], known_parameters: Set[str]
-                               ) -> List[str]:
+def constraint_record_problems(record: Dict[str, Any], known_parameters: Set[str],
+                               units: Optional[Dict[str, str]] = None) -> List[str]:
+    """Grammar, references, and - when the declared units are known - ONE
+    dimension on both sides. A constraint adding a length to a pure number is
+    not a relation the solver can read; it was found at settlement, after the
+    record stood. The dimensional reduction is the solver's own (Unit G)."""
     eid = record.get("entity_id")
     expr = record.get("expression")
     if not isinstance(expr, dict):
@@ -578,93 +624,93 @@ def constraint_record_problems(record: Dict[str, Any], known_parameters: Set[str
         for ref in sorted(used - set(listed)):
             out.append("IR: Constraint %s uses %s in its expression and does not list "
                        "it in `parameters`" % (eid, ref))
+    if not out and units is not None and all(ref in units for ref in used):
+        from . import solver                     # lazy: solver imports this module
+        out += ["IR: Constraint %s %s" % (eid, p) for p in solver.dimension_problems(expr, units)]
     return out
 
 
-def statement_record_problems(record: Dict[str, Any], known_parameters: Set[str],
-                              known_statements: Set[str]) -> List[str]:
-    eid = record.get("entity_id")
+@dataclass(frozen=True)
+class Known:
+    """What a record may refer to: the state a patch would leave, by family."""
+
+    parameters: Set[str]
+    #: datum id -> family, for every declared Joint / Envelope / FunctionalRegion / Feature
+    datums: Dict[str, str]
+    #: feature id -> body, for every declared Feature (a feature datum must share the body)
+    feature_bodies: Dict[str, str]
+    #: envelope id -> body, region id -> owning bodies (a datum of the wrong body is refused)
+    datum_bodies: Dict[str, Set[str]]
+    #: joint id -> its declared axis_direction, so a restated axis is checked against it
+    joint_axes: Optional[Dict[str, str]] = None
+    #: parameter id -> declared unit, so a constraint's two sides can be checked
+    #: for ONE dimension before it stands (INV-004 at the relation, not only at
+    #: the leaf)
+    units: Optional[Dict[str, str]] = None
+
+
+def feature_record_problems(record: Dict[str, Any], known: Known) -> List[str]:
+    """The whole feature, read once: placement, construction, references."""
+    eid = record.get("entity_id") or record.get("id")
     try:
-        stmt = Statement.parse(record)
+        spec = FeatureSpec.parse(record)
     except IRError as exc:
         return ["IR: %s" % exc]
     out: List[str] = []
-    for ref in sorted(stmt.refs()):
-        if ref not in known_parameters:
-            out.append("IR: ConstructionStatement %s references %s, which no standing "
-                       "Parameter declares" % (eid, ref))
-    for operand in stmt.operands:
-        if operand not in known_statements:
-            out.append("IR: ConstructionStatement %s consumes %s, which is no standing "
-                       "ConstructionStatement" % (eid, operand))
+    for ref in sorted(spec.refs()):
+        if ref not in known.parameters:
+            out.append("IR: feature %s references %s, which no standing Parameter declares"
+                       % (eid, ref))
+    datum = spec.placement.datum
+    family = known.datums.get(datum)
+    if family is None:
+        out.append("IR: feature %s is placed against %s, which is no standing joint, "
+                   "envelope, region or feature" % (eid, datum))
+        return out
+    if family == "Joint":
+        # A DATUM LOCATES; AN AXIS ORIENTS. They are two facts, and a joint
+        # datum settles only the first: the feature's origin is the joint's
+        # located frame. Its axis DEFAULTS to the joint's - which is what a
+        # bore, a pin or a bearing wants, and what most features at a joint
+        # mean - and a feature may state its own instead, which says "located
+        # by this joint, oriented otherwise": a face whose normal is not the
+        # hinge line, a snap arm that projects across it, a keeper that
+        # retains along it. Refusing that was an over-constraint, and it cost a
+        # live repair round: a stage told to realize a mating side could not
+        # place a FACE at the joint it belongs to without claiming the face
+        # points along the hinge axis.
+        #
+        # WHAT REALIZES THE JOINT IS THEREFORE NOT "ANY FEATURE PLACED AT IT" -
+        # it is one placed at it ON ITS AXIS, which
+        # `downstream.embodiment.joint_realization_findings` is what asks.
+        declared = str((known.joint_axes or {}).get(datum) or "").strip().upper()
+        if axis_vector(declared) is None and spec.placement.axis is None:
+            # a joint that points nowhere (FIXED, axis NONE) is a location only:
+            # the feature placed at it carries its own axis or has none at all
+            out.append("IR: feature %s is placed at joint %s, which declares no axis, and "
+                       "names none of its own" % (eid, datum))
+    if family == "Feature":
+        if datum == eid:
+            out.append("IR: feature %s is placed against itself" % eid)
+        elif known.feature_bodies.get(datum) not in (None, spec.body):
+            out.append("IR: feature %s on %s is placed against feature %s of body %s; a "
+                       "feature is placed relative to its own body, and bodies relate "
+                       "through joints" % (eid, spec.body, datum, known.feature_bodies.get(datum)))
+    bodies = known.datum_bodies.get(datum)
+    if family in ("Envelope",) and bodies and spec.body not in bodies:
+        out.append("IR: feature %s on %s is placed against envelope %s of another body"
+                   % (eid, spec.body, datum))
     return out
 
 
-def envelope_problems(feature_id: Any, envelope: Any, known_parameters: Set[str]
-                      ) -> Tuple[Optional[Dict[str, List[Expr]]], List[str]]:
-    """Parse a symbolic feature envelope: (expressions by axis list, problems).
-
-    The constraint grammar at the leaves of a spatial claim: `{ref}` naming a
-    declared Parameter, `{const, unit}`, or arithmetic over them. A bare number
-    is a solved dimension demanded of the stage that is told never to invent
-    one, and is refused by name; a coordinate at the frame origin is the typed
-    zero of the frame's unit.
-    """
-    if not isinstance(envelope, dict):
-        return None, ["IR: feature %s declares an envelope that is not an object"
-                      % feature_id]
-    out: Dict[str, List[Expr]] = {}
-    problems: List[str] = []
-    for axis_list in ("centre", "half_extent"):
-        components = envelope.get(axis_list)
-        if not isinstance(components, list) or len(components) != 3:
-            problems.append("IR: feature %s envelope %s is not three components"
-                            % (feature_id, axis_list))
-            continue
-        parsed: List[Expr] = []
-        for index, node in enumerate(components):
-            if isinstance(node, bool) or isinstance(node, (int, float)):
-                problems.append(
-                    "IR: feature %s envelope %s[%d] is a bare number (%r); a "
-                    "dimension is a declared parameter or a unit-bearing constant, "
-                    "never a value invented here" % (feature_id, axis_list, index, node))
-                continue
-            try:
-                expr = Expr.parse(node)
-            except IRError as exc:
-                problems.append("IR: feature %s envelope %s[%d]: %s"
-                                % (feature_id, axis_list, index, exc))
-                continue
-            for ref in sorted(expr.refs()):
-                if ref not in known_parameters:
-                    problems.append("IR: feature %s envelope references %s, which no "
-                                    "standing Parameter declares" % (feature_id, ref))
-            parsed.append(expr)
-        if len(parsed) == 3:
-            out[axis_list] = parsed
-    if problems or len(out) != 2:
-        return None, problems
-    return out, []
-
-
-def record_problems(kind: str, record: Dict[str, Any], known_parameters: Set[str],
-                    known_statements: Set[str], created: bool = False) -> List[str]:
+def record_problems(kind: str, record: Dict[str, Any], known: Known,
+                    created: bool = False) -> List[str]:
     """THE ONE ENTRY the write boundary calls, by the kind a family declares."""
     if kind == "parameter":
         return parameter_record_problems(record, created=created)
     if kind == "constraint":
-        return constraint_record_problems(record, known_parameters)
-    if kind == "statement":
-        return statement_record_problems(record, known_parameters, known_statements)
+        return constraint_record_problems(record, known.parameters, known.units)
     if kind == "feature":
-        problems: List[str] = []
-        if record.get("envelope") is not None:
-            _exprs, envelope = envelope_problems(record.get("entity_id"),
-                                                 record.get("envelope"), known_parameters)
-            problems += envelope
-        if record.get("placement") is not None:
-            problems += placement_problems("feature %s placement" % record.get("entity_id"),
-                                           record.get("placement"), known_parameters)
-        return problems
+        return feature_record_problems(record, known)
     raise IRError("unknown ir_validation kind %r; the vocabulary is %s"
                   % (kind, list(IR_VALIDATION_KINDS)))
