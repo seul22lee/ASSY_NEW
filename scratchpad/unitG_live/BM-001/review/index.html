@@ -1,0 +1,93 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASSY Ver3.0 - design review: BM-001</title><style>
+:root{--ink:#1b1f24;--muted:#6b7580;--rule:#d7dde4;--paper:#fff;--warn:#b3261e;
+--warnbg:#fdecea;--ok:#1a7f4b;--okbg:#eaf6ef;--code:#f5f7f9;--accent:#2f6fb2}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--ink);background:var(--paper)}
+.wrap{max-width:1180px;margin:0 auto;padding:2.2rem 1.4rem 5rem}
+h1{font-size:1.9rem;margin:0 0 .3rem;letter-spacing:-.01em}
+h2{font-size:1.35rem;margin:2.8rem 0 .5rem;padding-top:1.1rem;border-top:2px solid var(--rule)}
+h3{font-size:1.02rem;margin:1.8rem 0 .35rem}
+p{margin:.5rem 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+code{background:var(--code);padding:.1rem .3rem;border-radius:3px;font-size:.86em}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;padding:.8rem 1rem;
+overflow-x:auto;font-size:.8rem;line-height:1.5}
+table{border-collapse:collapse;width:100%;margin:.8rem 0;font-size:.86rem}
+th,td{border:1px solid var(--rule);padding:.45rem .6rem;text-align:left;vertical-align:top}
+th{background:#f2f5f8;font-weight:600}
+figure{margin:1.2rem 0 1.8rem}
+figure img{width:100%;height:auto;border:1px solid var(--rule);border-radius:6px;
+background:#fff}
+figcaption{font-size:.83rem;color:var(--muted);margin-top:.45rem}
+.src{display:inline-block;font-family:ui-monospace,monospace;font-size:.76rem;
+background:#eef2f6;border:1px solid var(--rule);border-radius:4px;padding:.15rem .45rem;
+margin:.3rem .3rem .3rem 0}
+.badge{display:inline-block;font-weight:700;font-size:.78rem;border-radius:4px;
+padding:.2rem .55rem;margin-right:.4rem}
+.rejected{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn)}
+.accepted{background:var(--okbg);color:var(--ok);border:1px solid var(--ok)}
+.neutral{background:#eef2f6;color:var(--muted);border:1px solid var(--rule)}
+.callout{border-left:4px solid var(--warn);background:var(--warnbg);padding:.7rem 1rem;
+margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.ok{border-left-color:var(--ok);background:var(--okbg)}
+.callout.info{border-left-color:var(--accent);background:#eef4fb}
+.chain{font-family:ui-monospace,monospace;font-size:.84rem;background:var(--code);
+border:1px solid var(--rule);border-radius:6px;padding:1rem;white-space:pre;overflow-x:auto}
+.muted{color:var(--muted)}
+.nav{position:sticky;top:0;background:rgba(255,255,255,.96);border-bottom:1px solid var(--rule);
+padding:.6rem 0;margin-bottom:1.2rem;font-size:.85rem;z-index:9}
+.nav a{color:var(--accent);text-decoration:none;margin-right:1rem}
+.nav a:hover{text-decoration:underline}
+ul{margin:.4rem 0 .4rem 1.2rem;padding:0}
+li{margin:.2rem 0}
+@media(prefers-color-scheme:dark){
+:root{--ink:#e6edf3;--muted:#9aa7b2;--rule:#30363d;--paper:#0d1117;--code:#161b22;
+--warnbg:#3a1d1a;--okbg:#132a1e}
+figure img{background:#fff}
+th{background:#161b22}
+.nav{background:rgba(13,17,23,.96)}
+}
+</style></head><body><div class='wrap'>
+<div class='nav'><a href='#s04'>S04</a><a href='#s05'>S05</a><a href='#s06'>S06</a></div>
+<h1>ASSY Ver3.0 - design review: BM-001</h1><p class='muted'>Branch CND-0001 | evidence rebuilt deterministically from recorded runs | zero provider calls</p>
+<div class='callout info'><strong>Evidence rule.</strong> Every figure states its SOURCE. A model response the write boundary refused is never shown as the accepted design: it is stamped <span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span> and its refusal reasons are printed beside it. No number here was invented for this report.</div>
+<h2>Dashboard</h2><table><tr><th>Stage</th><th>Source</th><th>Status</th><th>What exists</th><th>Main blocker</th></tr>
+<tr><td><strong>S04</strong></td><td>deterministic replay of accepted canonical DesignState</td><td><span class='badge accepted'>ACCEPTED</span></td><td>AssemblyStep 3, Body 3, Configuration 2, ConstraintRelation 6, EliminationRecord 1, Envelope 3, FunctionalRegion 4, Interface 4, Joint 3, LoadPath 5, MobilityExpectation 1, PhysicalInteraction 5, ReachResult 4, ReferenceScale 1, RigidGroup 4, State 2, SweptVolume 4, Transition 2, TransitionRequirement 2</td><td>-</td></tr>
+<tr><td><strong>S05</strong></td><td>DeepSeek + canonical write boundary</td><td><span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span></td><td>standing: NOTHING | proposed: constraints 5, features 12, kinematic_realizations 6, parameters 6</td><td>IR: feature FEA-0008 has 2 unconsumed steps (B2, B4); exactly one result IS the feature</td></tr>
+<tr><td><strong>S06</strong></td><td>deterministic settlement (no model)</td><td><span class='badge rejected'>NOT ENTERED</span></td><td>no system formulated; no value produced</td><td>settlement_readiness == False: no current embodiment (no standing feature) stands for CND-0001; there is nothing to settle for</td></tr>
+<tr><td><strong>S07</strong></td><td>deterministic CAD compilation</td><td><span class='badge rejected'>NOT ENTERED</span></td><td>no CAD artifact</td><td>S06 has not settled a system</td></tr>
+</table>
+<h2>Progression</h2><div class='chain'>S04  spatial / motion intent
+       |
+S05  physical symbolic embodiment
+       |
+S06  settled dimensions
+       |
+S07  actual CAD</div>
+<h2 id='s04'>S04 - spatial / motion intent</h2><p class='muted'>The arrangement, the joint frames and the sampled motion evidence the downstream consumes.</p>
+<p><code>state_hash</code> = <code>26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486</code> &middot; provider calls during rebuild: <strong>0</strong></p><h3>Joints</h3><table><tr><th>Joint</th><th>Type</th><th>Bodies</th><th>Origin</th><th>Axis</th><th>STA-CFG-0001</th><th>STA-CFG-0002</th></tr><tr><td>JNT-0001</td><td>FIXED</td><td>BOD-0003 -&gt; BOD-0001</td><td><code>[-48, 0, 20]</code></td><td>NONE</td><td>-</td><td>-</td></tr><tr><td>JNT-0002</td><td>REVOLUTE</td><td>BOD-0002 -&gt; BOD-0003</td><td><code>[-48, 0, 20]</code></td><td>+Y</td><td>0</td><td>-90</td></tr><tr><td>JNT-0003</td><td>COMPLIANT</td><td>BOD-0002 -&gt; BOD-0002</td><td><code>[40, 0, 30]</code></td><td>+Y</td><td>5</td><td>0</td></tr></table><h3>Transitions</h3><table><tr><th>Transition</th><th>Moving group</th><th>Start</th><th>End</th><th>Sweep evidence</th></tr><tr><td>TRN-0001</td><td>RGP-0002,RGP-0003,RGP-0004</td><td>STA-CFG-0001</td><td>STA-CFG-0002</td><td>SWV-TRN-0001-RGP-0002 (SAMPLED, 9 samples), SWV-TRN-0001-RGP-0004 (SAMPLED, 9 samples)</td></tr><tr><td>TRN-0002</td><td>RGP-0002,RGP-0003,RGP-0004</td><td>STA-CFG-0002</td><td>STA-CFG-0001</td><td>SWV-TRN-0002-RGP-0002 (SAMPLED, 9 samples), SWV-TRN-0002-RGP-0004 (SAMPLED, 9 samples)</td></tr></table>
+<figure><a href='s04/spatial_layout.png'><img src='s04/spatial_layout.png' alt='spatial_layout'></a><figcaption><strong>spatial layout</strong> - Bodies, rigid groups, envelopes, functional regions and joint origins in the arrangement frame.</figcaption></figure>
+<figure><a href='s04/joint_frames.png'><img src='s04/joint_frames.png' alt='joint_frames'></a><figcaption><strong>joint frames</strong> - Every joint: type, the bodies it relates, its located origin, its axis, and its coordinate in each state.</figcaption></figure>
+<figure><a href='s04/states_and_motion.png'><img src='s04/states_and_motion.png' alt='states_and_motion'></a><figcaption><strong>states and motion</strong> - The configurations, the transitions between them, and the swept occupancy - one panel per transition.</figcaption></figure>
+<p class='muted'>Evidence files: <a class='src' href='s04/state_summary.json'>state_summary.json</a></p>
+<h2 id='s05'>S05 - physical symbolic embodiment</h2><p class='muted'>The geometry that makes each declared relation real, symbolically. S05 declares parameters and never values.</p>
+<div class='callout'><span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span> The response below is a <strong>proposal</strong>. It never entered DesignState.</div><h3>DeepSeek proposed &rarr; write boundary &rarr; canonical standing &rarr; findings &rarr; settlement readiness</h3><table><tr><th>Step</th><th>Result</th></tr><tr><td>1. DeepSeek proposed</td><td>constraints 5, features 12, kinematic_realizations 6, parameters 6, realizations 0, unresolved 0</td></tr><tr><td>2. Write-boundary result</td><td><code>execution_status = SCHEMA_FAILURE</code> &middot; <code>patch_applied = False</code></td></tr><tr><td>3. Canonical standing S05 entities</td><td><strong>NONE</strong> &mdash; no S05-owned entity stands for this branch</td></tr><tr><td>4. Structural findings</td><td>4</td></tr><tr><td>5. Settlement readiness</td><td><code>False</code></td></tr></table><h3>Exact rejection reasons (write boundary)</h3><pre>IR: feature FEA-0008 has 2 unconsumed steps (B2, B4); exactly one result IS the feature</pre><h3>Deterministic structural findings</h3><pre>EMBODIMENT: constraint relation CRL-0001 blocks TX, TY, TZ, RX, RY, RZ and no KinematicRealization names it; the restraint is stated and nothing embodies it (its provider is the external reaction site RSR-0001, so only the retained side is owed material here)
+EMBODIMENT: constraint relation CRL-0004 blocks TX, TY, TZ, RX, RZ and no KinematicRealization names it; the restraint is stated and nothing embodies it
+EMBODIMENT: constraint relation CRL-0006 blocks TX, TY, TZ, RX, RY, RZ and no KinematicRealization names it; the restraint is stated and nothing embodies it (its provider is the external reaction site RSR-0002, so only the retained side is owed material here)
+EMBODIMENT: interface IFC-0001 declares INTERFERENCE_FIT and no Constraint governs it</pre><p class='muted'>Standing on this branch but authored by other stages (not S05 output): UnresolvedDecision 12.</p>
+<figure><a href='s05/write_boundary.png'><img src='s05/write_boundary.png' alt='write_boundary'></a><figcaption><strong>write boundary</strong> - MANDATORY DISTINCTION: what was proposed, what the boundary did with it, what stands, what the checks found, and whether S06 may be entered.</figcaption></figure>
+<figure><a href='s05/embodiment_overview.png'><img src='s05/embodiment_overview.png' alt='embodiment_overview'></a><figcaption><strong>embodiment overview</strong> - Body-centric: every feature, its kind, polarity, placement datum, axis, interface, construction steps and terminal.</figcaption></figure>
+<figure><a href='s05/feature_map.png'><img src='s05/feature_map.png' alt='feature_map'></a><figcaption><strong>feature map</strong> - Each feature at the committed datum it names, with the axis it states. Symbolic - nothing is drawn to scale.</figcaption></figure>
+<figure><a href='s05/kinematic_realizations.png'><img src='s05/kinematic_realizations.png' alt='kinematic_realizations'></a><figcaption><strong>kinematic realizations</strong> - Feature(s) -&gt; KinematicRealization -&gt; Joint | ConstraintRelation, for every declared relation.</figcaption></figure>
+<figure><a href='s05/interfaces.png'><img src='s05/interfaces.png' alt='interfaces'></a><figcaption><strong>interfaces</strong> - Interface -&gt; the two bodies -&gt; the feature realizing each side, with the deterministic finding printed against it.</figcaption></figure>
+<figure><a href='s05/parameter_constraint_graph.png'><img src='s05/parameter_constraint_graph.png' alt='parameter_constraint_graph'></a><figcaption><strong>parameter constraint graph</strong> - Parameter -&gt; Constraint &lt;- Parameter, with units, roles and what no constraint determines.</figcaption></figure>
+<p class='muted'>Evidence files: <a class='src' href='s05/accepted_state_summary.json'>accepted_state_summary.json</a> <a class='src' href='s05/boundary_verdict.json'>boundary_verdict.json</a> <a class='src' href='s05/provider_run_record.json'>provider_run_record.json</a> <a class='src' href='s05/raw_model_response.json'>raw_model_response.json</a> <a class='src' href='s05/prompt.txt'>prompt.txt</a> <a class='src' href='s05/raw_model_response.verbatim.txt'>raw_model_response.verbatim.txt</a></p>
+<h2 id='s06'>S06 - settled dimensions</h2><p class='muted'>Deterministic settlement of the declared system. Not a model result.</p>
+<div class='callout'><span class='badge rejected'>S06 NOT ENTERED</span>reason: <code>settlement_readiness == False</code><pre>no current embodiment (no standing feature) stands for CND-0001; there is nothing to settle for</pre><p>No solver value exists and none is shown. This is not a failed solve: the solver was never run.</p></div>
+<figure><a href='s06/constraint_graph.png'><img src='s06/constraint_graph.png' alt='constraint_graph'></a><figcaption><strong>constraint graph</strong> - The system actually formulated for the solver, or the entry gate that stopped it.</figcaption></figure>
+<figure><a href='s06/parameter_values.png'><img src='s06/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence files: <a class='src' href='s06/solver_input.json'>solver_input.json</a> <a class='src' href='s06/solver_result.json'>solver_result.json</a></p>
+</div></body></html>

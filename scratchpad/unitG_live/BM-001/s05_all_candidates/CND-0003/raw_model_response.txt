@@ -1,0 +1,593 @@
+{
+  "features": [
+    {
+      "key": "base_plate",
+      "body": "BOD-0008",
+      "feature_kind": "STOCK",
+      "geometry": "Envelope body as a thin-walled rectangular tray with a floor at z=-1.0, walls and an open top; interior volume kept clear for storage.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0008"
+        }
+      },
+      "solid": {
+        "shape": "COMPOUND",
+        "parts": [
+          {
+            "shape": "BLOCK",
+            "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 4},
+            "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2},
+            "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2}
+          },
+          {
+            "shape": "AT",
+            "of": {
+              "shape": "BLOCK",
+              "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+              "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2},
+              "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2}
+            },
+            "offset": [
+              {"kind": "number", "value": 0, "unit": "mm"},
+              {"kind": "number", "value": 0, "unit": "mm"},
+              {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1}
+            ]
+          },
+          {
+            "shape": "AT",
+            "of": {
+              "shape": "BLOCK",
+              "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+              "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2},
+              "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2}
+            },
+            "offset": [
+              {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 3.8},
+              {"kind": "number", "value": 0, "unit": "mm"},
+              {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1}
+            ]
+          },
+          {
+            "shape": "AT",
+            "of": {
+              "shape": "BLOCK",
+              "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 4},
+              "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+              "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2}
+            },
+            "offset": [
+              {"kind": "number", "value": 0, "unit": "mm"},
+              {"kind": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.9},
+              {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1}
+            ]
+          },
+          {
+            "shape": "AT",
+            "of": {
+              "shape": "BLOCK",
+              "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 4},
+              "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+              "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2}
+            },
+            "offset": [
+              {"kind": "number", "value": 0, "unit": "mm"},
+              {"kind": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": -1.1},
+              {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1}
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_storage_free",
+      "body": "BOD-0008",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Large open volume in the tray interior for storage.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0008"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 3.6},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.6},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.8}
+      }
+    },
+    {
+      "key": "base_hinge_bore",
+      "body": "BOD-0008",
+      "feature_kind": "BORE",
+      "geometry": "Hinge journal bore for the lid hinge at JNT-0009.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0009"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_hinge", "unit": "mm"},
+        "height": {"kind": "param", "param": "w_hinge", "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_latch_link_bore",
+      "body": "BOD-0008",
+      "feature_kind": "BORE",
+      "geometry": "Bore for the toggle link pivot at JNT-0012 on the base.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0012"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "height": {"kind": "param", "param": "w_link", "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_contact_pad",
+      "body": "BOD-0008",
+      "feature_kind": "FACE",
+      "geometry": "Flat contact pad on the base to contact the latch lever at IFC-0014 when latched.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0008"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2.5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.8}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2}
+      }
+    },
+    {
+      "key": "base_stop_face",
+      "body": "BOD-0008",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the base that the lid contacts when closed (IFC-0015).",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0008"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.8}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 3.6},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.6},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "base_keepout_clear",
+      "body": "BOD-0008",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Region cleared to keep FRG-0012 free of material.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0012"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2.8},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.0}
+      }
+    },
+    {
+      "key": "lid_plate",
+      "body": "BOD-0009",
+      "feature_kind": "STOCK",
+      "geometry": "Lid panel as a thin rectangular plate, initially flat.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0009"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 4},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "lid_hinge_pin",
+      "body": "BOD-0009",
+      "feature_kind": "PIN",
+      "geometry": "Pivot pin for the hinge with the base at JNT-0009.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0009"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_hinge", "unit": "mm"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "lid_lever_bore",
+      "body": "BOD-0009",
+      "feature_kind": "BORE",
+      "geometry": "Bore for the latch lever pivot at JNT-0010.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0010"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_lever", "unit": "mm"},
+        "height": {"kind": "param", "param": "w_lever", "unit": "mm"}
+      }
+    },
+    {
+      "key": "lid_keepout_clear",
+      "body": "BOD-0009",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Region cleared to keep FRG-0012 free of material.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0012"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2.8},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.0}
+      }
+    },
+    {
+      "key": "lever_body",
+      "body": "BOD-0010",
+      "feature_kind": "STOCK",
+      "geometry": "Latch lever arm from the pivot (JNT-0010) to the user access region, shaped as a flat bar.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0010"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.3},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "lever_pin",
+      "body": "BOD-0010",
+      "feature_kind": "PIN",
+      "geometry": "Pivot pin for the lever on the lid at JNT-0010.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0010"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_lever", "unit": "mm"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "lever_toggle_bore",
+      "body": "BOD-0010",
+      "feature_kind": "BORE",
+      "geometry": "Bore for the toggle link pivot at JNT-0011 on the lever.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0011"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "height": {"kind": "param", "param": "w_link", "unit": "mm"}
+      }
+    },
+    {
+      "key": "lever_access_clear",
+      "body": "BOD-0010",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Clearance to keep the access region FRG-0010 free of material.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0010"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.6},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 1.0}
+      }
+    },
+    {
+      "key": "toggle_link_body",
+      "body": "BOD-0011",
+      "feature_kind": "STOCK",
+      "geometry": "Toggle link bar connecting the base pivot (JNT-0012) and the lever pivot (JNT-0011).",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0011"
+        }
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 2.5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "toggle_link_pin_base",
+      "body": "BOD-0011",
+      "feature_kind": "PIN",
+      "geometry": "Pivot pin engaging the base bore at JNT-0012.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0012"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "toggle_link_pin_lever",
+      "body": "BOD-0011",
+      "feature_kind": "PIN",
+      "geometry": "Pivot pin engaging the lever bore at JNT-0011.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0011"
+        }
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.4}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "r_hinge", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "r_lever", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "r_link", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "w_hinge", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 6, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "w_lever", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 6, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "w_link", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 6, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "r_hinge", "unit": "mm"},
+      "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "r_lever", "unit": "mm"},
+      "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "r_link", "unit": "mm"},
+      "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "STATED_BOUND",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "wall", "unit": "mm"},
+      "rhs": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.2}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"},
+      "rhs": {"kind": "number", "value": 25, "unit": "mm"}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0009": {
+      "BOD-0008": ["base_hinge_bore"],
+      "BOD-0009": ["lid_hinge_pin"]
+    },
+    "JNT-0010": {
+      "BOD-0009": ["lid_lever_bore"],
+      "BOD-0010": ["lever_pin"]
+    },
+    "JNT-0011": {
+      "BOD-0010": ["lever_toggle_bore"],
+      "BOD-0011": ["toggle_link_pin_lever"]
+    },
+    "JNT-0012": {
+      "BOD-0008": ["base_latch_link_bore"],
+      "BOD-0011": ["toggle_link_pin_base"]
+    },
+    "CRL-0101": {
+      "BOD-0008": ["base_plate"]
+    },
+    "CRL-0102": {
+      "BOD-0008": ["base_plate"]
+    },
+    "CRL-0103": {
+      "BOD-0009": ["lid_hinge_pin", "lid_plate"],
+      "BOD-0008": ["base_hinge_bore", "base_plate"]
+    },
+    "CRL-0104": {
+      "BOD-0010": ["lever_pin", "lever_body"],
+      "BOD-0009": ["lid_lever_bore", "lid_plate"]
+    },
+    "CRL-0105": {
+      "BOD-0011": ["toggle_link_pin_lever", "toggle_link_body"],
+      "BOD-0010": ["lever_toggle_bore", "lever_body"]
+    },
+    "CRL-0106": {
+      "BOD-0011": ["toggle_link_pin_base", "toggle_link_body"],
+      "BOD-0008": ["base_latch_link_bore", "base_plate"]
+    },
+    "CRL-0107": {
+      "BOD-0010": ["lever_body"],
+      "BOD-0008": ["base_contact_pad"]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0010": {
+      "sides": {
+        "BOD-0008": ["base_hinge_bore"],
+        "BOD-0009": ["lid_hinge_pin"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "r_hinge", "unit": "mm"},
+        "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+      }
+    },
+    "IFC-0011": {
+      "sides": {
+        "BOD-0008": ["base_latch_link_bore"],
+        "BOD-0011": ["toggle_link_pin_base"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+      }
+    },
+    "IFC-0012": {
+      "sides": {
+        "BOD-0009": ["lid_lever_bore"],
+        "BOD-0010": ["lever_pin"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "r_lever", "unit": "mm"},
+        "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+      }
+    },
+    "IFC-0013": {
+      "sides": {
+        "BOD-0010": ["lever_toggle_bore"],
+        "BOD-0011": ["toggle_link_pin_lever"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "r_link", "unit": "mm"},
+        "rhs": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scl", "unit": "mm", "role": "SCALE"}, "factor": 0.5}, "right": {"kind": "param", "param": "wall", "unit": "mm"}}
+      }
+    },
+    "IFC-0014": {
+      "sides": {
+        "BOD-0008": ["base_contact_pad"],
+        "BOD-0010": ["lever_body"]
+      }
+    },
+    "IFC-0015": {
+      "sides": {
+        "BOD-0008": ["base_stop_face"],
+        "BOD-0009": ["lid_plate"]
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0010": {
+      "BOD-0010": ["lever_access_clear"]
+    },
+    "FRG-0012": {
+      "BOD-0008": ["base_keepout_clear"],
+      "BOD-0009": ["lid_keepout_clear"]
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

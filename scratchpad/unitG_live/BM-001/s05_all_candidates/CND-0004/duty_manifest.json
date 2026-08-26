@@ -1,0 +1,407 @@
+{
+ "assembly": [],
+ "axisless_datums": [],
+ "bodies": [
+  "BOD-0012",
+  "BOD-0013"
+ ],
+ "branch": "CND-0004",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0016",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0017",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0018",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0019",
+   "mating": {},
+   "needs_governing_constraint": false
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "descriptor": "PRISMATIC (dof TX, axis +X)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0013"
+  },
+  {
+   "bodies": [
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0001",
+   "family": "ConstraintRelation",
+   "target": "CRL-0108"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TY, TZ, RX, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0109"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0110"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0111"
+  }
+ ],
+ "regions": [
+  {
+   "excludes_occupancy": true,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0013"
+   ],
+   "region": "FRG-0013",
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     -2.0,
+     0.0,
+     0.0
+    ],
+    "half_extent": [
+     0.2,
+     0.4,
+     0.3
+    ]
+   }
+  },
+  {
+   "excludes_occupancy": true,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0012"
+   ],
+   "region": "FRG-0014",
+   "role": "APERTURE",
+   "volume": {
+    "centre": [
+     -3.0,
+     0.0,
+     0.0
+    ],
+    "half_extent": [
+     0.1,
+     0.5,
+     0.4
+    ]
+   }
+  },
+  {
+   "excludes_occupancy": true,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0013"
+   ],
+   "region": "FRG-0015",
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     -2.0,
+     -0.6,
+     0.0
+    ],
+    "half_extent": [
+     0.2,
+     0.3,
+     0.2
+    ]
+   }
+  },
+  {
+   "excludes_occupancy": false,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0012"
+   ],
+   "region": "FRG-0016",
+   "role": "SUPPORT",
+   "volume": {
+    "centre": [
+     0.0,
+     0.0,
+     -2.0
+    ],
+    "half_extent": [
+     2.5,
+     1.5,
+     0.1
+    ]
+   }
+  },
+  {
+   "excludes_occupancy": false,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "region": "FRG-0017",
+   "role": "SUPPORT",
+   "volume": {
+    "centre": [
+     0.0,
+     0.0,
+     -1.75
+    ],
+    "half_extent": [
+     2.0,
+     1.0,
+     0.15
+    ]
+   }
+  },
+  {
+   "excludes_occupancy": true,
+   "known_role": true,
+   "owning_bodies": [
+    "BOD-0012"
+   ],
+   "region": "FRG-0018",
+   "role": "APERTURE",
+   "volume": {
+    "centre": [
+     -3.0,
+     0.0,
+     0.0
+    ],
+    "half_extent": [
+     0.1,
+     1.8,
+     1.8
+    ]
+   }
+  }
+ ],
+ "released_motions": [
+  {
+   "from_state": "STA-CFG-0008",
+   "released_constraints": [
+    "CRL-0110"
+   ],
+   "required_motions": [
+    [
+     "JNT-0013",
+     "TX"
+    ]
+   ],
+   "to_state": "STA-CFG-0009",
+   "transition": "TRN-0105"
+  },
+  {
+   "from_state": "STA-CFG-0009",
+   "released_constraints": [],
+   "required_motions": [
+    [
+     "JNT-0013",
+     "TX"
+    ]
+   ],
+   "to_state": "STA-CFG-0008",
+   "transition": "TRN-0106"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0004",
+  "required": true
+ },
+ "state_restraints": [
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "bodies": [
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0008",
+   "joint_coordinates": {
+    "JNT-0013": 0.0
+   },
+   "relation": "CRL-0108",
+   "state": "STA-CFG-0008"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "bodies": [
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0009",
+   "joint_coordinates": {
+    "JNT-0013": 2.0
+   },
+   "relation": "CRL-0108",
+   "state": "STA-CFG-0009"
+  },
+  {
+   "blocked_dofs": [
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0008",
+   "joint_coordinates": {
+    "JNT-0013": 0.0
+   },
+   "relation": "CRL-0109",
+   "state": "STA-CFG-0008"
+  },
+  {
+   "blocked_dofs": [
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0009",
+   "joint_coordinates": {
+    "JNT-0013": 2.0
+   },
+   "relation": "CRL-0109",
+   "state": "STA-CFG-0009"
+  },
+  {
+   "blocked_dofs": [
+    "TX"
+   ],
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0008",
+   "joint_coordinates": {
+    "JNT-0013": 0.0
+   },
+   "relation": "CRL-0110",
+   "state": "STA-CFG-0008"
+  },
+  {
+   "blocked_dofs": [
+    "TX"
+   ],
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "configuration": "CFG-0009",
+   "joint_coordinates": {
+    "JNT-0013": 2.0
+   },
+   "relation": "CRL-0111",
+   "state": "STA-CFG-0009"
+  }
+ ],
+ "transitions": [
+  {
+   "changed_coordinates": [
+    "JNT-0013"
+   ],
+   "from_state": "STA-CFG-0008",
+   "moving_groups": [
+    "RGP-0015",
+    "RGP-0016"
+   ],
+   "swept_volumes": [
+    "SWV-TRN-0105-RGP-0015",
+    "SWV-TRN-0105-RGP-0016"
+   ],
+   "to_state": "STA-CFG-0009",
+   "transition": "TRN-0105"
+  },
+  {
+   "changed_coordinates": [
+    "JNT-0013"
+   ],
+   "from_state": "STA-CFG-0009",
+   "moving_groups": [
+    "RGP-0015",
+    "RGP-0016"
+   ],
+   "swept_volumes": [
+    "SWV-TRN-0106-RGP-0015",
+    "SWV-TRN-0106-RGP-0016"
+   ],
+   "to_state": "STA-CFG-0008",
+   "transition": "TRN-0106"
+  }
+ ]
+}

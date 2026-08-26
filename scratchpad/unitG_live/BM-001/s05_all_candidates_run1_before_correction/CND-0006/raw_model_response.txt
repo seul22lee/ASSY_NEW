@@ -1,0 +1,786 @@
+{
+  "parameters": [
+    {
+      "key": "scale",
+      "symbol": "s",
+      "unit": "mm",
+      "role": "SCALE"
+    }
+  ],
+  "features": [
+    {
+      "key": "bod14_stock",
+      "body": "BOD-0014",
+      "feature_kind": "STOCK",
+      "geometry": "Main body shell: a rectangular block enclosing the body.",
+      "placement": {
+        "datum": "ENV-0201"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 90
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 50
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 50
+        }
+      }
+    },
+    {
+      "key": "bod14_lid_flexure",
+      "body": "BOD-0014",
+      "feature_kind": "STOCK",
+      "geometry": "Thin flexible connector bridging base and lid within BOD-0014 material.",
+      "placement": {
+        "datum": "JNT-0014",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 5
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 30
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 1
+        }
+      }
+    },
+    {
+      "key": "bod14_handle_pivot_boss",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Boss on lid for revolute joint with handle.",
+      "placement": {
+        "datum": "JNT-0015",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pivot_boss"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod14_handle_pivot_bore",
+      "body": "BOD-0014",
+      "feature_kind": "BORE",
+      "geometry": "Bore through pivot boss for handle shaft.",
+      "placement": {
+        "datum": "JNT-0015",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_clearance"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod14_link_pivot_boss",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Boss on base for revolute joint with link.",
+      "placement": {
+        "datum": "JNT-0017",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pivot_boss"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod14_link_pivot_bore",
+      "body": "BOD-0014",
+      "feature_kind": "BORE",
+      "geometry": "Bore through base pivot boss for link shaft.",
+      "placement": {
+        "datum": "JNT-0017",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_clearance"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod14_snap_lid",
+      "body": "BOD-0014",
+      "feature_kind": "KEEPER",
+      "geometry": "Snap keeper on lid engaging handle snap arm.",
+      "placement": {
+        "datum": "JNT-0015",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "bod14_snap_base",
+      "body": "BOD-0014",
+      "feature_kind": "KEEPER",
+      "geometry": "Snap keeper on base engaging link snap arm.",
+      "placement": {
+        "datum": "JNT-0017",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "bod15_stock",
+      "body": "BOD-0015",
+      "feature_kind": "STOCK",
+      "geometry": "Handle lever stock: a rectangular block enclosing the handle envelope.",
+      "placement": {
+        "datum": "ENV-0202"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 20
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 16
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 14
+        }
+      }
+    },
+    {
+      "key": "bod15_pin_to_lid",
+      "body": "BOD-0015",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending from handle into lid pivot bore.",
+      "placement": {
+        "datum": "JNT-0015",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pin"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod15_pin_to_link",
+      "body": "BOD-0015",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending from handle into link pivot bore.",
+      "placement": {
+        "datum": "JNT-0016",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pin"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod15_snap_arm_to_lid",
+      "body": "BOD-0015",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on handle engaging lid keeper.",
+      "placement": {
+        "datum": "JNT-0015",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "scale_by",
+            "of": { "kind": "param", "param": "scale" },
+            "factor": 5
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "bod15_snap_arm_to_link",
+      "body": "BOD-0015",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on handle engaging link keeper.",
+      "placement": {
+        "datum": "JNT-0016",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "scale_by",
+            "of": { "kind": "param", "param": "scale" },
+            "factor": 5
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "bod16_stock",
+      "body": "BOD-0016",
+      "feature_kind": "STOCK",
+      "geometry": "Toggle link stock: a rectangular block enclosing the link envelope.",
+      "placement": {
+        "datum": "ENV-0203"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 90
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 30
+        }
+      }
+    },
+    {
+      "key": "bod16_pin_to_handle",
+      "body": "BOD-0016",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending from link into handle pivot bore.",
+      "placement": {
+        "datum": "JNT-0016",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pin"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod16_pin_to_base",
+      "body": "BOD-0016",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending from link into base pivot bore.",
+      "placement": {
+        "datum": "JNT-0017",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_pin"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 10
+        }
+      }
+    },
+    {
+      "key": "bod16_snap_arm_to_handle",
+      "body": "BOD-0016",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on link engaging handle keeper.",
+      "placement": {
+        "datum": "JNT-0016",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "scale_by",
+            "of": { "kind": "param", "param": "scale" },
+            "factor": 5
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "bod16_snap_arm_to_base",
+      "body": "BOD-0016",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on link engaging base keeper.",
+      "placement": {
+        "datum": "JNT-0017",
+        "axis": "+Y",
+        "offset": [
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "number",
+            "value": 0,
+            "unit": "mm"
+          },
+          {
+            "kind": "scale_by",
+            "of": { "kind": "param", "param": "scale" },
+            "factor": 5
+          }
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": { "kind": "param", "param": "scale" },
+          "factor": 4
+        }
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_closure",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "scale"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 1,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "clearance_journal",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_clearance"
+      },
+      "rhs": {
+        "kind": "sum",
+        "terms": [
+          {
+            "kind": "param",
+            "param": "r_pin"
+          },
+          {
+            "kind": "number",
+            "value": 0.5,
+            "unit": "mm"
+          }
+        ]
+      }
+    },
+    {
+      "key": "interference_snap",
+      "kind": "INTERFERENCE_FREE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_pin"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_pivot_bracket"
+      }
+    },
+    {
+      "key": "boss_radius",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_pivot_boss"
+      },
+      "rhs": {
+        "kind": "sum",
+        "terms": [
+          {
+            "kind": "param",
+            "param": "r_pin"
+          },
+          {
+            "kind": "number",
+            "value": 2,
+            "unit": "mm"
+          }
+        ]
+      }
+    },
+    {
+      "key": "snap_engage",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "snap_clearance"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0.5,
+        "unit": "mm"
+      }
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0014": [
+      "bod14_lid_flexure"
+    ],
+    "JNT-0015": [
+      "bod14_handle_pivot_boss",
+      "bod14_handle_pivot_bore",
+      "bod15_pin_to_lid"
+    ],
+    "JNT-0016": [
+      "bod15_pin_to_link",
+      "bod16_pin_to_handle"
+    ],
+    "JNT-0017": [
+      "bod14_link_pivot_boss",
+      "bod14_link_pivot_bore",
+      "bod16_pin_to_base"
+    ],
+    "CRL-1001": [
+      "bod14_lid_flexure"
+    ],
+    "CRL-1002": [
+      "bod14_handle_pivot_boss",
+      "bod15_pin_to_lid"
+    ],
+    "CRL-1003": [
+      "bod15_pin_to_link",
+      "bod16_pin_to_handle"
+    ],
+    "CRL-1004": [
+      "bod14_link_pivot_boss",
+      "bod16_pin_to_base"
+    ],
+    "CRL-1005": [
+      "bod16_snap_arm_to_handle",
+      "bod15_snap_arm_to_link"
+    ]
+  },
+  "interface_assignments": {
+    "IFC-0020": {
+      "sides": {
+        "BOD-0014": [
+          "bod14_handle_pivot_bore"
+        ],
+        "BOD-0015": [
+          "bod15_pin_to_lid"
+        ]
+      },
+      "governing_constraint": "clearance_journal"
+    },
+    "IFC-0021": {
+      "sides": {
+        "BOD-0014": [
+          "bod14_snap_lid"
+        ],
+        "BOD-0015": [
+          "bod15_snap_arm_to_lid"
+        ]
+      },
+      "governing_constraint": "interference_snap"
+    },
+    "IFC-0022": {
+      "sides": {
+        "BOD-0015": [
+          "bod15_pin_to_link"
+        ],
+        "BOD-0016": [
+          "bod16_pin_to_handle"
+        ]
+      },
+      "governing_constraint": "clearance_journal"
+    },
+    "IFC-0023": {
+      "sides": {
+        "BOD-0015": [
+          "bod15_snap_arm_to_link"
+        ],
+        "BOD-0016": [
+          "bod16_snap_arm_to_handle"
+        ]
+      },
+      "governing_constraint": "interference_snap"
+    },
+    "IFC-0024": {
+      "sides": {
+        "BOD-0016": [
+          "bod16_pin_to_base"
+        ],
+        "BOD-0014": [
+          "bod14_link_pivot_bore"
+        ]
+      },
+      "governing_constraint": "clearance_journal"
+    },
+    "IFC-0025": {
+      "sides": {
+        "BOD-0016": [
+          "bod16_snap_arm_to_base"
+        ],
+        "BOD-0014": [
+          "bod14_snap_base"
+        ]
+      },
+      "governing_constraint": "interference_snap"
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "Material properties for compliant flexure",
+      "why_open": "Flexure stiffness and fatigue life depend on material choice, which is not yet specified.",
+      "alternatives": ["polypropylene", "acetal", "nylon"],
+      "alternatives_kind": "material",
+      "kept_open_by": ["OBL-0002", "ACC-0006"],
+      "blocks": []
+    },
+    {
+      "decision": "Exact dimensions for snap interference",
+      "why_open": "Snap retention force and insertion force depend on geometry and material, not yet determined.",
+      "alternatives": [],
+      "alternatives_kind": "parameter",
+      "kept_open_by": ["IFC-0021", "IFC-0023", "IFC-0025"],
+      "blocks": []
+    }
+  ]
+}

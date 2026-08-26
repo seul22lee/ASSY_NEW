@@ -1,0 +1,465 @@
+{
+  "parameters": [
+    {
+      "key": "scale",
+      "symbol": "s",
+      "unit": "mm",
+      "role": "SCALE"
+    },
+    {
+      "key": "box_wall",
+      "symbol": "tw",
+      "unit": "mm"
+    },
+    {
+      "key": "lid_thick",
+      "symbol": "tl",
+      "unit": "mm"
+    },
+    {
+      "key": "pin_diam",
+      "symbol": "dp",
+      "unit": "mm"
+    },
+    {
+      "key": "bore_diam",
+      "symbol": "db",
+      "unit": "mm"
+    },
+    {
+      "key": "pin_hole_diam",
+      "symbol": "dh",
+      "unit": "mm"
+    },
+    {
+      "key": "knuckle_len",
+      "symbol": "lk",
+      "unit": "mm"
+    },
+    {
+      "key": "knuckle_gap",
+      "symbol": "gk",
+      "unit": "mm"
+    },
+    {
+      "key": "snap_thick",
+      "symbol": "tsn",
+      "unit": "mm"
+    },
+    {
+      "key": "snap_width",
+      "symbol": "wsn",
+      "unit": "mm"
+    },
+    {
+      "key": "snap_len",
+      "symbol": "lsn",
+      "unit": "mm"
+    },
+    {
+      "key": "recess_depth",
+      "symbol": "rd",
+      "unit": "mm"
+    },
+    {
+      "key": "recess_width",
+      "symbol": "rw",
+      "unit": "mm"
+    },
+    {
+      "key": "clearance",
+      "symbol": "c",
+      "unit": "mm"
+    },
+    {
+      "key": "interference",
+      "symbol": "i",
+      "unit": "mm"
+    },
+    {
+      "key": "wall_clearance",
+      "symbol": "wc",
+      "unit": "mm"
+    }
+  ],
+  "features": [
+    {
+      "key": "base_stock",
+      "body": "BOD-0001",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular box stock for the base body, sized to the envelope ENV-0001 with a hollow inner cavity for storage.",
+      "placement": {
+        "datum": "ENV-0001"
+      },
+      "solid": {
+        "op": "CUT",
+        "of": [
+          {
+            "op": "BOX",
+            "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 100},
+            "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 60},
+            "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40}
+          },
+          {
+            "op": "TRANSLATE",
+            "dx": {"kind": "number", "value": 0, "unit": "mm"},
+            "dy": {"kind": "number", "value": 0, "unit": "mm"},
+            "dz": {"kind": "param", "param": "box_wall"},
+            "of": {
+              "op": "BOX",
+              "dx": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 100}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 2}},
+              "dy": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 60}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 2}},
+              "dz": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 2}}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_knuckle",
+      "body": "BOD-0001",
+      "feature_kind": "LUG",
+      "geometry": "Two knuckle lugs on the base at the hinge axis, each with a hole for the pin.",
+      "placement": {
+        "datum": "JNT-0001",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "negate", "of": {"kind": "divide_by", "of": {"kind": "sum", "terms": [{"kind": "param", "param": "knuckle_len"}, {"kind": "param", "param": "knuckle_gap"}]}, "divisor": 2}},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "UNION",
+        "of": [
+          {
+            "op": "TRANSLATE",
+            "dx": {"kind": "number", "value": 0, "unit": "mm"},
+            "dy": {"kind": "number", "value": 0, "unit": "mm"},
+            "dz": {"kind": "negate", "of": {"kind": "param", "param": "knuckle_len"}},
+            "of": {
+              "op": "BOX",
+              "dx": {"kind": "param", "param": "box_wall"},
+              "dy": {"kind": "param", "param": "knuckle_len"},
+              "dz": {"kind": "param", "param": "box_wall"}
+            }
+          },
+          {
+            "op": "TRANSLATE",
+            "dx": {"kind": "number", "value": 0, "unit": "mm"},
+            "dy": {"kind": "sum", "terms": [{"kind": "param", "param": "knuckle_len"}, {"kind": "param", "param": "knuckle_gap"}]},
+            "dz": {"kind": "negate", "of": {"kind": "param", "param": "knuckle_len"}},
+            "of": {
+              "op": "BOX",
+              "dx": {"kind": "param", "param": "box_wall"},
+              "dy": {"kind": "param", "param": "knuckle_len"},
+              "dz": {"kind": "param", "param": "box_wall"}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_knuckle_hole",
+      "body": "BOD-0001",
+      "feature_kind": "BORE",
+      "geometry": "Through hole in each base knuckle for the hinge pin.",
+      "placement": {
+        "datum": "base_knuckle",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "divide_by", "of": {"kind": "param", "param": "pin_hole_diam"}, "divisor": 2},
+        "height": {"kind": "sum", "terms": [{"kind": "param", "param": "knuckle_len"}, {"kind": "param", "param": "knuckle_gap"}, {"kind": "param", "param": "knuckle_len"}]}
+      }
+    },
+    {
+      "key": "base_stop",
+      "body": "BOD-0001",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the base that contacts the lid in the closed configuration, limiting rotation.",
+      "placement": {
+        "datum": "ENV-0001",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 100},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 60},
+        "dz": {"kind": "number", "value": 0.1, "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_recess",
+      "body": "BOD-0001",
+      "feature_kind": "KEEPER",
+      "geometry": "Recess on the front of the base that receives the snap tab, providing retention.",
+      "placement": {
+        "datum": "ENV-0001",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "negate", "of": {"kind": "param", "param": "box_wall"}}
+        ]
+      },
+      "solid": {
+        "op": "CUT",
+        "of": [
+          {
+            "op": "BOX",
+            "dx": {"kind": "param", "param": "recess_width"},
+            "dy": {"kind": "param", "param": "recess_depth"},
+            "dz": {"kind": "param", "param": "recess_depth"}
+          },
+          {
+            "op": "TRANSLATE",
+            "dx": {"kind": "number", "value": 0, "unit": "mm"},
+            "dy": {"kind": "number", "value": 0, "unit": "mm"},
+            "dz": {"kind": "negate", "of": {"kind": "param", "param": "recess_depth"}},
+            "of": {
+              "op": "BOX",
+              "dx": {"kind": "param", "param": "recess_width"},
+              "dy": {"kind": "param", "param": "recess_depth"},
+              "dz": {"kind": "param", "param": "recess_depth"}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "lid_stock",
+      "body": "BOD-0002",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular plate stock for the lid, sized to the envelope ENV-0002.",
+      "placement": {
+        "datum": "ENV-0002"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 100},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 60},
+        "dz": {"kind": "param", "param": "lid_thick"}
+      }
+    },
+    {
+      "key": "lid_knuckle",
+      "body": "BOD-0002",
+      "feature_kind": "LUG",
+      "geometry": "Central knuckle lug on the lid at the hinge axis, with a through bore.",
+      "placement": {
+        "datum": "JNT-0002",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "param", "param": "box_wall"},
+        "dy": {"kind": "param", "param": "knuckle_len"},
+        "dz": {"kind": "param", "param": "box_wall"}
+      }
+    },
+    {
+      "key": "lid_bore",
+      "body": "BOD-0002",
+      "feature_kind": "BORE",
+      "geometry": "Through bore in the lid knuckle for the hinge pin.",
+      "placement": {
+        "datum": "lid_knuckle",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "divide_by", "of": {"kind": "param", "param": "bore_diam"}, "divisor": 2},
+        "height": {"kind": "param", "param": "knuckle_len"}
+      }
+    },
+    {
+      "key": "lid_snap_base",
+      "body": "BOD-0002",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Cantilever snap tab extending from the lid front, forming the compliant element.",
+      "placement": {
+        "datum": "JNT-0003",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "param", "param": "snap_width"},
+        "dy": {"kind": "param", "param": "snap_len"},
+        "dz": {"kind": "param", "param": "snap_thick"}
+      }
+    },
+    {
+      "key": "lid_snap_hook",
+      "body": "BOD-0002",
+      "feature_kind": "BOSS",
+      "geometry": "Hook at the end of the snap tab that engages the recess.",
+      "placement": {
+        "datum": "lid_snap_base",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "param", "param": "snap_len"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "param", "param": "snap_width"},
+        "dy": {"kind": "param", "param": "snap_thick"},
+        "dz": {"kind": "param", "param": "snap_thick"}
+      }
+    },
+    {
+      "key": "pin",
+      "body": "BOD-0003",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical hinge pin, length matching the total knuckle stack.",
+      "placement": {
+        "datum": "JNT-0001",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "divide_by", "of": {"kind": "param", "param": "pin_diam"}, "divisor": 2},
+        "height": {"kind": "sum", "terms": [{"kind": "param", "param": "knuckle_len"}, {"kind": "param", "param": "knuckle_gap"}, {"kind": "param", "param": "knuckle_len"}]}
+      }
+    },
+    {
+      "key": "pin_head",
+      "body": "BOD-0003",
+      "feature_kind": "BOSS",
+      "geometry": "Head on one end of the pin to prevent axial movement.",
+      "placement": {
+        "datum": "pin",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "negate", "of": {"kind": "param", "param": "pin_head_thick"}},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "sum", "terms": [{"kind": "divide_by", "of": {"kind": "param", "param": "pin_diam"}, "divisor": 2}, {"kind": "param", "param": "pin_head_rad_extra"}]},
+        "height": {"kind": "param", "param": "pin_head_thick"}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_closure",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "scale"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "clearance_gov",
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {"kind": "difference", "left": {"kind": "param", "param": "bore_diam"}, "right": {"kind": "param", "param": "pin_diam"}},
+      "rhs": {"kind": "param", "param": "clearance"}
+    },
+    {
+      "key": "interference_gov",
+      "kind": "INTERFERENCE_FREE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {"kind": "difference", "left": {"kind": "param", "param": "pin_diam"}, "right": {"kind": "param", "param": "pin_hole_diam"}},
+      "rhs": {"kind": "param", "param": "interference"}
+    },
+    {
+      "key": "wall_clearance",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": ">=",
+      "lhs": {"kind": "difference", "left": {"kind": "param", "param": "box_wall"}, "right": {"kind": "param", "param": "pin_diam"}},
+      "rhs": {"kind": "param", "param": "wall_clearance"}
+    },
+    {
+      "key": "knuckle_dim",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "knuckle_len"},
+      "rhs": {"kind": "number", "value": 10, "unit": "mm"}
+    },
+    {
+      "key": "knuckle_gap_dim",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "knuckle_gap"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "key": "pin_head_thick_dim",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "pin_head_thick"},
+      "rhs": {"kind": "number", "value": 3, "unit": "mm"}
+    },
+    {
+      "key": "pin_head_rad_extra_dim",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "pin_head_rad_extra"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "snap_closure",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {"kind": "sum", "terms": [{"kind": "param", "param": "snap_len"}, {"kind": "param", "param": "snap_thick"}]},
+      "rhs": {"kind": "param", "param": "recess_depth"}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0001": ["base_knuckle", "pin"],
+    "JNT-0002": ["lid_knuckle", "lid_bore", "pin"],
+    "JNT-0003": ["lid_snap_base"],
+    "CRL-0001": ["base_stock"],
+    "CRL-0002": ["base_stock", "base_knuckle", "pin"],
+    "CRL-0003": ["pin", "lid_bore"],
+    "CRL-0004": ["lid_knuckle", "lid_snap_base"],
+    "CRL-0005": ["base_stop", "lid_snap_hook"],
+    "CRL-0006": ["base_stock"]
+  },
+  "interface_assignments": {
+    "IFC-0001": {
+      "sides": {
+        "BOD-0001": ["base_knuckle_hole"],
+        "BOD-0003": ["pin"]
+      },
+      "governing_constraint": "interference_gov"
+    },
+    "IFC-0002": {
+      "sides": {
+        "BOD-0002": ["lid_bore"],
+        "BOD-0003": ["pin"]
+      },
+      "governing_constraint": "clearance_gov"
+    },
+    "IFC-0003": {
+      "sides": {
+        "BOD-0001": ["base_stop"],
+        "BOD-0002": ["lid_stock"]
+      }
+    },
+    "IFC-0004": {
+      "sides": {
+        "BOD-0001": ["base_recess"],
+        "BOD-0002": ["lid_snap_hook"]
+      }
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

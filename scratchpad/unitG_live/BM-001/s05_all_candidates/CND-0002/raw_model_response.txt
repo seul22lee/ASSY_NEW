@@ -1,0 +1,1293 @@
+{
+  "features": [
+    {
+      "key": "base_body",
+      "body": "BOD-0004",
+      "feature_kind": "STOCK",
+      "geometry": "main base shell forming storage volume and support",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0004"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "BLOCK",
+          "dx": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 10
+          },
+          "dy": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 8
+          },
+          "dz": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 6
+          }
+        },
+        "relief": [
+          {
+            "shape": "BLOCK",
+            "dx": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 8
+            },
+            "dy": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 6
+            },
+            "dz": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_wall_front",
+      "body": "BOD-0004",
+      "feature_kind": "FACE",
+      "geometry": "front wall with latch recess",
+      "placement": {
+        "datum": {
+          "kind": "FEATURE",
+          "ref": "base_body"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 8
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 3
+        }
+      }
+    },
+    {
+      "key": "base_flexure_socket",
+      "body": "BOD-0004",
+      "feature_kind": "BOSS",
+      "geometry": "socket for flexure hinge",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0006"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "sum",
+          "terms": [
+            {
+              "kind": "param",
+              "param": "r_flexure_base",
+              "unit": "mm"
+            },
+            {
+              "kind": "param",
+              "param": "wall_flexure",
+              "unit": "mm"
+            }
+          ]
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        }
+      }
+    },
+    {
+      "key": "base_flexure_socket_hole",
+      "body": "BOD-0004",
+      "feature_kind": "BORE",
+      "geometry": "hole for flexure hinge",
+      "placement": {
+        "datum": {
+          "kind": "FEATURE",
+          "ref": "base_flexure_socket"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_flexure_base",
+          "unit": "mm"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        }
+      }
+    },
+    {
+      "key": "base_latch_recess",
+      "body": "BOD-0004",
+      "feature_kind": "BOSS",
+      "geometry": "latch recess for snap engagement",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0005"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "param",
+          "param": "recess_width",
+          "unit": "mm"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "recess_depth",
+          "unit": "mm"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "recess_height",
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "base_latch_recess_clear",
+      "body": "BOD-0004",
+      "feature_kind": "HOLE",
+      "geometry": "clearance for latch recess",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0005"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "param",
+          "param": "recess_width",
+          "unit": "mm"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "recess_depth",
+          "unit": "mm"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "recess_height",
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "lid_body",
+      "body": "BOD-0005",
+      "feature_kind": "STOCK",
+      "geometry": "lid shell",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0005"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "BLOCK",
+          "dx": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 10
+          },
+          "dy": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 8
+          },
+          "dz": {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "scale",
+              "unit": "mm",
+              "role": "SCALE"
+            },
+            "factor": 4
+          }
+        },
+        "relief": [
+          {
+            "shape": "BLOCK",
+            "dx": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 8
+            },
+            "dy": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 6
+            },
+            "dz": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "lid_latch_aperture",
+      "body": "BOD-0005",
+      "feature_kind": "HOLE",
+      "geometry": "aperture for latch clip access",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0008"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 0.4
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 6
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "lid_flexure_socket",
+      "body": "BOD-0005",
+      "feature_kind": "BOSS",
+      "geometry": "socket for flexure hinge",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0007"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "sum",
+          "terms": [
+            {
+              "kind": "param",
+              "param": "r_flexure_base",
+              "unit": "mm"
+            },
+            {
+              "kind": "param",
+              "param": "wall_flexure",
+              "unit": "mm"
+            }
+          ]
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        }
+      }
+    },
+    {
+      "key": "lid_flexure_socket_hole",
+      "body": "BOD-0005",
+      "feature_kind": "BORE",
+      "geometry": "hole for flexure hinge",
+      "placement": {
+        "datum": {
+          "kind": "FEATURE",
+          "ref": "lid_flexure_socket"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_flexure_base",
+          "unit": "mm"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        }
+      }
+    },
+    {
+      "key": "lid_latch_clip_socket",
+      "body": "BOD-0005",
+      "feature_kind": "BOSS",
+      "geometry": "socket for latch clip",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0008"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "sum",
+          "terms": [
+            {
+              "kind": "param",
+              "param": "r_latch_clip",
+              "unit": "mm"
+            },
+            {
+              "kind": "param",
+              "param": "wall_latch_clip",
+              "unit": "mm"
+            }
+          ]
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "lid_latch_clip_socket_hole",
+      "body": "BOD-0005",
+      "feature_kind": "BORE",
+      "geometry": "hole for latch clip",
+      "placement": {
+        "datum": {
+          "kind": "FEATURE",
+          "ref": "lid_latch_clip_socket"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_latch_clip",
+          "unit": "mm"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "access_clear_base",
+      "body": "BOD-0004",
+      "feature_kind": "HOLE",
+      "geometry": "clearance for access region",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0005"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 8
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 6
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 5
+        }
+      }
+    },
+    {
+      "key": "access_clear_lid",
+      "body": "BOD-0005",
+      "feature_kind": "HOLE",
+      "geometry": "clearance for access region",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0005"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 8
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 6
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 5
+        }
+      }
+    },
+    {
+      "key": "latch_clip_body",
+      "body": "BOD-0007",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "latch clip with snap arm",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0007"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "COMPOUND",
+        "parts": [
+          {
+            "shape": "BLOCK",
+            "dx": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 1
+            },
+            "dy": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 4
+            },
+            "dz": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 2
+            }
+          },
+          {
+            "shape": "CYLINDER",
+            "radius": {
+              "kind": "param",
+              "param": "r_latch_clip",
+              "unit": "mm"
+            },
+            "height": {
+              "kind": "scale_by",
+              "of": {
+                "kind": "param",
+                "param": "scale",
+                "unit": "mm",
+                "role": "SCALE"
+              },
+              "factor": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "latch_clip_actuation",
+      "body": "BOD-0007",
+      "feature_kind": "FACE",
+      "geometry": "actuation surface",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0006"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "latch_clip_clear",
+      "body": "BOD-0007",
+      "feature_kind": "HOLE",
+      "geometry": "clearance for access region",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0006"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 1
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "flexure_hinge_base",
+      "body": "BOD-0006",
+      "feature_kind": "BOSS",
+      "geometry": "flexure hinge base",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0004"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {
+          "kind": "param",
+          "param": "r_flexure_base",
+          "unit": "mm"
+        },
+        "height": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 4
+        }
+      }
+    },
+    {
+      "key": "flexure_hinge_web",
+      "body": "BOD-0006",
+      "feature_kind": "RIB",
+      "geometry": "flexure web",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0004"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {
+          "kind": "param",
+          "param": "t_flexure",
+          "unit": "mm"
+        },
+        "dy": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 4
+        },
+        "dz": {
+          "kind": "param",
+          "param": "l_flexure",
+          "unit": "mm"
+        }
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 100
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 100,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {
+        "kind": "param",
+        "param": "r_flexure_base",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {
+        "kind": "param",
+        "param": "wall_flexure",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "INTERFERENCE_FREE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_flexure_base",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 0.5
+      }
+    },
+    {
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {
+        "kind": "param",
+        "param": "r_latch_clip",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "INTERFERENCE_FREE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_latch_clip",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 0.5
+      }
+    },
+    {
+      "kind": "INTERFERENCE_FREE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "wall_latch_clip",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 0.2
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {
+        "kind": "param",
+        "param": "t_flexure",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "t_flexure",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 0.1
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": ">=",
+      "lhs": {
+        "kind": "param",
+        "param": "l_flexure",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "l_flexure",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale",
+          "unit": "mm",
+          "role": "SCALE"
+        },
+        "factor": 0.5
+      }
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0004": {
+      "BOD-0006": [
+        "flexure_hinge_base",
+        "flexure_hinge_web"
+      ]
+    },
+    "JNT-0005": {
+      "BOD-0007": [
+        "latch_clip_body"
+      ]
+    },
+    "JNT-0006": {
+      "BOD-0004": [
+        "base_flexure_socket",
+        "base_flexure_socket_hole"
+      ],
+      "BOD-0006": [
+        "flexure_hinge_base"
+      ]
+    },
+    "JNT-0007": {
+      "BOD-0005": [
+        "lid_flexure_socket",
+        "lid_flexure_socket_hole"
+      ],
+      "BOD-0006": [
+        "flexure_hinge_base"
+      ]
+    },
+    "JNT-0008": {
+      "BOD-0005": [
+        "lid_latch_clip_socket",
+        "lid_latch_clip_socket_hole"
+      ],
+      "BOD-0007": [
+        "latch_clip_body"
+      ]
+    },
+    "CRL-0010": {
+      "BOD-0004": [
+        "base_body"
+      ]
+    },
+    "CRL-0011": {
+      "BOD-0004": [
+        "base_body"
+      ]
+    },
+    "CRL-0012": {
+      "BOD-0005": [
+        "lid_flexure_socket"
+      ],
+      "BOD-0006": [
+        "flexure_hinge_base"
+      ]
+    },
+    "CRL-0013": {
+      "BOD-0005": [
+        "lid_latch_clip_socket"
+      ],
+      "BOD-0007": [
+        "latch_clip_body"
+      ]
+    },
+    "CRL-0014": {
+      "BOD-0006": [
+        "flexure_hinge_base"
+      ],
+      "BOD-0004": [
+        "base_flexure_socket"
+      ]
+    },
+    "CRL-0015": {
+      "BOD-0006": [
+        "flexure_hinge_base"
+      ],
+      "BOD-0005": [
+        "lid_flexure_socket"
+      ]
+    },
+    "CRL-0016": {
+      "BOD-0007": [
+        "latch_clip_body"
+      ],
+      "BOD-0005": [
+        "lid_latch_clip_socket"
+      ]
+    },
+    "CRL-0017": {
+      "BOD-0007": [
+        "latch_clip_body"
+      ]
+    },
+    "CRL-0018": {
+      "BOD-0007": [
+        "latch_clip_body"
+      ],
+      "BOD-0004": [
+        "base_latch_recess"
+      ]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0005": {
+      "sides": {
+        "BOD-0004": [
+          "base_wall_front"
+        ],
+        "BOD-0005": [
+          "lid_body"
+        ]
+      }
+    },
+    "IFC-0006": {
+      "sides": {
+        "BOD-0004": [
+          "base_flexure_socket",
+          "base_flexure_socket_hole"
+        ],
+        "BOD-0006": [
+          "flexure_hinge_base"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "INTERFERENCE_FREE",
+        "basis": "DESIGN_CHOICE",
+        "relation": "==",
+        "lhs": {
+          "kind": "param",
+          "param": "r_flexure_base",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 0.5
+        }
+      }
+    },
+    "IFC-0007": {
+      "sides": {
+        "BOD-0005": [
+          "lid_flexure_socket",
+          "lid_flexure_socket_hole"
+        ],
+        "BOD-0006": [
+          "flexure_hinge_base"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "INTERFERENCE_FREE",
+        "basis": "DESIGN_CHOICE",
+        "relation": "==",
+        "lhs": {
+          "kind": "param",
+          "param": "r_flexure_base",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "scale",
+            "unit": "mm",
+            "role": "SCALE"
+          },
+          "factor": 0.5
+        }
+      }
+    },
+    "IFC-0008": {
+      "sides": {
+        "BOD-0005": [
+          "lid_latch_clip_socket",
+          "lid_latch_clip_socket_hole"
+        ],
+        "BOD-0007": [
+          "latch_clip_body"
+        ]
+      }
+    },
+    "IFC-0009": {
+      "sides": {
+        "BOD-0004": [
+          "base_latch_recess"
+        ],
+        "BOD-0007": [
+          "latch_clip_body"
+        ]
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0005": {
+      "BOD-0004": [
+        "access_clear_base"
+      ],
+      "BOD-0005": [
+        "access_clear_lid"
+      ]
+    },
+    "FRG-0006": {
+      "BOD-0007": [
+        "latch_clip_clear"
+      ]
+    },
+    "FRG-0008": {
+      "BOD-0005": [
+        "lid_latch_aperture"
+      ]
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "Absolute scale and material properties",
+      "why_open": "Scale parameter and material choice determine flexure stiffness and latch retention force, which are critical for OBL-0014 and OBL-0018.",
+      "alternatives": [],
+      "alternatives_kind": "",
+      "kept_open_by": [
+        "Scale authority SCL-CND-0002"
+      ],
+      "blocks": [
+        "Flexure stress analysis",
+        "Latch retention verification"
+      ]
+    }
+  ]
+}

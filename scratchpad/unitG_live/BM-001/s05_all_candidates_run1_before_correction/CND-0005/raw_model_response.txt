@@ -1,0 +1,776 @@
+{
+  "parameters": [
+    {
+      "key": "scale",
+      "symbol": "s",
+      "unit": "mm",
+      "role": "SCALE"
+    },
+    {
+      "key": "t",
+      "symbol": "t",
+      "unit": "mm"
+    },
+    {
+      "key": "hinge_r",
+      "symbol": "r_h",
+      "unit": "mm"
+    },
+    {
+      "key": "hasp_r",
+      "symbol": "r_p",
+      "unit": "mm"
+    },
+    {
+      "key": "hinge_len",
+      "symbol": "l_h",
+      "unit": "mm"
+    },
+    {
+      "key": "hasp_len",
+      "symbol": "l_p",
+      "unit": "mm"
+    },
+    {
+      "key": "hinge_boss_r",
+      "symbol": "R_h",
+      "unit": "mm"
+    },
+    {
+      "key": "hasp_boss_r",
+      "symbol": "R_p",
+      "unit": "mm"
+    },
+    {
+      "key": "head_clearance",
+      "symbol": "c_h",
+      "unit": "mm"
+    },
+    {
+      "key": "axial_clearance",
+      "symbol": "c_a",
+      "unit": "mm"
+    },
+    {
+      "key": "boss_clearance",
+      "symbol": "c_b",
+      "unit": "mm"
+    },
+    {
+      "key": "catch_depth",
+      "symbol": "d_c",
+      "unit": "mm"
+    },
+    {
+      "key": "catch_overlap",
+      "symbol": "o_c",
+      "unit": "mm"
+    },
+    {
+      "key": "catch_gap",
+      "symbol": "c_c",
+      "unit": "mm"
+    },
+    {
+      "key": "stop_gap",
+      "symbol": "c_s",
+      "unit": "mm"
+    }
+  ],
+  "features": [
+    {
+      "key": "base_stock",
+      "body": "BOD-0101",
+      "feature_kind": "STOCK",
+      "geometry": "Base rectangular box, centered at envelope center, walls of thickness t.",
+      "placement": {
+        "datum": "ENV-0101",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 50},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40}
+      }
+    },
+    {
+      "key": "base_cavity",
+      "body": "BOD-0101",
+      "feature_kind": "BORE",
+      "geometry": "Cavity inside base for storage, walls thickness t.",
+      "placement": {
+        "datum": "base_stock",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 50}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "t"}, "factor": 2}},
+        "dy": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "t"}, "factor": 2}},
+        "dz": {"kind": "difference", "left": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "t"}, "factor": 2}}
+      }
+    },
+    {
+      "key": "base_hinge_boss",
+      "body": "BOD-0101",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for hinge, centered on joint, radius hinge_boss_r, height hinge_len plus margin.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hinge_boss_r"},
+        "height": {"kind": "param", "param": "hinge_len"}
+      }
+    },
+    {
+      "key": "base_hinge_bore",
+      "body": "BOD-0101",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for hinge pin, radius hinge_r, along +Y.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hinge_r"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_len"}, "factor": 2}
+      }
+    },
+    {
+      "key": "base_hinge_thrust_face",
+      "body": "BOD-0101",
+      "feature_kind": "FACE",
+      "geometry": "Annular face on boss end for axial thrust, perpendicular to +Y.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_boss_r"}, "factor": 2},
+        "dy": {"kind": "number", "value": 1, "unit": "mm"},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_boss_r"}, "factor": 2}
+      }
+    },
+    {
+      "key": "base_hasp_boss",
+      "body": "BOD-0101",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for hasp catch, centered near base top front, radius hasp_boss_r, height catch_depth.",
+      "placement": {
+        "datum": "ENV-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 0},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 15},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 40}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_boss_r"},
+        "height": {"kind": "param", "param": "catch_depth"}
+      }
+    },
+    {
+      "key": "base_hasp_bore",
+      "body": "BOD-0101",
+      "feature_kind": "BORE",
+      "geometry": "Blind hole for hasp catch, radius hasp_r, depth catch_depth.",
+      "placement": {
+        "datum": "base_hasp_boss",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_r"},
+        "height": {"kind": "param", "param": "catch_depth"}
+      }
+    },
+    {
+      "key": "base_seating_face",
+      "body": "BOD-0101",
+      "feature_kind": "FACE",
+      "geometry": "Top rim face of base for lid seating, a flat annulus around opening.",
+      "placement": {
+        "datum": "ENV-0101",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 20}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 50},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30},
+        "dz": {"kind": "number", "value": 1, "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_hasp_clearance",
+      "body": "BOD-0101",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket in base near catch to clear hasp motion.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16}
+      }
+    },
+    {
+      "key": "base_hasp_stop",
+      "body": "BOD-0101",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on base catch to block hasp rotation beyond latched position.",
+      "placement": {
+        "datum": "base_hasp_boss",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "hasp_boss_r"}, "factor": 2},
+        "dy": {"kind": "number", "value": 1, "unit": "mm"},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "hasp_boss_r"}, "factor": 2}
+      }
+    },
+    {
+      "key": "lid_stock",
+      "body": "BOD-0102",
+      "feature_kind": "STOCK",
+      "geometry": "Lid rectangular plate, centered at envelope center, thickness t.",
+      "placement": {
+        "datum": "ENV-0102",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 50},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30},
+        "dz": {"kind": "param", "param": "t"}
+      }
+    },
+    {
+      "key": "lid_hinge_boss",
+      "body": "BOD-0102",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss on lid for hinge, centered on joint, radius hinge_boss_r, height hinge_len.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hinge_boss_r"},
+        "height": {"kind": "param", "param": "hinge_len"}
+      }
+    },
+    {
+      "key": "lid_hinge_bore",
+      "body": "BOD-0102",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for hinge pin, radius hinge_r, along +Y.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hinge_r"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_len"}, "factor": 2}
+      }
+    },
+    {
+      "key": "lid_hinge_thrust_face",
+      "body": "BOD-0102",
+      "feature_kind": "FACE",
+      "geometry": "Annular face on lid hinge boss for axial thrust, perpendicular to +Y.",
+      "placement": {
+        "datum": "JNT-0101",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_boss_r"}, "factor": 2},
+        "dy": {"kind": "number", "value": 1, "unit": "mm"},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "hinge_boss_r"}, "factor": 2}
+      }
+    },
+    {
+      "key": "lid_hasp_boss",
+      "body": "BOD-0102",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for hasp pivot, centered on joint JNT-0102, radius hasp_boss_r, height hasp_len.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_boss_r"},
+        "height": {"kind": "param", "param": "hasp_len"}
+      }
+    },
+    {
+      "key": "lid_hasp_bore",
+      "body": "BOD-0102",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for hasp pin, radius hasp_r, along +X.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_r"},
+        "height": {"kind": "scale_by", "of": {"kind": "param", "param": "hasp_len"}, "factor": 2}
+      }
+    },
+    {
+      "key": "lid_hasp_thrust_face",
+      "body": "BOD-0102",
+      "feature_kind": "FACE",
+      "geometry": "Annular face on lid hasp boss for axial thrust, perpendicular to +X.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "number", "value": 1, "unit": "mm"},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "hasp_boss_r"}, "factor": 2},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "hasp_boss_r"}, "factor": 2}
+      }
+    },
+    {
+      "key": "lid_hasp_clearance",
+      "body": "BOD-0102",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket in lid near hasp to clear hasp motion.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16}
+      }
+    },
+    {
+      "key": "hasp_stock",
+      "body": "BOD-0103",
+      "feature_kind": "STOCK",
+      "geometry": "Hasp plate, centered at envelope center, thickness t.",
+      "placement": {
+        "datum": "ENV-0103",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 16}
+      }
+    },
+    {
+      "key": "hasp_pin",
+      "body": "BOD-0103",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending from hasp plate along +X for pivot, radius hasp_r, length hasp_len.",
+      "placement": {
+        "datum": "JNT-0102",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_r"},
+        "height": {"kind": "param", "param": "hasp_len"}
+      }
+    },
+    {
+      "key": "hasp_catch",
+      "body": "BOD-0103",
+      "feature_kind": "LUG",
+      "geometry": "Lug on hasp plate that engages base catch, radius hasp_boss_r, length catch_depth.",
+      "placement": {
+        "datum": "ENV-0103",
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"kind": "param", "param": "hasp_boss_r"},
+        "height": {"kind": "param", "param": "catch_depth"}
+      }
+    },
+    {
+      "key": "hasp_access",
+      "body": "BOD-0103",
+      "feature_kind": "FACE",
+      "geometry": "Grip surface on hasp for finger actuation, located in access region.",
+      "placement": {
+        "datum": "FRG-0101",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 10},
+        "dy": {"kind": "number", "value": 2, "unit": "mm"},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 10}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_closure",
+      "kind": "DIMENSIONAL",
+      "basis": "STATED_BOUND",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "scale"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "wall_thickness",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "t"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "key": "hinge_boss_radius",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hinge_boss_r"},
+      "rhs": {"kind": "sum", "terms": [
+        {"kind": "param", "param": "hinge_r"},
+        {"kind": "param", "param": "t"}
+      ]}
+    },
+    {
+      "key": "hasp_boss_radius",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hasp_boss_r"},
+      "rhs": {"kind": "sum", "terms": [
+        {"kind": "param", "param": "hasp_r"},
+        {"kind": "param", "param": "t"}
+      ]}
+    },
+    {
+      "key": "hinge_length",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hinge_len"},
+      "rhs": {"kind": "sum", "terms": [
+        {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30},
+        {"kind": "scale_by", "of": {"kind": "param", "param": "head_clearance"}, "factor": 2}
+      ]}
+    },
+    {
+      "key": "hasp_length",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hasp_len"},
+      "rhs": {"kind": "sum", "terms": [
+        {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30},
+        {"kind": "scale_by", "of": {"kind": "param", "param": "head_clearance"}, "factor": 2}
+      ]}
+    },
+    {
+      "key": "head_clearance_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "head_clearance"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "axial_clearance_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "axial_clearance"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    },
+    {
+      "key": "boss_clearance_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "boss_clearance"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    },
+    {
+      "key": "catch_depth_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "catch_depth"},
+      "rhs": {"kind": "number", "value": 5, "unit": "mm"}
+    },
+    {
+      "key": "catch_overlap_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "catch_overlap"},
+      "rhs": {"kind": "number", "value": 3, "unit": "mm"}
+    },
+    {
+      "key": "catch_gap_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "catch_gap"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    },
+    {
+      "key": "stop_gap_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "stop_gap"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    },
+    {
+      "key": "inter_hinge_clearance",
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "axial_clearance"},
+      "rhs": {"kind": "difference", "left": {"kind": "param", "param": "hinge_len"}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30}}
+    },
+    {
+      "key": "inter_hasp_clearance",
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "axial_clearance"},
+      "rhs": {"kind": "difference", "left": {"kind": "param", "param": "hasp_len"}, "right": {"kind": "scale_by", "of": {"kind": "param", "param": "scale"}, "factor": 30}}
+    },
+    {
+      "key": "catch_engagement",
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "catch_gap"},
+      "rhs": {"kind": "difference", "left": {"kind": "param", "param": "hasp_boss_r"}, "right": {"kind": "sum", "terms": [
+        {"kind": "param", "param": "hasp_r"},
+        {"kind": "param", "param": "catch_overlap"}
+      ]}}
+    },
+    {
+      "key": "stop_interface",
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "stop_gap"},
+      "rhs": {"kind": "difference", "left": {"kind": "param", "param": "hasp_boss_r"}, "right": {"kind": "param", "param": "hasp_r"}}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0101": [
+      "base_hinge_boss",
+      "base_hinge_bore",
+      "lid_hinge_boss",
+      "lid_hinge_bore"
+    ],
+    "JNT-0102": [
+      "lid_hasp_boss",
+      "lid_hasp_bore",
+      "hasp_pin"
+    ],
+    "CRL-0201": [
+      "base_hinge_boss",
+      "base_hinge_bore",
+      "lid_hinge_boss",
+      "lid_hinge_bore"
+    ],
+    "CRL-0202": [
+      "lid_hasp_boss",
+      "lid_hasp_bore",
+      "hasp_pin"
+    ],
+    "CRL-0203": [
+      "base_hasp_stop",
+      "hasp_catch"
+    ],
+    "CRL-0204": [
+      "base_hasp_boss",
+      "base_hasp_bore",
+      "hasp_catch"
+    ]
+  },
+  "interface_assignments": {
+    "IFC-0101": {
+      "sides": {
+        "BOD-0101": ["base_hinge_bore"],
+        "BOD-0102": ["lid_hinge_boss"]
+      },
+      "governing_constraint": "inter_hinge_clearance"
+    },
+    "IFC-0102": {
+      "sides": {
+        "BOD-0102": ["lid_hasp_bore"],
+        "BOD-0103": ["hasp_pin"]
+      },
+      "governing_constraint": "inter_hasp_clearance"
+    },
+    "IFC-0103": {
+      "sides": {
+        "BOD-0101": ["base_hasp_boss", "base_hasp_bore"],
+        "BOD-0103": ["hasp_catch"]
+      },
+      "governing_constraint": "catch_engagement"
+    },
+    "IFC-0104": {
+      "sides": {
+        "BOD-0101": ["base_seating_face"],
+        "BOD-0102": ["lid_stock"]
+      },
+      "governing_constraint": "stop_interface"
+    },
+    "IFC-0105": {
+      "sides": {
+        "BOD-0101": ["base_hinge_thrust_face"],
+        "BOD-0102": ["lid_hinge_thrust_face"]
+      },
+      "governing_constraint": "axial_clearance"
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "Material choice",
+      "why_open": "No material specified in requirements; low-cost manufacturing obligation left open.",
+      "alternatives": ["ABS", "polypropylene", "steel"],
+      "alternatives_kind": "material",
+      "kept_open_by": ["OBL-0007"],
+      "blocks": ["manufacturing detail"]
+    },
+    {
+      "decision": "Exact scale of product",
+      "why_open": "No absolute dimension given; scale is a parameter to be solved from constraints.",
+      "alternatives": [],
+      "alternatives_kind": "none",
+      "kept_open_by": ["SCL-CND-0005"],
+      "blocks": ["physical size determination"]
+    }
+  ]
+}

@@ -619,6 +619,14 @@ class DesignState:
             a stage granted a field through `extendable_fields` may revise THAT
             field - having been trusted to write it in the first place.
 
+        A UNIVERSALLY OWNABLE FAMILY HAS NO OWNING STAGE, so ownership of one of
+        its records is the record's own: whoever authored it (`_created_by`) may
+        revise it, and no other stage may. Comparing the declared owner token to
+        a stage id made those families unrevisable BY ANYONE - no stage is
+        called "any" - so an Assumption or an UnresolvedDecision could be
+        written once and never corrected, and a repair round that restated one
+        it had authored was refused for revising a record it owned.
+
         INVALIDATE names no field. It withdraws standing rather than replacing a
         value, it is how lifecycle coordination retires an entity across
         families, and gating it on family ownership would be a different rule
@@ -637,6 +645,9 @@ class DesignState:
                 out.append("SUPERSEDE_EMPTY: %s names no field" % op.entity_id)
             fam = self.stored_family(op.entity_id)
             owner = self.c.owner_of(fam)
+            if fam in self.c.universally_ownable:
+                # No stage owns the family; the author owns the record.
+                owner = _STORAGE[self].entities[op.entity_id].get("_created_by")
             extendable = self.c.extendable_fields(fam)
             for name in op.fields:
                 if name not in _STORAGE[self].entities[op.entity_id]:

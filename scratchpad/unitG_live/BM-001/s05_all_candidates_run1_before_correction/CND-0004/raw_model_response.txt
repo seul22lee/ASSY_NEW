@@ -1,0 +1,373 @@
+{
+  "parameters": [
+    {"key": "scale_s", "symbol": "s", "unit": "mm", "role": "SCALE"}
+  ],
+  "features": [
+    {
+      "key": "housing_stock",
+      "body": "BOD-0012",
+      "feature_kind": "STOCK",
+      "geometry": "housing rectangular stock",
+      "placement": {
+        "datum": "ENV-0012",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 6.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0}
+      }
+    },
+    {
+      "key": "drawer_stock",
+      "body": "BOD-0013",
+      "feature_kind": "STOCK",
+      "geometry": "drawer rectangular stock",
+      "placement": {
+        "datum": "ENV-0013",
+        "axis": "+Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0}
+      }
+    },
+    {
+      "key": "left_guide_rail",
+      "body": "BOD-0012",
+      "feature_kind": "RAIL",
+      "geometry": "left guide rail along X",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -1.7},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -0.2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "right_guide_rail",
+      "body": "BOD-0012",
+      "feature_kind": "RAIL",
+      "geometry": "right guide rail along X",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 1.7},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -0.2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "left_guide_slot",
+      "body": "BOD-0013",
+      "feature_kind": "GUIDE",
+      "geometry": "left guide slot in drawer",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -1.7},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -0.2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.5},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.5}
+      }
+    },
+    {
+      "key": "right_guide_slot",
+      "body": "BOD-0013",
+      "feature_kind": "GUIDE",
+      "geometry": "right guide slot in drawer",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 1.7},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -0.2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.5},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.5}
+      }
+    },
+    {
+      "key": "front_stop_face",
+      "body": "BOD-0013",
+      "feature_kind": "STOP",
+      "geometry": "vertical stop face at front of drawer",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -2.5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0}
+      }
+    },
+    {
+      "key": "back_stop_face",
+      "body": "BOD-0013",
+      "feature_kind": "STOP",
+      "geometry": "vertical stop face at back of drawer",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 2.5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0}
+      }
+    },
+    {
+      "key": "housing_stop_front",
+      "body": "BOD-0012",
+      "feature_kind": "STOP",
+      "geometry": "vertical stop face at front of housing",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -3.0},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0}
+      }
+    },
+    {
+      "key": "housing_stop_back",
+      "body": "BOD-0012",
+      "feature_kind": "STOP",
+      "geometry": "vertical stop face at back of housing",
+      "placement": {
+        "datum": "JNT-0013",
+        "axis": "+X",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0}
+      }
+    },
+    {
+      "key": "drawer_bottom",
+      "body": "BOD-0013",
+      "feature_kind": "FACE",
+      "geometry": "bottom face of drawer",
+      "placement": {
+        "datum": "ENV-0013",
+        "axis": "-Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -1.5}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 5.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 3.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "housing_support",
+      "body": "BOD-0012",
+      "feature_kind": "FACE",
+      "geometry": "support face under housing",
+      "placement": {
+        "datum": "ENV-0012",
+        "axis": "-Z",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": -2.0}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 6.0},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 4.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.1}
+      }
+    },
+    {
+      "key": "aperture_cutout",
+      "body": "BOD-0012",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "aperture cutout in housing front wall",
+      "placement": {
+        "datum": "FRG-0014",
+        "axis": "+X",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 1.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale_s"}, "factor": 0.8}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_bound",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "scale_s"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "guide_clearance",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "guide_clearance"},
+      "rhs": {"kind": "number", "value": 0.1, "unit": "mm"}
+    },
+    {
+      "key": "rail_width",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "rail_width"},
+      "rhs": {"kind": "sum", "terms": [
+        {"kind": "param", "param": "slot_width"},
+        {"kind": "negate", "of": {"kind": "param", "param": "guide_clearance"}}
+      ]}
+    },
+    {
+      "key": "wall_thickness",
+      "kind": "ENVELOPE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "wall_thickness"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0013": ["left_guide_rail", "left_guide_slot", "right_guide_rail", "right_guide_slot"],
+    "CRL-0108": ["housing_support"],
+    "CRL-0109": ["left_guide_rail", "left_guide_slot", "right_guide_rail", "right_guide_slot"],
+    "CRL-0110": ["front_stop_face", "housing_stop_front"],
+    "CRL-0111": ["back_stop_face", "housing_stop_back"]
+  },
+  "interface_assignments": {
+    "IFC-0016": {
+      "sides": {
+        "BOD-0012": ["left_guide_rail"],
+        "BOD-0013": ["left_guide_slot"]
+      },
+      "governing_constraint": "guide_clearance"
+    },
+    "IFC-0017": {
+      "sides": {
+        "BOD-0012": ["right_guide_rail"],
+        "BOD-0013": ["right_guide_slot"]
+      },
+      "governing_constraint": "guide_clearance"
+    },
+    "IFC-0018": {
+      "sides": {
+        "BOD-0012": ["housing_stop_front"],
+        "BOD-0013": ["front_stop_face"]
+      },
+      "governing_constraint": "guide_clearance"
+    },
+    "IFC-0019": {
+      "sides": {
+        "BOD-0012": ["housing_stop_back"],
+        "BOD-0013": ["back_stop_face"]
+      },
+      "governing_constraint": "guide_clearance"
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "material choice for low-cost manufacturing",
+      "why_open": "No material selected",
+      "alternatives": ["ABS", "polypropylene", "nylon"],
+      "alternatives_kind": "material",
+      "kept_open_by": ["OBL-0007"],
+      "blocks": ["OBL-0016"]
+    },
+    {
+      "decision": "friction coefficient between guide materials",
+      "why_open": "depends on material selection and surface finish",
+      "alternatives": [],
+      "alternatives_kind": "parameter",
+      "kept_open_by": ["OBL-0016"],
+      "blocks": ["OBL-0004", "OBL-0005"]
+    }
+  ]
+}

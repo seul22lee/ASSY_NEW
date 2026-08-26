@@ -474,6 +474,23 @@ def posed_shapes(K, bodies: Sequence[CompiledBody], poses: Dict[str, Frame]) -> 
     return out
 
 
+def translated(K, shape, vector: Tuple[float, float, float]):
+    """A posed solid moved along a vector, for a path check. Nothing about the
+    design changes: this is the same solid asked where it would be."""
+    trsf = K["gp_Trsf"]()
+    trsf.SetTranslation(K["gp_Vec"](float(vector[0]), float(vector[1]), float(vector[2])))
+    return K["BRepBuilderAPI_Transform"](shape, trsf, True).Shape()
+
+
+def bbox_extent(K, shape) -> Tuple[float, float, float]:
+    """The solid's bounding extent, used only to scale how far a path check
+    walks. It decides nothing about the geometry."""
+    box = K["Bnd_Box"]()
+    K["BRepBndLib"].Add_s(shape, box)
+    xa, ya, za, xb, yb, zb = box.Get()
+    return (abs(xb - xa), abs(yb - ya), abs(zb - za))
+
+
 def pair_geometry(K, a, b) -> Dict[str, float]:
     """The shared volume and the minimum distance of two posed solids."""
     common = K["BRepAlgoAPI_Common"](a, b)

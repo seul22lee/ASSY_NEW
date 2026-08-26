@@ -1,0 +1,4345 @@
+{
+ "assembly": {
+  "ASY-0002": {
+   "against": [
+    "BOD-0001"
+   ],
+   "blocked": [],
+   "body": "BOD-0003",
+   "insertion_direction": [
+    -0.0,
+    -1.0,
+    -0.0
+   ],
+   "reach": 60.0000002
+  },
+  "ASY-0003": {
+   "against": [
+    "BOD-0001",
+    "BOD-0003"
+   ],
+   "blocked": [],
+   "body": "BOD-0002",
+   "insertion_direction": [
+    -0.0,
+    -1.0,
+    -0.0
+   ],
+   "reach": 110.0000003
+  }
+ },
+ "basis": "RELATIVE",
+ "body_validity": {
+  "BOD-0001": {
+   "single_connected_solid": true,
+   "solid_count": 1,
+   "valid": true,
+   "volume": 75877.79148361363
+  },
+  "BOD-0002": {
+   "single_connected_solid": true,
+   "solid_count": 1,
+   "valid": true,
+   "volume": 37841.51325120771
+  },
+  "BOD-0003": {
+   "single_connected_solid": true,
+   "solid_count": 1,
+   "valid": true,
+   "volume": 753.9822368615504
+  }
+ },
+ "branch": "CND-0001",
+ "built_bodies": [
+  "BOD-0001",
+  "BOD-0002",
+  "BOD-0003"
+ ],
+ "expected_bodies": [
+  "BOD-0001",
+  "BOD-0002",
+  "BOD-0003"
+ ],
+ "exports": {
+  "assembly_step_per_state": {
+   "STA-CFG-0001": "/home/ftk3187/github/ASSY_Ver3.0/scratchpad/unitG_live/BM-001/s05_fresh_authoring_pilot/CND-0001/cad/assembly_STA-CFG-0001.step",
+   "STA-CFG-0002": "/home/ftk3187/github/ASSY_Ver3.0/scratchpad/unitG_live/BM-001/s05_fresh_authoring_pilot/CND-0001/cad/assembly_STA-CFG-0002.step"
+  },
+  "stl_per_body": {
+   "BOD-0001": "/home/ftk3187/github/ASSY_Ver3.0/scratchpad/unitG_live/BM-001/s05_fresh_authoring_pilot/CND-0001/cad/BOD-0001.stl",
+   "BOD-0002": "/home/ftk3187/github/ASSY_Ver3.0/scratchpad/unitG_live/BM-001/s05_fresh_authoring_pilot/CND-0001/cad/BOD-0002.stl",
+   "BOD-0003": "/home/ftk3187/github/ASSY_Ver3.0/scratchpad/unitG_live/BM-001/s05_fresh_authoring_pilot/CND-0001/cad/BOD-0003.stl"
+  }
+ },
+ "feature_map": {
+  "FEA-0001": {
+   "body": "BOD-0001",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0002": {
+   "body": "BOD-0001",
+   "polarity": "SUBTRACTIVE"
+  },
+  "FEA-0003": {
+   "body": "BOD-0001",
+   "polarity": "SUBTRACTIVE"
+  },
+  "FEA-0004": {
+   "body": "BOD-0001",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0005": {
+   "body": "BOD-0001",
+   "polarity": "SUBTRACTIVE"
+  },
+  "FEA-0006": {
+   "body": "BOD-0001",
+   "polarity": "SUBTRACTIVE"
+  },
+  "FEA-0007": {
+   "body": "BOD-0002",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0008": {
+   "body": "BOD-0002",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0009": {
+   "body": "BOD-0002",
+   "polarity": "SUBTRACTIVE"
+  },
+  "FEA-0010": {
+   "body": "BOD-0002",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0011": {
+   "body": "BOD-0002",
+   "polarity": "ADDITIVE"
+  },
+  "FEA-0012": {
+   "body": "BOD-0003",
+   "polarity": "ADDITIVE"
+  }
+ },
+ "findings": [
+  {
+   "detail": "state STA-CFG-0001: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0002",
+    "FEA-0009",
+    "FEA-0012"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0001: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 20.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0001: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 34.5,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0001: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 75877.79148361363
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0001: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0001: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 753.9822368615504
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0003",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0002: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 254.80384612481814,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0002: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 288.0624932197873,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "state STA-CFG-0002: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0002",
+    "FEA-0009",
+    "FEA-0012"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 20.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 34.5,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 75877.79148361363
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 1/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 753.9822368615504
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0003",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: bodies BOD-0001 and BOD-0002 share 3371.08 mm3 of volume",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 3371.0754026314235
+   },
+   "kind": "TRAVEL_BLOCKED",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "BOD-0002",
+    "IFC-0003",
+    "IFC-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: features FEA-0001 and FEA-0007 (interface IFC-0003) share 25452.1 mm3 of volume; the design declares an interface expecting TOUCHES",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 25452.065644826755
+   },
+   "kind": "TRAVEL_BLOCKED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 11.1562 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 11.156242851772806,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 75877.7914836136
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 2/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 753.9822368615511
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0003",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 3/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 16.8443 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 16.844308248012652,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 3/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 30.8635 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 30.86352795164248,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 3/9: body BOD-0001 occupies 9572.84 mm3 of reserved region FRG-0003",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 9572.83711970717
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0003"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 3/9: body BOD-0001 occupies 39619.9 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 39619.90096382776
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 3/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 4/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 60.782 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 60.781990797418985,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 4/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 76.5889 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 76.58889005095742,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 4/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 5/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 104.497 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 104.4974746830583,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 5/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 116.081 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 116.08096710244622,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 5/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 6/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 146.311 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 146.3107983751313,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 6/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 158.564 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 158.56407018298424,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 6/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 7/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 184.727 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 184.72685355137878,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 7/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 202.6 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 202.59985343676286,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 7/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 8/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 220.769 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 220.76886119619056,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 8/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 246.122 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 246.12194673562806,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 8/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 9/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 254.80384612481814,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 9/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 288.0624932197873,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0001 sample 9/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 1/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 254.80384612481814,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 1/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 288.0624932197873,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 1/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 2/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 220.769 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 220.76886119619056,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 2/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 246.122 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 246.12194673562806,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 2/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 3/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 184.727 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 184.72685355137878,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 3/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 202.6 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 202.59985343676286,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 3/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 4/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 146.311 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 146.3107983751313,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 4/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 158.564 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 158.56407018298424,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 4/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 5/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 104.497 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 104.4974746830583,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 5/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 116.081 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 116.08096710244622,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 5/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 6/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 60.782 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 60.781990797418985,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 6/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 76.5889 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 76.58889005095742,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 6/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 7/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 16.8443 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 16.844308248012652,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 7/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 30.8635 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 30.86352795164248,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 7/9: body BOD-0001 occupies 9572.84 mm3 of reserved region FRG-0003",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 9572.83711970717
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0003"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 7/9: body BOD-0001 occupies 39619.9 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 39619.90096382776
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 7/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: bodies BOD-0001 and BOD-0002 share 3371.08 mm3 of volume",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 3371.0754026314235
+   },
+   "kind": "TRAVEL_BLOCKED",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "BOD-0002",
+    "IFC-0003",
+    "IFC-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: features FEA-0001 and FEA-0007 (interface IFC-0003) share 25452.1 mm3 of volume; the design declares an interface expecting TOUCHES",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 25452.065644826755
+   },
+   "kind": "TRAVEL_BLOCKED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 11.1562 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 11.156242851772806,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 75877.7914836136
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 8/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 753.9822368615511
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0003",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+   "evaluable": true,
+   "evidence": {
+    "distance": 0.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0002",
+    "FEA-0009",
+    "FEA-0012"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 20.0,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0003",
+    "FEA-0001",
+    "FEA-0007"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+   "evaluable": true,
+   "evidence": {
+    "distance": 34.5,
+    "shared_volume": 0.0
+   },
+   "kind": "MATING_NOT_REALIZED",
+   "owner": "s05",
+   "subjects": [
+    "IFC-0004",
+    "FEA-0006",
+    "FEA-0011"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 75877.79148361363
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0001",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 37841.51325120771
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0002",
+    "FRG-0004"
+   ]
+  },
+  {
+   "detail": "transition TRN-0002 sample 9/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+   "evaluable": true,
+   "evidence": {
+    "shared_volume": 753.9822368615504
+   },
+   "kind": "FEATURE_OUTSIDE_REGION",
+   "owner": "s05",
+   "subjects": [
+    "BOD-0003",
+    "FRG-0004"
+   ]
+  }
+ ],
+ "scale": "settled scale parameter PRM-0001",
+ "spatial_duties": {
+  "assembly": [
+   {
+    "access_side": "+Z",
+    "activates": [],
+    "body": "BOD-0001",
+    "insertion_direction": [
+     0.0,
+     0.0,
+     -1.0
+    ],
+    "order_index": 1,
+    "step": "ASY-0001"
+   },
+   {
+    "access_side": "+Y",
+    "activates": [
+     "IFC-0001"
+    ],
+    "body": "BOD-0003",
+    "insertion_direction": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "order_index": 2,
+    "step": "ASY-0002"
+   },
+   {
+    "access_side": "+Y",
+    "activates": [
+     "IFC-0002",
+     "IFC-0003",
+     "IFC-0004"
+    ],
+    "body": "BOD-0002",
+    "insertion_direction": [
+     -0.0,
+     -1.0,
+     -0.0
+    ],
+    "order_index": 3,
+    "step": "ASY-0003"
+   }
+  ],
+  "axisless_datums": [
+   "JNT-0001 (FIXED, axis_direction NONE)"
+  ],
+  "bodies": [
+   "BOD-0001",
+   "BOD-0002",
+   "BOD-0003"
+  ],
+  "branch": "CND-0001",
+  "interfaces": [
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0003"
+    ],
+    "interaction_kind": "INTERFERENCE_FIT",
+    "interface": "IFC-0001",
+    "mating": {},
+    "needs_governing_constraint": true
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "interaction_kind": "CLEARANCE",
+    "interface": "IFC-0002",
+    "mating": {
+     "BOD-0002": "BORE",
+     "BOD-0003": "PIN"
+    },
+    "needs_governing_constraint": true
+   },
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0002"
+    ],
+    "interaction_kind": "CONTACT",
+    "interface": "IFC-0003",
+    "mating": {},
+    "needs_governing_constraint": false
+   },
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0002"
+    ],
+    "interaction_kind": "COMPLIANT_INTERACTION",
+    "interface": "IFC-0004",
+    "mating": {},
+    "needs_governing_constraint": false
+   }
+  ],
+  "obligations_to_discharge": [],
+  "realizations": [
+   {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0003"
+    ],
+    "descriptor": "FIXED (dof none, axis NONE)",
+    "external_provider": null,
+    "family": "Joint",
+    "target": "JNT-0001"
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "descriptor": "REVOLUTE (dof RY, axis +Y)",
+    "external_provider": null,
+    "family": "Joint",
+    "target": "JNT-0002"
+   },
+   {
+    "bodies": [
+     "BOD-0002"
+    ],
+    "descriptor": "COMPLIANT (dof RY, axis +Y)",
+    "external_provider": null,
+    "family": "Joint",
+    "target": "JNT-0003"
+   },
+   {
+    "bodies": [
+     "BOD-0001"
+    ],
+    "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+    "external_provider": "RSR-0001",
+    "family": "ConstraintRelation",
+    "target": "CRL-0001"
+   },
+   {
+    "bodies": [
+     "BOD-0003",
+     "BOD-0001"
+    ],
+    "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+    "external_provider": null,
+    "family": "ConstraintRelation",
+    "target": "CRL-0002"
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "descriptor": "blocks TX, TY, TZ, RX, RZ",
+    "external_provider": null,
+    "family": "ConstraintRelation",
+    "target": "CRL-0003"
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0002"
+    ],
+    "descriptor": "blocks TX, TY, TZ, RX, RZ",
+    "external_provider": null,
+    "family": "ConstraintRelation",
+    "target": "CRL-0004"
+   },
+   {
+    "bodies": [
+     "BOD-0002",
+     "BOD-0001"
+    ],
+    "descriptor": "blocks RY",
+    "external_provider": null,
+    "family": "ConstraintRelation",
+    "target": "CRL-0005"
+   },
+   {
+    "bodies": [
+     "BOD-0001"
+    ],
+    "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+    "external_provider": "RSR-0002",
+    "family": "ConstraintRelation",
+    "target": "CRL-0006"
+   }
+  ],
+  "regions": [
+   {
+    "excludes_occupancy": true,
+    "known_role": true,
+    "owning_bodies": [
+     "BOD-0002"
+    ],
+    "region": "FRG-0001",
+    "role": "ACCESS",
+    "volume": {
+     "centre": [
+      40,
+      0,
+      31
+     ],
+     "half_extent": [
+      5,
+      5,
+      2
+     ]
+    }
+   },
+   {
+    "excludes_occupancy": false,
+    "known_role": true,
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0002",
+    "role": "SUPPORT",
+    "volume": {
+     "centre": [
+      0,
+      0,
+      -21
+     ],
+     "half_extent": [
+      50,
+      30,
+      1
+     ]
+    }
+   },
+   {
+    "excludes_occupancy": true,
+    "known_role": true,
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0003",
+    "role": "APERTURE",
+    "volume": {
+     "centre": [
+      0,
+      0,
+      20
+     ],
+     "half_extent": [
+      40,
+      20,
+      0.5
+     ]
+    }
+   },
+   {
+    "excludes_occupancy": true,
+    "known_role": true,
+    "owning_bodies": [
+     "BOD-0001"
+    ],
+    "region": "FRG-0004",
+    "role": "ACCESS",
+    "volume": {
+     "centre": [
+      0,
+      0,
+      5
+     ],
+     "half_extent": [
+      35,
+      15,
+      15
+     ]
+    }
+   }
+  ],
+  "released_motions": [
+   {
+    "from_state": "STA-CFG-0001",
+    "released_constraints": [
+     "CRL-0005"
+    ],
+    "required_motions": [
+     [
+      "JNT-0002",
+      "RY"
+     ],
+     [
+      "JNT-0003",
+      "RY"
+     ]
+    ],
+    "to_state": "STA-CFG-0002",
+    "transition": "TRN-0001"
+   },
+   {
+    "from_state": "STA-CFG-0002",
+    "released_constraints": [],
+    "required_motions": [
+     [
+      "JNT-0002",
+      "RY"
+     ],
+     [
+      "JNT-0003",
+      "RY"
+     ]
+    ],
+    "to_state": "STA-CFG-0001",
+    "transition": "TRN-0002"
+   }
+  ],
+  "scale": {
+   "basis": "RELATIVE",
+   "reference_scale": "SCL-CND-0001",
+   "required": true
+  },
+  "state_restraints": [
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0001",
+    "state": "STA-CFG-0001"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0002",
+    "joint_coordinates": {
+     "JNT-0002": -90,
+     "JNT-0003": 0
+    },
+    "relation": "CRL-0001",
+    "state": "STA-CFG-0002"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0003",
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0002",
+    "state": "STA-CFG-0001"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0003",
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0002",
+    "joint_coordinates": {
+     "JNT-0002": -90,
+     "JNT-0003": 0
+    },
+    "relation": "CRL-0002",
+    "state": "STA-CFG-0002"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0003",
+    "state": "STA-CFG-0001"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "configuration": "CFG-0002",
+    "joint_coordinates": {
+     "JNT-0002": -90,
+     "JNT-0003": 0
+    },
+    "relation": "CRL-0003",
+    "state": "STA-CFG-0002"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0002",
+     "BOD-0002"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0004",
+    "state": "STA-CFG-0001"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0002",
+     "BOD-0002"
+    ],
+    "configuration": "CFG-0002",
+    "joint_coordinates": {
+     "JNT-0002": -90,
+     "JNT-0003": 0
+    },
+    "relation": "CRL-0004",
+    "state": "STA-CFG-0002"
+   },
+   {
+    "blocked_dofs": [
+     "RY"
+    ],
+    "bodies": [
+     "BOD-0002",
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0005",
+    "state": "STA-CFG-0001"
+   },
+   {
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "bodies": [
+     "BOD-0001"
+    ],
+    "configuration": "CFG-0001",
+    "joint_coordinates": {
+     "JNT-0002": 0,
+     "JNT-0003": 5
+    },
+    "relation": "CRL-0006",
+    "state": "STA-CFG-0001"
+   }
+  ],
+  "transitions": [
+   {
+    "changed_coordinates": [
+     "JNT-0002",
+     "JNT-0003"
+    ],
+    "from_state": "STA-CFG-0001",
+    "moving_groups": [
+     "RGP-0002",
+     "RGP-0003",
+     "RGP-0004"
+    ],
+    "swept_volumes": [
+     "SWV-TRN-0001-RGP-0002",
+     "SWV-TRN-0001-RGP-0004"
+    ],
+    "to_state": "STA-CFG-0002",
+    "transition": "TRN-0001"
+   },
+   {
+    "changed_coordinates": [
+     "JNT-0002",
+     "JNT-0003"
+    ],
+    "from_state": "STA-CFG-0002",
+    "moving_groups": [
+     "RGP-0002",
+     "RGP-0003",
+     "RGP-0004"
+    ],
+    "swept_volumes": [
+     "SWV-TRN-0002-RGP-0002",
+     "SWV-TRN-0002-RGP-0004"
+    ],
+    "to_state": "STA-CFG-0001",
+    "transition": "TRN-0002"
+   }
+  ]
+ },
+ "states": {
+  "STA-CFG-0001": {
+   "findings": [
+    {
+     "detail": "state STA-CFG-0001: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+     "evaluable": true,
+     "evidence": {
+      "distance": 0.0,
+      "shared_volume": 0.0
+     },
+     "kind": "MATING_NOT_REALIZED",
+     "owner": "s05",
+     "subjects": [
+      "IFC-0002",
+      "FEA-0009",
+      "FEA-0012"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0001: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+     "evaluable": true,
+     "evidence": {
+      "distance": 20.0,
+      "shared_volume": 0.0
+     },
+     "kind": "MATING_NOT_REALIZED",
+     "owner": "s05",
+     "subjects": [
+      "IFC-0003",
+      "FEA-0001",
+      "FEA-0007"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0001: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+     "evaluable": true,
+     "evidence": {
+      "distance": 34.5,
+      "shared_volume": 0.0
+     },
+     "kind": "MATING_NOT_REALIZED",
+     "owner": "s05",
+     "subjects": [
+      "IFC-0004",
+      "FEA-0006",
+      "FEA-0011"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0001: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+     "evaluable": true,
+     "evidence": {
+      "shared_volume": 75877.79148361363
+     },
+     "kind": "FEATURE_OUTSIDE_REGION",
+     "owner": "s05",
+     "subjects": [
+      "BOD-0001",
+      "FRG-0004"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0001: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+     "evaluable": true,
+     "evidence": {
+      "shared_volume": 37841.51325120771
+     },
+     "kind": "FEATURE_OUTSIDE_REGION",
+     "owner": "s05",
+     "subjects": [
+      "BOD-0002",
+      "FRG-0004"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0001: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+     "evaluable": true,
+     "evidence": {
+      "shared_volume": 753.9822368615504
+     },
+     "kind": "FEATURE_OUTSIDE_REGION",
+     "owner": "s05",
+     "subjects": [
+      "BOD-0003",
+      "FRG-0004"
+     ]
+    }
+   ],
+   "interfaces": {
+    "IFC-0001": {
+     "distance": 12.5,
+     "features": [
+      "FEA-0005",
+      "FEA-0012"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0002": {
+     "distance": 0.0,
+     "features": [
+      "FEA-0009",
+      "FEA-0012"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0003": {
+     "distance": 20.0,
+     "features": [
+      "FEA-0001",
+      "FEA-0007"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0004": {
+     "distance": 34.5,
+     "features": [
+      "FEA-0006",
+      "FEA-0011"
+     ],
+     "shared_volume": 0.0
+    }
+   },
+   "pairs": {
+    "BOD-0001|BOD-0002": {
+     "distance": 6.5,
+     "shared_volume": 0.0
+    },
+    "BOD-0001|BOD-0003": {
+     "distance": 12.5,
+     "shared_volume": 0.0
+    },
+    "BOD-0002|BOD-0003": {
+     "distance": 0.0,
+     "shared_volume": 0.0
+    }
+   },
+   "posed_bodies": [
+    "BOD-0001",
+    "BOD-0002",
+    "BOD-0003"
+   ],
+   "poses": {
+    "base": "BOD-0002",
+    "edges": [
+     [
+      "JNT-0002",
+      "BOD-0002",
+      "BOD-0003",
+      "REVOLUTE"
+     ],
+     [
+      "JNT-0001",
+      "BOD-0003",
+      "BOD-0001",
+      "FIXED"
+     ]
+    ],
+    "findings": [],
+    "poses": {
+     "BOD-0001": {
+      "rotation": [
+       [
+        1.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0
+       ]
+      ],
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "BOD-0002": {
+      "rotation": [
+       [
+        1.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0
+       ]
+      ],
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "BOD-0003": {
+      "rotation": [
+       [
+        1.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0
+       ]
+      ],
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     }
+    }
+   }
+  },
+  "STA-CFG-0002": {
+   "findings": [
+    {
+     "detail": "state STA-CFG-0002: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+     "evaluable": true,
+     "evidence": {
+      "distance": 254.80384612481814,
+      "shared_volume": 0.0
+     },
+     "kind": "MATING_NOT_REALIZED",
+     "owner": "s05",
+     "subjects": [
+      "IFC-0003",
+      "FEA-0001",
+      "FEA-0007"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0002: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+     "evaluable": true,
+     "evidence": {
+      "distance": 288.0624932197873,
+      "shared_volume": 0.0
+     },
+     "kind": "MATING_NOT_REALIZED",
+     "owner": "s05",
+     "subjects": [
+      "IFC-0004",
+      "FEA-0006",
+      "FEA-0011"
+     ]
+    },
+    {
+     "detail": "state STA-CFG-0002: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+     "evaluable": true,
+     "evidence": {
+      "shared_volume": 37841.51325120771
+     },
+     "kind": "FEATURE_OUTSIDE_REGION",
+     "owner": "s05",
+     "subjects": [
+      "BOD-0002",
+      "FRG-0004"
+     ]
+    }
+   ],
+   "interfaces": {
+    "IFC-0001": {
+     "distance": 12.5,
+     "features": [
+      "FEA-0005",
+      "FEA-0012"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0002": {
+     "distance": 268.0296746752044,
+     "features": [
+      "FEA-0009",
+      "FEA-0012"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0003": {
+     "distance": 254.80384612481814,
+     "features": [
+      "FEA-0001",
+      "FEA-0007"
+     ],
+     "shared_volume": 0.0
+    },
+    "IFC-0004": {
+     "distance": 288.0624932197873,
+     "features": [
+      "FEA-0006",
+      "FEA-0011"
+     ],
+     "shared_volume": 0.0
+    }
+   },
+   "pairs": {
+    "BOD-0001|BOD-0002": {
+     "distance": 248.67148263880037,
+     "shared_volume": 0.0
+    },
+    "BOD-0001|BOD-0003": {
+     "distance": 12.5,
+     "shared_volume": 0.0
+    },
+    "BOD-0002|BOD-0003": {
+     "distance": 268.0296746752044,
+     "shared_volume": 0.0
+    }
+   },
+   "posed_bodies": [
+    "BOD-0001",
+    "BOD-0002",
+    "BOD-0003"
+   ],
+   "poses": {
+    "base": "BOD-0002",
+    "edges": [
+     [
+      "JNT-0002",
+      "BOD-0002",
+      "BOD-0003",
+      "REVOLUTE"
+     ],
+     [
+      "JNT-0001",
+      "BOD-0003",
+      "BOD-0001",
+      "FIXED"
+     ]
+    ],
+    "findings": [],
+    "poses": {
+     "BOD-0001": {
+      "rotation": [
+       [
+        0.0,
+        0.0,
+        -1.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        1.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "translation": [
+       -140.0,
+       0.0,
+       340.0
+      ]
+     },
+     "BOD-0002": {
+      "rotation": [
+       [
+        1.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0
+       ]
+      ],
+      "translation": [
+       0.0,
+       0.0,
+       0.0
+      ]
+     },
+     "BOD-0003": {
+      "rotation": [
+       [
+        0.0,
+        0.0,
+        -1.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0
+       ],
+       [
+        1.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "translation": [
+       -140.0,
+       0.0,
+       340.0
+      ]
+     }
+    }
+   }
+  }
+ },
+ "transitions": {
+  "TRN-0001": {
+   "blocked": true,
+   "samples": [
+    {
+     "coordinates": {
+      "JNT-0002": 0.0,
+      "JNT-0003": 5.0
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 1/9: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0002",
+        "FEA-0009",
+        "FEA-0012"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 1/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 20.0,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 1/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 34.5,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 1/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 75877.79148361363
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 1/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 1/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 753.9822368615504
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0003",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.5,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 0.0,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 20.0,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 34.5,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 6.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 0.0,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -11.25,
+      "JNT-0003": 4.375
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 2/9: bodies BOD-0001 and BOD-0002 share 3371.08 mm3 of volume",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 3371.0754026314235
+       },
+       "kind": "TRAVEL_BLOCKED",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "BOD-0002",
+        "IFC-0003",
+        "IFC-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 2/9: features FEA-0001 and FEA-0007 (interface IFC-0003) share 25452.1 mm3 of volume; the design declares an interface expecting TOUCHES",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 25452.065644826755
+       },
+       "kind": "TRAVEL_BLOCKED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 2/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 11.1562 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 11.156242851772806,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 2/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 75877.7914836136
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 2/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 2/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 753.9822368615511
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0003",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999998,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 28.539686456821148,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 0.0,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 25452.065644826755
+      },
+      "IFC-0004": {
+       "distance": 11.156242851772806,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 0.0,
+       "shared_volume": 3371.0754026314235
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999998,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 28.539686456821148,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -22.5,
+      "JNT-0003": 3.75
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 3/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 16.8443 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 16.844308248012652,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 3/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 30.8635 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 30.86352795164248,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 3/9: body BOD-0001 occupies 9572.84 mm3 of reserved region FRG-0003",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 9572.83711970717
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0003"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 3/9: body BOD-0001 occupies 39619.9 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 39619.90096382776
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 3/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000004,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 66.70821466512746,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 16.844308248012652,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 30.86352795164248,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 16.844308248012652,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000004,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 66.70821466512746,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -33.75,
+      "JNT-0003": 3.125
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 4/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 60.782 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 60.781990797418985,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 4/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 76.5889 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 76.58889005095742,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 4/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000009,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 104.13800083323301,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 60.781990797418985,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 76.58889005095742,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 60.781990797418985,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000009,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 104.13800083323301,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -45.0,
+      "JNT-0003": 2.5
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 5/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 104.497 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 104.4974746830583,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 5/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 116.081 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 116.08096710244622,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 5/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999991,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 140.46857565913646,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 104.4974746830583,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 116.08096710244622,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 103.45444438625012,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999991,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 140.46857565913646,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -56.25,
+      "JNT-0003": 1.875
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 6/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 146.311 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 146.3107983751313,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 6/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 158.564 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 158.56407018298424,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 6/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999977,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 175.350055846952,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 146.3107983751313,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 158.56407018298424,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 141.81703994916222,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999977,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 175.350055846952,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -67.5,
+      "JNT-0003": 1.25
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 7/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 184.727 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 184.72685355137878,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 7/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 202.6 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 202.59985343676286,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 7/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999993,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 208.44651367431425,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 184.72685355137878,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 202.59985343676286,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 179.16740502465194,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999993,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 208.44651367431425,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -78.75,
+      "JNT-0003": 0.625
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 8/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 220.769 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 220.76886119619056,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 8/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 246.122 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 246.12194673562806,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 8/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000007,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 239.4392121599815,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 220.76886119619056,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 246.12194673562806,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 214.9302076353989,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000007,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 239.4392121599815,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -90.0,
+      "JNT-0003": 0.0
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0001 sample 9/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 254.80384612481814,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 9/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 288.0624932197873,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0001 sample 9/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.5,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 268.0296746752044,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 254.80384612481814,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 288.0624932197873,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 248.67148263880037,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 268.0296746752044,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    }
+   ],
+   "sampling_declaration": {
+    "adaptive": false,
+    "interior_samples": 7,
+    "kind": "UNIFORM",
+    "method": "LOCKSTEP_LINEAR_IN_JOINT_COORDINATES",
+    "samples": 9
+   }
+  },
+  "TRN-0002": {
+   "blocked": true,
+   "samples": [
+    {
+     "coordinates": {
+      "JNT-0002": -90.0,
+      "JNT-0003": 0.0
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 1/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 254.804 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 254.80384612481814,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 1/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 288.062 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 288.0624932197873,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 1/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.5,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 268.0296746752044,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 254.80384612481814,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 288.0624932197873,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 248.67148263880037,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 268.0296746752044,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -78.75,
+      "JNT-0003": 0.625
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 2/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 220.769 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 220.76886119619056,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 2/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 246.122 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 246.12194673562806,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 2/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000007,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 239.4392121599815,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 220.76886119619056,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 246.12194673562806,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 214.9302076353989,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000007,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 239.4392121599815,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -67.5,
+      "JNT-0003": 1.25
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 3/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 184.727 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 184.72685355137878,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 3/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 202.6 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 202.59985343676286,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 3/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999993,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 208.44651367431425,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 184.72685355137878,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 202.59985343676286,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 179.16740502465194,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999993,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 208.44651367431425,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -56.25,
+      "JNT-0003": 1.875
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 4/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 146.311 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 146.3107983751313,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 4/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 158.564 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 158.56407018298424,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 4/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999977,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 175.350055846952,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 146.3107983751313,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 158.56407018298424,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 141.81703994916222,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999977,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 175.350055846952,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -45.0,
+      "JNT-0003": 2.5
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 5/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 104.497 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 104.4974746830583,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 5/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 116.081 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 116.08096710244622,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 5/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999991,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 140.46857565913646,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 104.4974746830583,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 116.08096710244622,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 103.45444438625012,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999991,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 140.46857565913646,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -33.75,
+      "JNT-0003": 3.125
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 6/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 60.782 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 60.781990797418985,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 6/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 76.5889 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 76.58889005095742,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 6/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000009,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 104.13800083323301,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 60.781990797418985,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 76.58889005095742,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 60.781990797418985,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000009,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 104.13800083323301,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -22.5,
+      "JNT-0003": 3.75
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 7/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 16.8443 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 16.844308248012652,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 7/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 30.8635 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 30.86352795164248,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 7/9: body BOD-0001 occupies 9572.84 mm3 of reserved region FRG-0003",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 9572.83711970717
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0003"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 7/9: body BOD-0001 occupies 39619.9 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 39619.90096382776
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 7/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.500000000000004,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 66.70821466512746,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 16.844308248012652,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 30.86352795164248,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 16.844308248012652,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.500000000000004,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 66.70821466512746,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": -11.25,
+      "JNT-0003": 4.375
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 8/9: bodies BOD-0001 and BOD-0002 share 3371.08 mm3 of volume",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 3371.0754026314235
+       },
+       "kind": "TRAVEL_BLOCKED",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "BOD-0002",
+        "IFC-0003",
+        "IFC-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 8/9: features FEA-0001 and FEA-0007 (interface IFC-0003) share 25452.1 mm3 of volume; the design declares an interface expecting TOUCHES",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 25452.065644826755
+       },
+       "kind": "TRAVEL_BLOCKED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 8/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 11.1562 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 11.156242851772806,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 8/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 75877.7914836136
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 8/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 8/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 753.9822368615511
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0003",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.499999999999998,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 28.539686456821148,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 0.0,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 25452.065644826755
+      },
+      "IFC-0004": {
+       "distance": 11.156242851772806,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 0.0,
+       "shared_volume": 3371.0754026314235
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.499999999999998,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 28.539686456821148,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    },
+    {
+     "coordinates": {
+      "JNT-0002": 0.0,
+      "JNT-0003": 5.0
+     },
+     "findings": [
+      {
+       "detail": "transition TRN-0002 sample 9/9: features FEA-0009 and FEA-0012 (interface IFC-0002) touch; the interface declares a clearance",
+       "evaluable": true,
+       "evidence": {
+        "distance": 0.0,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0002",
+        "FEA-0009",
+        "FEA-0012"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 9/9: features FEA-0001 and FEA-0007 (interface IFC-0003) are 20 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 20.0,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0003",
+        "FEA-0001",
+        "FEA-0007"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 9/9: features FEA-0006 and FEA-0011 (interface IFC-0004) are 34.5 mm apart; the interface expects them to touch",
+       "evaluable": true,
+       "evidence": {
+        "distance": 34.5,
+        "shared_volume": 0.0
+       },
+       "kind": "MATING_NOT_REALIZED",
+       "owner": "s05",
+       "subjects": [
+        "IFC-0004",
+        "FEA-0006",
+        "FEA-0011"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 9/9: body BOD-0001 occupies 75877.8 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 75877.79148361363
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0001",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 9/9: body BOD-0002 occupies 37841.5 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 37841.51325120771
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0002",
+        "FRG-0004"
+       ]
+      },
+      {
+       "detail": "transition TRN-0002 sample 9/9: body BOD-0003 occupies 753.982 mm3 of reserved region FRG-0004",
+       "evaluable": true,
+       "evidence": {
+        "shared_volume": 753.9822368615504
+       },
+       "kind": "FEATURE_OUTSIDE_REGION",
+       "owner": "s05",
+       "subjects": [
+        "BOD-0003",
+        "FRG-0004"
+       ]
+      }
+     ],
+     "interfaces": {
+      "IFC-0001": {
+       "distance": 12.5,
+       "features": [
+        "FEA-0005",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0002": {
+       "distance": 0.0,
+       "features": [
+        "FEA-0009",
+        "FEA-0012"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0003": {
+       "distance": 20.0,
+       "features": [
+        "FEA-0001",
+        "FEA-0007"
+       ],
+       "shared_volume": 0.0
+      },
+      "IFC-0004": {
+       "distance": 34.5,
+       "features": [
+        "FEA-0006",
+        "FEA-0011"
+       ],
+       "shared_volume": 0.0
+      }
+     },
+     "pairs": {
+      "BOD-0001|BOD-0002": {
+       "distance": 6.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0001|BOD-0003": {
+       "distance": 12.5,
+       "shared_volume": 0.0
+      },
+      "BOD-0002|BOD-0003": {
+       "distance": 0.0,
+       "shared_volume": 0.0
+      }
+     },
+     "posed_bodies": [
+      "BOD-0001",
+      "BOD-0002",
+      "BOD-0003"
+     ]
+    }
+   ],
+   "sampling_declaration": {
+    "adaptive": false,
+    "interior_samples": 7,
+    "kind": "UNIFORM",
+    "method": "LOCKSTEP_LINEAR_IN_JOINT_COORDINATES",
+    "samples": 9
+   }
+  }
+ },
+ "workable": false
+}

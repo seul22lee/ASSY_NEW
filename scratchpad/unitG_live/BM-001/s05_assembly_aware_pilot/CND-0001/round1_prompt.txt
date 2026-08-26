@@ -1,0 +1,981 @@
+You are a mechanical designer. You are given a SPATIAL AND KINEMATIC
+DESIGN that has already been decided: which bodies exist, how they are jointed,
+what they must touch, what positions they must reach, what space must stay open,
+in what order they are put together, and how big the whole thing roughly is.
+
+Design the ACTUAL PARTS: a physically manufacturable AND assemblable mechanism
+whose real geometry realizes that design.
+
+This is not "make a box or a cylinder for each feature". A mechanism is only
+real if the parts can be made, brought together, and then move as declared.
+
+WHAT YOU MUST WORK OUT BEFORE YOU ANSWER
+
+Picture the finished object, then picture someone assembling it.
+
+  MANUFACTURABLE PARTS
+  - Every body must come out as ONE connected part. Material you add must touch
+    the rest of its own body - nothing floating alongside it. Material you
+    remove must not accidentally cut a body into two pieces.
+  - An envelope is a bound, not a solid. Build the part you would actually make
+    inside that bound: walls, floors, ribs, bosses - not a filled block.
+
+  PARTS THAT ACTUALLY MEET
+  - Where the design says two bodies touch in a state, their surfaces must
+    really meet there - seated on each other, not floating apart and not
+    overlapping.
+  - No required relationship may be satisfied by a NAME or by a sentence. If
+    two things are meant to engage, the geometry has to put them in the same
+    place, at the same size, facing each other.
+
+  JOINTS THAT ARE REALLY BUILT
+  - A rotating joint is not built by separately naming a barrel, a bore and a
+    pin. The whole joint has to exist: material on EACH body that carries the
+    joint, bores through them that are genuinely COAXIAL - same axis line, same
+    diameter class - and a shaft or pin long enough to actually pass through
+    the parts it joins, with running clearance so it can still turn afterwards.
+  - Whatever you build must leave the declared motion possible over its whole
+    range, not only at the two ends.
+
+  A THING THAT CAN BE PUT TOGETHER
+  - Decide the real order of assembly: what goes on what, from which direction,
+    through which opening.
+  - If a part has to be inserted, there must be a clear path for it to travel
+    along and room for a hand or a tool to reach it. A pin cannot be inserted
+    through solid material, and it cannot appear inside a closed cavity.
+  - Say what stops an inserted part from simply falling back out.
+  - Interleaving parts (for instance alternating projections that must pass
+    each other) only works if the gaps and the projections actually match.
+
+  A LATCH OR RETAINER THAT REALLY LATCHES
+  - Where the design calls for something to be held or released, the geometry
+    must do the holding. A flexible catch needs: a root that is CONNECTED to
+    its own body, a member slender enough to bend, a real projection that
+    hooks, a matching recess or ledge on the other body for it to hook into, a
+    sloped or rounded lead-in so it can be pushed into engagement, EMPTY SPACE
+    behind or beside it for it to deflect into, and a way to release it.
+  - It must be engaged in the state where the design says it holds, and clear
+    of its catch in the state where the design says the parts move.
+
+  TWO STATES, ONE MECHANISM
+  - The required states are two poses of ONE assembled thing. Everything that is
+    joined stays joined in both. If a part is only plausible in one of them,
+    the design is wrong.
+
+  SPACE THAT MUST STAY EMPTY
+  - Where the design reserves a volume to be reached into or passed through,
+    your material must genuinely not be there.
+
+Then design the parts so that all of that is true, and say so in the answer.
+
+SIZES ARE YOURS. The arrangement is in relative units: choose a real size and
+say how many millimetres one unit is (`scale_mm_per_unit`). Then work in
+MILLIMETRES with ordinary engineering values. Give real numbers. Use a
+`relation` only where two dimensions genuinely have to stay tied together - a
+shaft and the bore it turns in, a projection and the recess it enters.
+
+COORDINATES. Every `at` is the CENTRE of that piece of material, in millimetres,
+in the assembly frame below, with every joint at coordinate zero.
+
+WHAT YOU MAY BUILD WITH. Boxes, cylinders and wedges, added or subtracted. A
+wedge is a right triangular prism - use it for a lead-in ramp or a hooking
+face. A part is made by adding several pieces and subtracting the spaces that
+are not material.
+
+ANSWER WITH ONE JSON OBJECT, exactly this shape:
+
+{
+  "design_summary": "<what each part is, how it is assembled, and how it works>",
+  "scale_mm_per_unit": <number>,
+
+  "dimensions": [
+    {"name": "<short name>", "value": <number>, "unit": "mm", "why": "<why>"},
+    {"name": "<short name>", "relation": "<name> + <number>", "unit": "mm",
+      "why": "<why these must stay tied>"}
+  ],
+
+  "bodies": [
+    {"upstream_body": "<Body id>",
+      "summary": "<what this part is>",
+      "elements": [
+        {"op": "add", "shape": "box", "name": "<name>",
+          "size": [<x>, <y>, <z>], "at": [<x>, <y>, <z>]},
+        {"op": "subtract", "shape": "cylinder", "name": "<name>",
+          "radius": <r>, "height": <h>, "at": [<x>, <y>, <z>], "axis": "+X|+Y|+Z",
+          "clears": "<FunctionalRegion id, only if this opens that space>"},
+        {"op": "add", "shape": "wedge", "name": "<name>",
+          "size": [<x>, <y>, <z>], "at": [<x>, <y>, <z>],
+          "slope": "+X|-X|+Y|-Y|+Z|-Z"}
+      ]}
+  ],
+
+  "mating_sets": [
+    {"name": "<what this joint or engagement is>",
+      "upstream_relationships": ["<Interface / Joint / ConstraintRelation ids>"],
+      "participants": [{"body": "<Body id>", "element": "<element name>",
+                        "role": "<what this piece does in this set>"}],
+      "purpose": "<what the set achieves mechanically>",
+      "fit": "<the intended fit or clearance, as a dimension name or mm value>",
+      "motion_after_assembly": "<what may still move once assembled, and how far>"}
+  ],
+
+  "assembly_sequence": [
+    {"step": <n>,
+      "component": "<Body id>",
+      "action": "<what is done>",
+      "insertion_direction": [<x>, <y>, <z>],
+      "access": "<the opening or face it goes in through>",
+      "final_retention": "<what holds it once it is there>"}
+  ],
+
+  "state_expectations": [
+    {"state": "<State id>",
+      "touching": "<what is in contact>",
+      "engaged": "<what is holding what>",
+      "free": "<what is clear, and what can still move>",
+      "still_assembled": "<what remains joined in this state>"}
+  ]
+}
+
+Every `size`, `at`, `radius`, `height` may instead be the NAME of one of your
+`dimensions`.
+
+A MATING SET IS THE WHOLE ENGAGEMENT. Put every participant of one joint in ONE
+mating set - both sides' material and the part that joins them - not as separate
+unrelated entries. Do the same for a catch: the flexible member, its hook, the
+recess it enters and the lead-in belong to one set.
+
+THE DECIDED SPATIAL AND KINEMATIC DESIGN
+========================================
+{
+ "assembly_steps": [
+  {
+   "access_side": "+Z",
+   "body": "BOD-0001",
+   "entity_id": "ASY-0001",
+   "insertion_direction": [
+    0,
+    0,
+    -1
+   ],
+   "order_index": 1,
+   "path_kind": "RIGID",
+   "termination_strategy": "LATER_BODY_COVER"
+  },
+  {
+   "access_side": "+Y",
+   "activates": [
+    "IFC-0001"
+   ],
+   "body": "BOD-0003",
+   "depends_on": [
+    "ASY-0001"
+   ],
+   "entity_id": "ASY-0002",
+   "insertion_direction": [
+    -0.0,
+    -1.0,
+    -0.0
+   ],
+   "order_index": 2,
+   "path_kind": "DEFORMATION_RESOLVED",
+   "termination_strategy": "ELASTICITY"
+  },
+  {
+   "access_side": "+Y",
+   "activates": [
+    "IFC-0002",
+    "IFC-0003",
+    "IFC-0004"
+   ],
+   "body": "BOD-0002",
+   "depends_on": [
+    "ASY-0001",
+    "ASY-0002"
+   ],
+   "entity_id": "ASY-0003",
+   "insertion_direction": [
+    -0.0,
+    -1.0,
+    -0.0
+   ],
+   "order_index": 3,
+   "path_kind": "RIGID",
+   "termination_strategy": "ROTATION"
+  }
+ ],
+ "bodies": [
+  {
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0008",
+    "OBL-0009",
+    "OBL-0011",
+    "OBL-0014"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0001",
+   "instance_identity": "SINGLETON",
+   "role": "Stationary box base providing storage volume, support surface, hinge knuckles, and latch recess"
+  },
+  {
+   "addresses_obligations": [
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0010",
+    "OBL-0011",
+    "OBL-0014",
+    "OBL-0018",
+    "OBL-0019"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0002",
+   "instance_identity": "SINGLETON",
+   "role": "Moving lid providing closure, hinge knuckle, and integrated snap tab"
+  },
+  {
+   "addresses_obligations": [
+    "OBL-0003",
+    "OBL-0010",
+    "OBL-0011",
+    "OBL-0019"
+   ],
+   "created_by_stage": "s03",
+   "entity_id": "BOD-0003",
+   "instance_identity": "SINGLETON",
+   "role": "Hinge pin connecting base and lid, providing axial retention and radial support"
+  }
+ ],
+ "candidate": "CND-0001",
+ "candidate_record": [
+  {
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0002",
+    "OBL-0003",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0007",
+    "OBL-0008",
+    "OBL-0009",
+    "OBL-0010",
+    "OBL-0011",
+    "OBL-0014",
+    "OBL-0018",
+    "OBL-0019"
+   ],
+   "entity_id": "CND-0001",
+   "evidence_route_verdict": {
+    "available": false,
+    "note": "Snap engagement retention requires contact analysis; route unavailable.",
+    "route": "CONTACT_RESOLVING_ANALYSIS"
+   },
+   "family": "MAINTAIN_CONFIGURATION",
+   "obligations_created": [
+    "OBL-0011",
+    "OBL-0014",
+    "OBL-0018",
+    "OBL-0019"
+   ],
+   "principle": {
+    "ACTUATE": "DIRECT_MANUAL",
+    "MAINTAIN_CONFIGURATION": "DETENT_OR_SNAP",
+    "PERMIT_ASSEMBLY": "STRAIGHT_INSERTION",
+    "PERMIT_RELATIVE_MOTION": "REVOLUTE_PAIR"
+   },
+   "summary": "Revolute hinge lid with detent/snap latch"
+  }
+ ],
+ "configurations": [
+  {
+   "bodies_present": [
+    "BOD-0001",
+    "BOD-0002",
+    "BOD-0003"
+   ],
+   "distinguishing_basis": [
+    {
+     "differs_from": [
+      "CFG-0002"
+     ],
+     "dof": "RY",
+     "joint": "JNT-0002"
+    }
+   ],
+   "entity_id": "CFG-0001",
+   "kind": "STABLE",
+   "name": "Closed"
+  },
+  {
+   "bodies_present": [
+    "BOD-0001",
+    "BOD-0002",
+    "BOD-0003"
+   ],
+   "distinguishing_basis": [
+    {
+     "differs_from": [
+      "CFG-0001"
+     ],
+     "dof": "RY",
+     "joint": "JNT-0002"
+    }
+   ],
+   "entity_id": "CFG-0002",
+   "kind": "STABLE",
+   "name": "Open"
+  }
+ ],
+ "constraint_relations": [
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "configurations": [
+    "CFG-0001",
+    "CFG-0002"
+   ],
+   "driver": "LOAD",
+   "entity_id": "CRL-0001",
+   "provider_reaction_site": "RSR-0001",
+   "retained_body": "BOD-0001",
+   "retained_group": "RGP-0001"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "configurations": [
+    "CFG-0001",
+    "CFG-0002"
+   ],
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0002",
+   "provider_body": "BOD-0001",
+   "provider_site": "IFC-0001",
+   "retained_body": "BOD-0003",
+   "retained_group": "RGP-0002"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "RX",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0002"
+    }
+   ],
+   "configurations": [
+    "CFG-0001",
+    "CFG-0002"
+   ],
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0003",
+   "provider_body": "BOD-0003",
+   "provider_site": "IFC-0002",
+   "retained_body": "BOD-0002",
+   "retained_group": "RGP-0003"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RZ"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "TX",
+     "joint": "JNT-0003"
+    },
+    {
+     "dof": "TY",
+     "joint": "JNT-0003"
+    },
+    {
+     "dof": "TZ",
+     "joint": "JNT-0003"
+    },
+    {
+     "dof": "RX",
+     "joint": "JNT-0003"
+    },
+    {
+     "dof": "RZ",
+     "joint": "JNT-0003"
+    }
+   ],
+   "configurations": [
+    "CFG-0001",
+    "CFG-0002"
+   ],
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0004",
+   "provider_body": "BOD-0002",
+   "retained_body": "BOD-0002",
+   "retained_group": "RGP-0004"
+  },
+  {
+   "blocked_dofs": [
+    "RY"
+   ],
+   "blocked_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0002"
+    }
+   ],
+   "configurations": [
+    "CFG-0001"
+   ],
+   "defeat_specification": "The imposed JNT-0002/RY rotation moves the retained group RGP-0003 out of the held configuration, disengaging the physical interaction at IFC-0004 so that the restraint no longer blocks the joint.",
+   "driver": "KINEMATIC_NECESSITY",
+   "entity_id": "CRL-0005",
+   "maintaining_interaction": "PHI-0002",
+   "provider_body": "BOD-0001",
+   "provider_site": "IFC-0004",
+   "retained_body": "BOD-0002",
+   "retained_group": "RGP-0003"
+  },
+  {
+   "blocked_dofs": [
+    "TX",
+    "TY",
+    "TZ",
+    "RX",
+    "RY",
+    "RZ"
+   ],
+   "configurations": [
+    "CFG-0001"
+   ],
+   "driver": "LOAD",
+   "entity_id": "CRL-0006",
+   "provider_reaction_site": "RSR-0002",
+   "retained_body": "BOD-0001",
+   "retained_group": "RGP-0001"
+  }
+ ],
+ "envelopes": [
+  {
+   "NOTE": "BOUNDING EXTENT ONLY - this is not material",
+   "body": "BOD-0001",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0001",
+   "extent": {
+    "centre": [
+     0,
+     0,
+     0
+    ],
+    "half_extent": [
+     50,
+     30,
+     20
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  },
+  {
+   "NOTE": "BOUNDING EXTENT ONLY - this is not material",
+   "body": "BOD-0002",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0002",
+   "extent": {
+    "centre": [
+     0,
+     0,
+     25
+    ],
+    "half_extent": [
+     50,
+     30,
+     5
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  },
+  {
+   "NOTE": "BOUNDING EXTENT ONLY - this is not material",
+   "body": "BOD-0003",
+   "commitment_class": "COMPARABLE",
+   "entity_id": "ENV-0003",
+   "extent": {
+    "centre": [
+     -48,
+     0,
+     20
+    ],
+    "half_extent": [
+     2,
+     30,
+     2
+    ]
+   },
+   "frame": "world",
+   "maturity": "PROVISIONAL",
+   "scale_basis": "RELATIVE"
+  }
+ ],
+ "functional_regions": [
+  {
+   "entity_id": "FRG-0001",
+   "owning_bodies": [
+    "BOD-0002"
+   ],
+   "required_by_actors": [
+    "ACT-0001"
+   ],
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     40,
+     0,
+     31
+    ],
+    "half_extent": [
+     5,
+     5,
+     2
+    ]
+   }
+  },
+  {
+   "entity_id": "FRG-0002",
+   "owning_bodies": [
+    "BOD-0001"
+   ],
+   "role": "SUPPORT",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     -21
+    ],
+    "half_extent": [
+     50,
+     30,
+     1
+    ]
+   }
+  },
+  {
+   "entity_id": "FRG-0003",
+   "owning_bodies": [
+    "BOD-0001"
+   ],
+   "reach_targets": [
+    "FRG-0004"
+   ],
+   "required_by_actors": [
+    "ACT-0001"
+   ],
+   "role": "APERTURE",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     20
+    ],
+    "half_extent": [
+     40,
+     20,
+     0.5
+    ]
+   }
+  },
+  {
+   "entity_id": "FRG-0004",
+   "owning_bodies": [
+    "BOD-0001"
+   ],
+   "required_by_actors": [
+    "ACT-0001"
+   ],
+   "role": "ACCESS",
+   "volume": {
+    "centre": [
+     0,
+     0,
+     5
+    ],
+    "half_extent": [
+     35,
+     15,
+     15
+    ]
+   }
+  }
+ ],
+ "interfaces": [
+  {
+   "addresses_obligations": [
+    "OBL-0010",
+    "OBL-0011",
+    "OBL-0019"
+   ],
+   "bodies": [
+    "BOD-0001",
+    "BOD-0003"
+   ],
+   "entity_id": "IFC-0001",
+   "interaction_kind": "INTERFERENCE_FIT",
+   "nominal": true
+  },
+  {
+   "addresses_obligations": [
+    "OBL-0003",
+    "OBL-0009",
+    "OBL-0011"
+   ],
+   "bodies": [
+    "BOD-0002",
+    "BOD-0003"
+   ],
+   "entity_id": "IFC-0002",
+   "interaction_kind": "CLEARANCE",
+   "mating_geometry": {
+    "axis_joint": "JNT-0002",
+    "engagement_length": 60.0,
+    "inner_body": "BOD-0003",
+    "inner_diameter": 4.0,
+    "inner_feature": "PIN",
+    "maturity": "PROVISIONAL",
+    "outer_body": "BOD-0002",
+    "outer_diameter": 4.0,
+    "outer_feature": "BORE"
+   },
+   "nominal": true
+  },
+  {
+   "addresses_obligations": [
+    "OBL-0001",
+    "OBL-0004",
+    "OBL-0006",
+    "OBL-0008",
+    "OBL-0009"
+   ],
+   "bodies": [
+    "BOD-0001",
+    "BOD-0002"
+   ],
+   "entity_id": "IFC-0003",
+   "feature": "STOP_FACE",
+   "interaction_kind": "CONTACT",
+   "nominal": true
+  },
+  {
+   "addresses_obligations": [
+    "OBL-0002",
+    "OBL-0004",
+    "OBL-0005",
+    "OBL-0006",
+    "OBL-0014",
+    "OBL-0018"
+   ],
+   "bodies": [
+    "BOD-0001",
+    "BOD-0002"
+   ],
+   "entity_id": "IFC-0004",
+   "feature": "SNAP_RETAINER",
+   "interaction_kind": "COMPLIANT_INTERACTION",
+   "nominal": true
+  }
+ ],
+ "joints": [
+  {
+   "axis_direction": "NONE",
+   "child_body": "BOD-0003",
+   "child_group": "RGP-0002",
+   "entity_id": "JNT-0001",
+   "frame_origin": [
+    -48,
+    0,
+    20
+   ],
+   "joint_type": "FIXED",
+   "parent_body": "BOD-0001",
+   "parent_group": "RGP-0001"
+  },
+  {
+   "axis_direction": "+Y",
+   "child_body": "BOD-0002",
+   "child_group": "RGP-0003",
+   "dof": [
+    "RY"
+   ],
+   "entity_id": "JNT-0002",
+   "frame_ids": [
+    "FRM-JNT-0001"
+   ],
+   "frame_origin": [
+    -48,
+    0,
+    20
+   ],
+   "joint_type": "REVOLUTE",
+   "parent_body": "BOD-0003",
+   "parent_group": "RGP-0002"
+  },
+  {
+   "activation_window": "CLOSING_AND_DISENGAGEMENT",
+   "actuation": "PRESCRIBED_KINEMATIC",
+   "allowable_travel": "UNSUPPORTED",
+   "axis_direction": "+Y",
+   "child_body": "BOD-0002",
+   "child_group": "RGP-0003",
+   "compliant_element": "cantilever snap tab root on lid",
+   "direction": "about +Y",
+   "dof": [
+    "RY"
+   ],
+   "entity_id": "JNT-0003",
+   "frame_ids": [
+    "FRM-JNT-0002"
+   ],
+   "frame_origin": [
+    40,
+    0,
+    30
+   ],
+   "joint_type": "COMPLIANT",
+   "mode": "ROTATIONAL",
+   "parent_body": "BOD-0002",
+   "parent_group": "RGP-0004",
+   "required_travel": "CLEAR_LATCH_ENGAGEMENT",
+   "root_interface": "material root between snap tab and lid main"
+  }
+ ],
+ "physical_interactions": [
+  {
+   "at_interface": "IFC-0002",
+   "configurations": [
+    "CFG-0001",
+    "CFG-0002"
+   ],
+   "discharges_effect": "PEO-0001",
+   "effect": "PERMIT_MOTION",
+   "entity_id": "PHI-0001",
+   "groups": [
+    "RGP-0003",
+    "RGP-0001"
+   ]
+  },
+  {
+   "at_interface": "IFC-0004",
+   "configurations": [
+    "CFG-0001"
+   ],
+   "discharges_effect": "PEO-0002",
+   "effect": "PREVENT_MOTION",
+   "entity_id": "PHI-0002",
+   "groups": [
+    "RGP-0003",
+    "RGP-0001"
+   ]
+  },
+  {
+   "at_interface": "IFC-0004",
+   "configurations": [
+    "CFG-0001"
+   ],
+   "discharges_effect": "PEO-0003",
+   "effect": "TRANSMIT_FORCE",
+   "entity_id": "PHI-0003",
+   "groups": [
+    "RGP-0004",
+    "RGP-0001"
+   ]
+  },
+  {
+   "at_interface": "IFC-0003",
+   "configurations": [
+    "CFG-0001"
+   ],
+   "discharges_effect": "PEO-0004",
+   "effect": "LOCATE",
+   "entity_id": "PHI-0004",
+   "groups": [
+    "RGP-0003",
+    "RGP-0001"
+   ]
+  },
+  {
+   "discharges_effect": "PEO-0005",
+   "effect": "CONTAIN",
+   "entity_id": "PHI-0005"
+  }
+ ],
+ "reference_scale": {
+  "basis": "RELATIVE",
+  "commitment_class": "COMPARABLE",
+  "entity_id": "SCL-CND-0001",
+  "note": "No absolute quantity stated; relative units used."
+ },
+ "rigid_groups": [
+  {
+   "body": "BOD-0001",
+   "entity_id": "RGP-0001",
+   "is_default": true,
+   "members": [
+    "base_structure"
+   ]
+  },
+  {
+   "body": "BOD-0003",
+   "entity_id": "RGP-0002",
+   "is_default": true,
+   "members": [
+    "pin"
+   ]
+  },
+  {
+   "body": "BOD-0002",
+   "entity_id": "RGP-0003",
+   "is_default": true,
+   "members": [
+    "lid_plate",
+    "hinge_knuckle"
+   ]
+  },
+  {
+   "body": "BOD-0002",
+   "entity_id": "RGP-0004",
+   "is_default": false,
+   "members": [
+    "snap_tab"
+   ]
+  }
+ ],
+ "state_hash": "479c373ab42fb9d5de17257e03555f88e4ea39dd79f6195b6b74322b99484b9f",
+ "states": [
+  {
+   "configuration": "CFG-0001",
+   "entity_id": "STA-CFG-0001",
+   "joint_coordinates": {
+    "JNT-0002": 0,
+    "JNT-0003": 5
+   },
+   "name": "CFG-0001"
+  },
+  {
+   "configuration": "CFG-0002",
+   "entity_id": "STA-CFG-0002",
+   "joint_coordinates": {
+    "JNT-0002": -90,
+    "JNT-0003": 0
+   },
+   "name": "CFG-0002"
+  }
+ ],
+ "swept_volumes": [],
+ "transition_requirements": [
+  {
+   "entity_id": "TRQ-0001",
+   "from_configuration": "CFG-0001",
+   "released_constraints": [
+    "CRL-0005"
+   ],
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "RY",
+     "joint": "JNT-0003"
+    }
+   ],
+   "to_configuration": "CFG-0002"
+  },
+  {
+   "entity_id": "TRQ-0002",
+   "from_configuration": "CFG-0002",
+   "required_relative_motions": [
+    {
+     "dof": "RY",
+     "joint": "JNT-0002"
+    },
+    {
+     "dof": "RY",
+     "joint": "JNT-0003"
+    }
+   ],
+   "to_configuration": "CFG-0001"
+  }
+ ],
+ "transitions": [
+  {
+   "changed_coordinates": [
+    "JNT-0002",
+    "JNT-0003"
+   ],
+   "entity_id": "TRN-0001",
+   "from_state": "STA-CFG-0001",
+   "path": {
+    "moving_groups": [
+     "RGP-0003",
+     "RGP-0004"
+    ]
+   },
+   "realizes_requirement": "TRQ-0001",
+   "to_state": "STA-CFG-0002"
+  },
+  {
+   "changed_coordinates": [
+    "JNT-0002",
+    "JNT-0003"
+   ],
+   "entity_id": "TRN-0002",
+   "from_state": "STA-CFG-0002",
+   "path": {
+    "moving_groups": [
+     "RGP-0003",
+     "RGP-0004"
+    ]
+   },
+   "realizes_requirement": "TRQ-0002",
+   "to_state": "STA-CFG-0001"
+  }
+ ]
+}

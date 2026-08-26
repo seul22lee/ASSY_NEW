@@ -172,12 +172,16 @@ settlement_entry:
     solve over the empty system is not evidence of anything.
   mandatory_prerequisites: >
     Unit G. A program is not enough: the numbers may be settled only for an
-    embodiment that could be built. Every axis-bearing joint realized on each
-    body it relates; every body given material; every stated mating side
+    embodiment that could be built. Every Joint, and every ConstraintRelation
+    that blocks something, named by exactly ONE KinematicRealization whose
+    participating features cover every side it relates - the retained side
+    always, the provider body where one is named, nothing for an external
+    provider_reaction_site, and no feature axis, joint class or feature kind
+    consulted; every body given material; every stated mating side
     realized by a feature of the stated kind; every Interface of the branch
     realized by a feature on EACH participant body; every declared CLEARANCE or
     INTERFERENCE_FIT governed by a Constraint that names it. These are the same
-    duties s05 must satisfy before it writes (S05-C1, C9, C11, C12, C14) and
+    duties s05 must satisfy before it writes (S05-C1, C2, C9, C11, C12, C14) and
     they are computed by ONE implementation asked at both surfaces -
     `downstream.embodiment.structural_problems`, over canonical rows from the
     response at s05 and from standing state at this gate. A duty enforced at one

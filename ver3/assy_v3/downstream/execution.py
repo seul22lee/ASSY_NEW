@@ -537,7 +537,8 @@ def embodiment_refinement(provider, state, progression: Progression, branch: Opt
                           invocation=None):
     """A `settle` refine hook: hand s06's report to s05 as a repair round."""
     from ..pipeline.progression import execute_stage
-    from ..stages.base import CAUSE_FINDINGS, CAUSE_PREREQUISITES, REPAIR_KEY
+    from ..stages.base import (CAUSE_FINDINGS, CAUSE_PREREQUISITES, CAUSE_REFUSED,
+                               REPAIR_KEY)
     from ..stages.s05_embodiment import S05Embodiment
 
     def refine(round_index: int, report) -> bool:
@@ -565,6 +566,35 @@ def embodiment_refinement(provider, state, progression: Progression, branch: Opt
                                            inputs={"candidate": branch, REPAIR_KEY: repair},
                                            attempt=10 + round_index, invocation=invocation)
         applied = bool(execution is not None and getattr(execution, "patch_applied", False))
+
+        # THE BOUNDARY'S REFUSAL IS ROUTED TO ITS AUTHOR, ONCE (Unit G). A patch
+        # is atomic and rightly so - a half-written embodiment is not an
+        # embodiment - but the consequence was that ONE malformed field
+        # discarded a revision that had answered every finding, and the reasons
+        # went nowhere: the loop saw only that nothing changed, and the next
+        # round re-authored blind against the same stale report. This is not a
+        # favourable retry of the same question. It is a different question,
+        # carrying evidence the author has never seen, answered under its own
+        # cause and recorded as its own attempt.
+        refusals = list(getattr(outcome, "problems", None) or []) if outcome is not None else []
+        if not applied and refusals:
+            refused = {"round": round_index, "cause": CAUSE_REFUSED,
+                       "findings": [{"code": CAUSE_REFUSED, "detail": problem}
+                                    for problem in refusals[:20]],
+                       "settled": repair["settled"], "current": repair["current"]}
+            outcome, execution = execute_stage(
+                S05Embodiment(), provider, state, progression,
+                inputs={"candidate": branch, REPAIR_KEY: refused},
+                attempt=50 + round_index, invocation=invocation)
+            applied = bool(execution is not None and getattr(execution, "patch_applied", False))
+            refine.records.append({
+                "round": round_index, "findings": [CAUSE_REFUSED],
+                "status": getattr(getattr(outcome, "execution_status", None), "value", None)
+                if outcome is not None else None,
+                "problems": list(getattr(outcome, "problems", None) or [])[:12]
+                if outcome is not None else [],
+                "declared_incompleteness": None, "patch_applied": applied})
+            return applied
         # WHAT THE REVISION RETURNED, kept with the loop: a loop that escalates
         # must say whether the producing stage answered, was refused, or wrote.
         refine.records.append({

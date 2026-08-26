@@ -1,0 +1,430 @@
+{
+ "s05_state": {
+  "counts": {
+   "Constraint": 21,
+   "Feature": 18,
+   "KinematicRealization": 8
+  },
+  "gate_refusal": [
+   "EMBODIMENT: constraint relation CRL-0004 blocks TX, TY, TZ, RX, RZ and no KinematicRealization names it; the restraint is stated and nothing embodies it",
+   "EMBODIMENT: interface IFC-0002 states a PIN side on BOD-0003; the feature(s) realizing that side are FEA-0010(STOCK)",
+   "EMBODIMENT: feature FEA-0006 on BOD-0001 names interface IFC-0002, which does not involve that body",
+   "EMBODIMENT: feature FEA-0007 on BOD-0001 names interface IFC-0002, which does not involve that body",
+   "EMBODIMENT: feature FEA-0016 on BOD-0002 names interface IFC-0001, which does not involve that body",
+   "EMBODIMENT: interface IFC-0001 declares INTERFERENCE_FIT and no Constraint governs it",
+   "EMBODIMENT: interface IFC-0002 declares CLEARANCE and no Constraint governs it",
+   "EMBODIMENT: region FRG-0001 is a ACCESS of BOD-0002, so that volume must be FREE of its material, and no feature of BOD-0002 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned",
+   "EMBODIMENT: region FRG-0003 is a APERTURE of BOD-0001, so that volume must be FREE of its material, and no feature of BOD-0001 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned",
+   "EMBODIMENT: region FRG-0004 is a ACCESS of BOD-0001, so that volume must be FREE of its material, and no feature of BOD-0001 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned"
+  ],
+  "outstanding_duties": [
+   "duty: CRL-0004 (ConstraintRelation) is embodied by no KinematicRealization",
+   "duty: interface IFC-0001 owes a governing Constraint and has none",
+   "duty: interface IFC-0002 owes a governing Constraint and has none",
+   "duty: region FRG-0001 (ACCESS) must be free of BOD-0002's material and no feature of that body removes material at it",
+   "duty: region FRG-0003 (APERTURE) must be free of BOD-0001's material and no feature of that body removes material at it",
+   "duty: region FRG-0004 (ACCESS) must be free of BOD-0001's material and no feature of that body removes material at it"
+  ],
+  "settlement_readiness": false,
+  "structural_problems": [
+   "EMBODIMENT: constraint relation CRL-0004 blocks TX, TY, TZ, RX, RZ and no KinematicRealization names it; the restraint is stated and nothing embodies it",
+   "EMBODIMENT: interface IFC-0002 states a PIN side on BOD-0003; the feature(s) realizing that side are FEA-0010(STOCK)",
+   "EMBODIMENT: feature FEA-0006 on BOD-0001 names interface IFC-0002, which does not involve that body",
+   "EMBODIMENT: feature FEA-0007 on BOD-0001 names interface IFC-0002, which does not involve that body",
+   "EMBODIMENT: feature FEA-0016 on BOD-0002 names interface IFC-0001, which does not involve that body",
+   "EMBODIMENT: interface IFC-0001 declares INTERFERENCE_FIT and no Constraint governs it",
+   "EMBODIMENT: interface IFC-0002 declares CLEARANCE and no Constraint governs it",
+   "EMBODIMENT: region FRG-0001 is a ACCESS of BOD-0002, so that volume must be FREE of its material, and no feature of BOD-0002 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned",
+   "EMBODIMENT: region FRG-0003 is a APERTURE of BOD-0001, so that volume must be FREE of its material, and no feature of BOD-0001 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned",
+   "EMBODIMENT: region FRG-0004 is a ACCESS of BOD-0001, so that volume must be FREE of its material, and no feature of BOD-0001 removes material at it; an envelope is a bounding extent and a region inside it is not cleared by being unmentioned"
+  ]
+ },
+ "s06": {
+  "constraint_count": 21,
+  "equation_count": null,
+  "formulation_sha256": "dacc5c637e744d740719c11e1feb15b04e8640d17a25bd24ad1860da737d7fde",
+  "gate_bypassed": true,
+  "parameter_count": 21,
+  "parameters": {
+   "PRM-0001": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "scale_mm_per_unit",
+    "unit": "mm",
+    "value": 1.0
+   },
+   "PRM-0002": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "base_width",
+    "unit": "mm",
+    "value": 100.0
+   },
+   "PRM-0003": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "base_depth",
+    "unit": "mm",
+    "value": 60.0
+   },
+   "PRM-0004": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "base_height",
+    "unit": "mm",
+    "value": 40.0
+   },
+   "PRM-0005": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "wall_thickness",
+    "unit": "mm",
+    "value": 3.0
+   },
+   "PRM-0006": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "bottom_thickness",
+    "unit": "mm",
+    "value": 3.0
+   },
+   "PRM-0007": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "top_ledge_thickness",
+    "unit": "mm",
+    "value": 3.0
+   },
+   "PRM-0008": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "cavity_depth",
+    "unit": "mm",
+    "value": 31.0
+   },
+   "PRM-0009": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "hinge_axis_x",
+    "unit": "mm",
+    "value": -48.0
+   },
+   "PRM-0010": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "knuckle_outer_diameter",
+    "unit": "mm",
+    "value": 10.0
+   },
+   "PRM-0011": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "knuckle_length",
+    "unit": "mm",
+    "value": 10.0
+   },
+   "PRM-0012": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "pin_diameter",
+    "unit": "mm",
+    "value": 4.0
+   },
+   "PRM-0013": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "pin_length",
+    "unit": "mm",
+    "value": 62.0
+   },
+   "PRM-0014": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "snap_tab_beam_length",
+    "unit": "mm",
+    "value": 20.0
+   },
+   "PRM-0015": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "snap_tab_beam_width",
+    "unit": "mm",
+    "value": 10.0
+   },
+   "PRM-0016": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "snap_tab_beam_thickness",
+    "unit": "mm",
+    "value": 2.0
+   },
+   "PRM-0017": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "snap_hook_height",
+    "unit": "mm",
+    "value": 3.0
+   },
+   "PRM-0018": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "latch_recess_depth",
+    "unit": "mm",
+    "value": 3.0
+   },
+   "PRM-0019": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "lid_plate_thickness",
+    "unit": "mm",
+    "value": 6.0
+   },
+   "PRM-0020": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "lid_hinge_stop_angle",
+    "unit": "mm",
+    "value": 90.0
+   },
+   "PRM-0021": {
+    "solved_by": "SLV-dacc5c637e744d74",
+    "status": "DECLARED",
+    "symbol": "lid_hinge_stop_height",
+    "unit": "mm",
+    "value": 5.0
+   }
+  },
+  "problems": [],
+  "rank": 21,
+  "solver_status": "feasible",
+  "unknown_count": 21,
+  "write_problems": []
+ },
+ "s07": {
+  "artifacts": [],
+  "bodies": [
+   {
+    "bbox": [
+     -53.00000015,
+     -30.00000015,
+     -20.00000015,
+     50.00000015,
+     30.00000015,
+     40.00000015
+    ],
+    "body_id": "BOD-0001",
+    "feature_map": {
+     "FEA-0001": "ADDITIVE",
+     "FEA-0002": "SUBTRACTIVE",
+     "FEA-0003": "SUBTRACTIVE",
+     "FEA-0004": "ADDITIVE",
+     "FEA-0005": "ADDITIVE",
+     "FEA-0006": "SUBTRACTIVE",
+     "FEA-0007": "SUBTRACTIVE",
+     "FEA-0008": "SUBTRACTIVE",
+     "FEA-0009": "ADDITIVE"
+    },
+    "is_valid": true,
+    "single_connected_solid": false,
+    "solid_count": 2,
+    "volume": 84250.36984003248
+   },
+   {
+    "bbox": [
+     -53.00000015,
+     -30.00000015,
+     36.99999985,
+     73.00000015,
+     30.00000015,
+     48.00000015
+    ],
+    "body_id": "BOD-0002",
+    "feature_map": {
+     "FEA-0013": "ADDITIVE",
+     "FEA-0014": "SUBTRACTIVE",
+     "FEA-0015": "ADDITIVE",
+     "FEA-0016": "SUBTRACTIVE",
+     "FEA-0017": "ADDITIVE",
+     "FEA-0018": "ADDITIVE"
+    },
+    "is_valid": true,
+    "single_connected_solid": false,
+    "solid_count": 2,
+    "volume": 23311.862160457928
+   },
+   {
+    "bbox": [
+     -51.0000001,
+     -30.500000100000005,
+     16.999999899999995,
+     -44.9999999,
+     32.0000001,
+     23.000000100000005
+    ],
+    "body_id": "BOD-0003",
+    "feature_map": {
+     "FEA-0010": "ADDITIVE",
+     "FEA-0011": "ADDITIVE",
+     "FEA-0012": "SUBTRACTIVE"
+    },
+    "is_valid": true,
+    "single_connected_solid": true,
+    "solid_count": 1,
+    "volume": 816.814089933346
+   }
+  ],
+  "failed_feature": null,
+  "failed_step": null,
+  "ok": false,
+  "problems": [
+   "S07-C2: body BOD-0001 compiled to 2 solids; a body must be a single connected solid",
+   "S07-C2: body BOD-0002 compiled to 2 solids; a body must be a single connected solid"
+  ]
+ },
+ "translation": {
+  "accepted": true,
+  "assembly_sequence": [
+   {
+    "access": "Free space above",
+    "action": "Place base on flat surface with open top up.",
+    "component": "BOD-0001",
+    "final_retention": "Gravity holds it.",
+    "insertion_direction": [
+     0,
+     0,
+     1
+    ],
+    "step": 1
+   },
+   {
+    "access": "Open end of +Y knuckle",
+    "action": "Insert pin into base knuckles from +Y side until head contacts the outer face of the +Y knuckle.",
+    "component": "BOD-0003",
+    "final_retention": "Pin is held by friction in base knuckles (interference fit) and later captured by lid knuckle.",
+    "insertion_direction": [
+     0,
+     -1,
+     0
+    ],
+    "step": 2
+   },
+   {
+    "access": "Open end of +Y knuckle and top opening",
+    "action": "Slide lid knuckle onto pin from +Y side, aligning bore with pin, and push lid downward until it sits over the base opening. The snap tab will deflect outward as it passes the front wall, then engage the latch recess.",
+    "component": "BOD-0002",
+    "final_retention": "Lid is retained by pin through knuckles and snap tab engagement.",
+    "insertion_direction": [
+     0,
+     -1,
+     0
+    ],
+    "step": 3
+   }
+  ],
+  "choices": [
+   "the SCALE parameter takes the model's own scale_mm_per_unit = 1.0",
+   "vector-valued dimensions read as triples: none",
+   "KRL for JNT-0002 includes BOD-0001/bore_base because the design's mating set names it",
+   "KRL for JNT-0002 includes BOD-0001/bore_base2 because the design's mating set names it",
+   "KRL for JNT-0003 includes BOD-0001/latch_recess because the design's mating set names it",
+   "KRL for JNT-0002 includes BOD-0002/bore_lid because the design's mating set names it",
+   "KRL for JNT-0003 includes BOD-0002/snap_beam because the design's mating set names it",
+   "KRL for JNT-0003 includes BOD-0002/snap_hook because the design's mating set names it",
+   "KRL for JNT-0002 includes BOD-0003/pin_shaft because the design's mating set names it",
+   "KRL for CRL-0001 (external reaction site RSR-0001) uses the retained body's own material; upstream names no interface for it",
+   "KRL for CRL-0002 from its own provider_site IFC-0001",
+   "KRL for CRL-0003 from its own provider_site IFC-0002",
+   "KRL for CRL-0005 from its own provider_site IFC-0004",
+   "KRL for CRL-0006 (external reaction site RSR-0002) uses the retained body's own material; upstream names no interface for it",
+   "KRL for JNT-0001 from PERMIT_MOTION at IFC-0002"
+  ],
+  "counts": {
+   "constraints": 21,
+   "features": 18,
+   "fixed_by_choice": 20,
+   "fixed_by_relation": 0,
+   "kinematic_realizations": 8,
+   "parameters": 21
+  },
+  "mating_sets": [
+   {
+    "fit": "pin_diameter + 0.1 clearance",
+    "name": "Hinge Joint",
+    "participants": [
+     {
+      "body": "BOD-0003",
+      "element": "pin_shaft",
+      "role": "Pin shaft"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "bore_base",
+      "role": "Base knuckle bore"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "bore_base2",
+      "role": "Base knuckle bore"
+     },
+     {
+      "body": "BOD-0002",
+      "element": "bore_lid",
+      "role": "Lid knuckle bore"
+     }
+    ],
+    "upstream": [
+     "IFC-0001",
+     "IFC-0002",
+     "JNT-0002",
+     "PHI-0001"
+    ]
+   },
+   {
+    "fit": "latch_recess_depth = snap_hook_height",
+    "name": "Snap Latch",
+    "participants": [
+     {
+      "body": "BOD-0002",
+      "element": "snap_beam",
+      "role": "Cantilever beam"
+     },
+     {
+      "body": "BOD-0002",
+      "element": "snap_hook",
+      "role": "Hook"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "latch_recess",
+      "role": "Recess"
+     }
+    ],
+    "upstream": [
+     "IFC-0004",
+     "JNT-0003",
+     "PHI-0002"
+    ]
+   },
+   {
+    "fit": "Contact when open",
+    "name": "Hinge Stop",
+    "participants": [
+     {
+      "body": "BOD-0002",
+      "element": "lid_main",
+      "role": "Lid surface"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "hinge_stop",
+      "role": "Stop ledge"
+     }
+    ],
+    "upstream": [
+     "IFC-0003"
+    ]
+   }
+  ],
+  "write_boundary_problems": []
+ }
+}

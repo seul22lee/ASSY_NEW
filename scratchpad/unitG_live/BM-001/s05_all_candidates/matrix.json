@@ -1,0 +1,387 @@
+[
+ {
+  "candidate": "CND-0001",
+  "s05": {
+   "accepted": true,
+   "declared_incompleteness": [],
+   "duties_recomputed_with_spatial_manifest": true,
+   "duties_required": {
+    "bodies": [
+     "BOD-0001",
+     "BOD-0002",
+     "BOD-0003"
+    ],
+    "interfaces": [
+     "IFC-0001",
+     "IFC-0002",
+     "IFC-0003",
+     "IFC-0004"
+    ],
+    "realization_targets": [
+     "JNT-0001",
+     "JNT-0002",
+     "JNT-0003",
+     "CRL-0001",
+     "CRL-0002",
+     "CRL-0003",
+     "CRL-0004",
+     "CRL-0005",
+     "CRL-0006"
+    ]
+   },
+   "elapsed_s": 43.2,
+   "entities_written": {
+    "Constraint": 4,
+    "Feature": 16,
+    "KinematicRealization": 9,
+    "Parameter": 4
+   },
+   "outstanding_duties": [],
+   "patch_applied": true,
+   "problems": [],
+   "raw_chars": 11342,
+   "settlement_readiness": true,
+   "settlement_readiness_why_not": [],
+   "status": "SUCCESS",
+   "structural_problems": []
+  },
+  "s06": {
+   "entered": true,
+   "formulation_sha256": "1160d5404ae93de8395db41bfdc0c0419c7e69e4d25ce01b9a5769a23a971a37",
+   "parameters": {
+    "PRM-0001": {
+     "solved_by": null,
+     "status": "DECLARED",
+     "symbol": "r_base_bore",
+     "unit": "mm",
+     "value": null
+    },
+    "PRM-0002": {
+     "solved_by": null,
+     "status": "DECLARED",
+     "symbol": "r_lid_bore",
+     "unit": "mm",
+     "value": null
+    },
+    "PRM-0003": {
+     "solved_by": null,
+     "status": "DECLARED",
+     "symbol": "r_pin",
+     "unit": "mm",
+     "value": null
+    },
+    "PRM-0004": {
+     "solved_by": null,
+     "status": "DECLARED",
+     "symbol": "scale",
+     "unit": "mm",
+     "value": null
+    }
+   },
+   "patch_applied": false,
+   "problems": [
+    "rank 3 over 4 unknown(s); 3 direction(s) remain free: PRM-0001, PRM-0002, PRM-0003"
+   ],
+   "solver_status": "underdetermined"
+  },
+  "s07": {
+   "artifacts": [],
+   "assembly": {},
+   "blocking_findings": [],
+   "bodies": [],
+   "compiled": false,
+   "entered": true,
+   "findings": [],
+   "findings_by_owner": {},
+   "patch_applied": false,
+   "problems": [
+    "constraint CON-0001 carries no feasible settlement (none); the system was not settled feasible",
+    "constraint CON-0002 carries no feasible settlement (none); the system was not settled feasible",
+    "constraint CON-0003 carries no feasible settlement (none); the system was not settled feasible",
+    "constraint CON-0004 carries no feasible settlement (none); the system was not settled feasible",
+    "no scale authority: the basis is RELATIVE and its scale parameter PRM-0004 has no settled value",
+    "POSE_NOT_DERIVABLE (s05): feature FEA-0014 is placed against feature FEA-0013, whose frame is not derivable"
+   ],
+   "spatial_duties_judged": {},
+   "workable": false
+  },
+  "selection": {
+   "decision": "SLD-C1AD91761F07",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ },
+ {
+  "candidate": "CND-0002",
+  "s05": {
+   "accepted": false,
+   "declared_incompleteness": [],
+   "duties_required": {
+    "bodies": [
+     "BOD-0004",
+     "BOD-0005",
+     "BOD-0006",
+     "BOD-0007"
+    ],
+    "interfaces": [
+     "IFC-0005",
+     "IFC-0006",
+     "IFC-0007",
+     "IFC-0008",
+     "IFC-0009"
+    ],
+    "realization_targets": [
+     "JNT-0004",
+     "JNT-0005",
+     "JNT-0006",
+     "JNT-0007",
+     "JNT-0008",
+     "CRL-0010",
+     "CRL-0011",
+     "CRL-0012",
+     "CRL-0013",
+     "CRL-0014",
+     "CRL-0015",
+     "CRL-0016",
+     "CRL-0017",
+     "CRL-0018"
+    ]
+   },
+   "elapsed_s": 45.8,
+   "entities_written": {},
+   "patch_applied": false,
+   "problems": [
+    "s05 response does not discharge this branch's embodiment duties (3):\n  - parameter recess_depth (recess_depth) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it\n  - parameter recess_height (recess_height) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it\n  - parameter recess_width (recess_width) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it"
+   ],
+   "raw_chars": 28000,
+   "status": "SCHEMA_FAILURE"
+  },
+  "s06": {
+   "entered": false,
+   "reason": "S05 was refused; nothing stands to settle"
+  },
+  "s07": {
+   "entered": false,
+   "reason": "S06 not entered"
+  },
+  "selection": {
+   "decision": "SLD-08658A27B2A0",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ },
+ {
+  "candidate": "CND-0003",
+  "s05": {
+   "accepted": false,
+   "declared_incompleteness": [],
+   "duties_required": {
+    "bodies": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011"
+    ],
+    "interfaces": [
+     "IFC-0010",
+     "IFC-0011",
+     "IFC-0012",
+     "IFC-0013",
+     "IFC-0014",
+     "IFC-0015"
+    ],
+    "realization_targets": [
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "CRL-0101",
+     "CRL-0102",
+     "CRL-0103",
+     "CRL-0104",
+     "CRL-0105",
+     "CRL-0106",
+     "CRL-0107"
+    ]
+   },
+   "elapsed_s": 42.0,
+   "entities_written": {},
+   "patch_applied": false,
+   "problems": [
+    "s05 response is not a semantic embodiment: feature base_plate solid parts[3] offset[1] declares kind {'kind': 'param', 'param': 'scl', 'unit': 'mm', 'role': 'SCALE'}; an expression is one of ['param', 'number', 'sum', 'difference', 'negate', 'scale_by', 'divide_by']"
+   ],
+   "raw_chars": 22391,
+   "status": "SCHEMA_FAILURE"
+  },
+  "s06": {
+   "entered": false,
+   "reason": "S05 was refused; nothing stands to settle"
+  },
+  "s07": {
+   "entered": false,
+   "reason": "S06 not entered"
+  },
+  "selection": {
+   "decision": "SLD-DCCF0F3392A3",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ },
+ {
+  "candidate": "CND-0004",
+  "s05": {
+   "accepted": false,
+   "declared_incompleteness": [],
+   "duties_required": {
+    "bodies": [
+     "BOD-0012",
+     "BOD-0013"
+    ],
+    "interfaces": [
+     "IFC-0016",
+     "IFC-0017",
+     "IFC-0018",
+     "IFC-0019"
+    ],
+    "realization_targets": [
+     "JNT-0013",
+     "CRL-0108",
+     "CRL-0109",
+     "CRL-0110",
+     "CRL-0111"
+    ]
+   },
+   "elapsed_s": 37.5,
+   "entities_written": {},
+   "patch_applied": false,
+   "problems": [
+    "s05 response does not discharge this branch's embodiment duties (2):\n  - realization_assignments[CRL-0108] states a side for BOD-0013, which the relation does not relate\n  - the relations that restrain JNT-0013 at coordinate 0.0 and at coordinate 2.0 are embodied by material in exactly the same place; one piece of geometry cannot produce a limit at two different positions of the same joint - the two limits sit at different coordinates and their geometry has to sit at different places too"
+   ],
+   "raw_chars": 15939,
+   "status": "SCHEMA_FAILURE"
+  },
+  "s06": {
+   "entered": false,
+   "reason": "S05 was refused; nothing stands to settle"
+  },
+  "s07": {
+   "entered": false,
+   "reason": "S06 not entered"
+  },
+  "selection": {
+   "decision": "SLD-9ABA0CB6173C",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ },
+ {
+  "candidate": "CND-0005",
+  "s05": {
+   "accepted": false,
+   "declared_incompleteness": [],
+   "duties_required": {
+    "bodies": [
+     "BOD-0101",
+     "BOD-0102",
+     "BOD-0103"
+    ],
+    "interfaces": [
+     "IFC-0101",
+     "IFC-0102",
+     "IFC-0103",
+     "IFC-0104",
+     "IFC-0105"
+    ],
+    "realization_targets": [
+     "JNT-0101",
+     "JNT-0102",
+     "CRL-0201",
+     "CRL-0202",
+     "CRL-0203",
+     "CRL-0204"
+    ]
+   },
+   "elapsed_s": 32.8,
+   "entities_written": {},
+   "patch_applied": false,
+   "problems": [
+    "s05 response is not a semantic embodiment: feature key 'hasp_stop_ry' is used twice; a local key names one record"
+   ],
+   "raw_chars": 15787,
+   "status": "SCHEMA_FAILURE"
+  },
+  "s06": {
+   "entered": false,
+   "reason": "S05 was refused; nothing stands to settle"
+  },
+  "s07": {
+   "entered": false,
+   "reason": "S06 not entered"
+  },
+  "selection": {
+   "decision": "SLD-59A744C18BF9",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ },
+ {
+  "candidate": "CND-0006",
+  "s05": {
+   "accepted": false,
+   "declared_incompleteness": [],
+   "duties_required": {
+    "bodies": [
+     "BOD-0014",
+     "BOD-0015",
+     "BOD-0016"
+    ],
+    "interfaces": [
+     "IFC-0020",
+     "IFC-0021",
+     "IFC-0022",
+     "IFC-0023",
+     "IFC-0024",
+     "IFC-0025"
+    ],
+    "realization_targets": [
+     "JNT-0014",
+     "JNT-0015",
+     "JNT-0016",
+     "JNT-0017",
+     "CRL-1001",
+     "CRL-1002",
+     "CRL-1003",
+     "CRL-1004",
+     "CRL-1005"
+    ]
+   },
+   "elapsed_s": 51.7,
+   "entities_written": {},
+   "patch_applied": false,
+   "problems": [
+    "s05 response is not a semantic embodiment: feature key 'handle_access_clear' is used twice; a local key names one record"
+   ],
+   "raw_chars": 28798,
+   "status": "SCHEMA_FAILURE"
+  },
+  "s06": {
+   "entered": false,
+   "reason": "S05 was refused; nothing stands to settle"
+  },
+  "s07": {
+   "entered": false,
+   "reason": "S06 not entered"
+  },
+  "selection": {
+   "decision": "SLD-C048DBFE20F8",
+   "problems": null
+  },
+  "upstream_state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486",
+  "view_status": "VIEW_READY"
+ }
+]

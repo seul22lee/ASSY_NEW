@@ -1,0 +1,542 @@
+{
+  "features": [
+    {
+      "key": "base_body",
+      "body": "BOD-0001",
+      "feature_kind": "STOCK",
+      "geometry": "Main box body as a shallow rectangular tray with side and bottom walls, open at top to define storage volume.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0001"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "COMPOUND",
+        "parts": [
+          {
+            "shape": "BLOCK",
+            "dx": 100,
+            "dy": 60,
+            "dz": 20
+          },
+          {
+            "shape": "RELIEVED",
+            "base": {
+              "shape": "BLOCK",
+              "dx": 100,
+              "dy": 60,
+              "dz": 20
+            },
+            "relief": [
+              {
+                "shape": "BLOCK",
+                "dx": 90,
+                "dy": 50,
+                "dz": 15
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_hinge_knuckle",
+      "body": "BOD-0001",
+      "feature_kind": "STOCK",
+      "geometry": "Knuckle protruding from base at hinge location, with bore for pin.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0002"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "CYLINDER",
+          "radius": 8,
+          "height": 10
+        },
+        "relief": [
+          {
+            "shape": "CYLINDER",
+            "radius": 4,
+            "height": 10
+          }
+        ]
+      }
+    },
+    {
+      "key": "base_pin_bore",
+      "body": "BOD-0001",
+      "feature_kind": "BORE",
+      "geometry": "Bore through base hinge knuckle to accept hinge pin with interference fit.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0002"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 4,
+        "height": 10
+      }
+    },
+    {
+      "key": "base_storage_recess",
+      "body": "BOD-0001",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Recess inside base storage volume, open at top (part of top aperture).",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0003"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 80,
+        "dy": 40,
+        "dz": 10
+      }
+    },
+    {
+      "key": "base_top_aperture",
+      "body": "BOD-0001",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Opening at top of base for access to storage volume.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0003"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 80,
+        "dy": 40,
+        "dz": 2
+      }
+    },
+    {
+      "key": "base_front_access",
+      "body": "BOD-0001",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket at the front of the base (FRG-0004) to provide access for lifting the lid.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0004"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 70,
+        "dy": 30,
+        "dz": 20
+      }
+    },
+    {
+      "key": "base_latch_recess",
+      "body": "BOD-0001",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Recess in base front wall to receive the lid snap tab.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0004"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 10,
+        "dy": 10,
+        "dz": 5
+      }
+    },
+    {
+      "key": "base_stop_front",
+      "body": "BOD-0001",
+      "feature_kind": "STOP",
+      "geometry": "Front wall top face; provides closing stop when lid contacts it.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0004"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 80,
+        "dy": 5,
+        "dz": 2
+      }
+    },
+    {
+      "key": "base_ground_pad",
+      "body": "BOD-0001",
+      "feature_kind": "STOCK",
+      "geometry": "Bottom support pad for base.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0001"
+        },
+        "axis": "-Z",
+        "offset": [0, 0, -20]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 100,
+        "dy": 60,
+        "dz": 1
+      }
+    },
+    {
+      "key": "lid_main",
+      "body": "BOD-0002",
+      "feature_kind": "STOCK",
+      "geometry": "Main lid plate.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0002"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 100,
+        "dy": 60,
+        "dz": 5
+      }
+    },
+    {
+      "key": "lid_hinge_knuckle",
+      "body": "BOD-0002",
+      "feature_kind": "STOCK",
+      "geometry": "Knuckle on lid that interlocks with base knuckle; has bore for pin.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0002"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "CYLINDER",
+          "radius": 8,
+          "height": 8
+        },
+        "relief": [
+          {
+            "shape": "CYLINDER",
+            "radius": 4,
+            "height": 8
+          }
+        ]
+      }
+    },
+    {
+      "key": "lid_hinge_bore",
+      "body": "BOD-0002",
+      "feature_kind": "BORE",
+      "geometry": "Bore through lid hinge knuckle for pin with clearance.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0002"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 4,
+        "height": 8
+      }
+    },
+    {
+      "key": "lid_snap_tab",
+      "body": "BOD-0002",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Cantilever snap tab on front edge of lid, able to deflect about the hinge axis of JNT-0003.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0003"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 10,
+        "dy": 8,
+        "dz": 3
+      }
+    },
+    {
+      "key": "lid_snap_hook",
+      "body": "BOD-0002",
+      "feature_kind": "KEEPER",
+      "geometry": "Hook at end of snap tab to engage the base latch recess.",
+      "placement": {
+        "datum": {
+          "kind": "FEATURE",
+          "ref": "lid_snap_tab"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 10,
+        "dy": 4,
+        "dz": 3
+      }
+    },
+    {
+      "key": "lid_access_clear",
+      "body": "BOD-0002",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Cutout on lid near snap tab to provide finger access.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0001"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 10,
+        "dy": 10,
+        "dz": 2
+      }
+    },
+    {
+      "key": "pin_body",
+      "body": "BOD-0003",
+      "feature_kind": "PIN",
+      "geometry": "Solid cylindrical hinge pin.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0002"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 4,
+        "height": 20
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "GEOMETRIC_RELATION",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "scale",
+        "unit": "mm",
+        "role": "SCALE"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 1,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "r_lid_bore",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_pin",
+        "unit": "mm"
+      }
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0001": {
+      "BOD-0001": [
+        "base_hinge_knuckle",
+        "base_pin_bore"
+      ],
+      "BOD-0003": [
+        "pin_body"
+      ]
+    },
+    "JNT-0002": {
+      "BOD-0002": [
+        "lid_hinge_knuckle",
+        "lid_hinge_bore"
+      ],
+      "BOD-0003": [
+        "pin_body"
+      ]
+    },
+    "JNT-0003": {
+      "BOD-0002": [
+        "lid_snap_tab"
+      ]
+    },
+    "CRL-0001": {
+      "BOD-0001": [
+        "base_body"
+      ]
+    },
+    "CRL-0002": {
+      "BOD-0003": [
+        "pin_body"
+      ],
+      "BOD-0001": [
+        "base_hinge_knuckle",
+        "base_pin_bore"
+      ]
+    },
+    "CRL-0003": {
+      "BOD-0002": [
+        "lid_hinge_knuckle",
+        "lid_hinge_bore"
+      ],
+      "BOD-0003": [
+        "pin_body"
+      ]
+    },
+    "CRL-0004": {
+      "BOD-0002": [
+        "lid_snap_tab",
+        "lid_snap_hook"
+      ],
+      "BOD-0002": [
+        "lid_snap_tab"
+      ]
+    },
+    "CRL-0005": {
+      "BOD-0002": [
+        "lid_snap_tab",
+        "lid_snap_hook"
+      ],
+      "BOD-0001": [
+        "base_latch_recess"
+      ]
+    },
+    "CRL-0006": {
+      "BOD-0001": [
+        "base_body"
+      ]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0001": {
+      "sides": {
+        "BOD-0001": [
+          "base_pin_bore"
+        ],
+        "BOD-0003": [
+          "pin_body"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "DESIGN_CHOICE",
+        "relation": "==",
+        "lhs": {
+          "kind": "param",
+          "param": "r_base_bore",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "param",
+          "param": "r_pin",
+          "unit": "mm"
+        }
+      }
+    },
+    "IFC-0002": {
+      "sides": {
+        "BOD-0002": [
+          "lid_hinge_bore"
+        ],
+        "BOD-0003": [
+          "pin_body"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "DESIGN_CHOICE",
+        "relation": "==",
+        "lhs": {
+          "kind": "param",
+          "param": "r_lid_bore",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "param",
+          "param": "r_pin",
+          "unit": "mm"
+        }
+      }
+    },
+    "IFC-0003": {
+      "sides": {
+        "BOD-0001": [
+          "base_stop_front"
+        ],
+        "BOD-0002": [
+          "lid_main"
+        ]
+      }
+    },
+    "IFC-0004": {
+      "sides": {
+        "BOD-0001": [
+          "base_latch_recess"
+        ],
+        "BOD-0002": [
+          "lid_snap_tab",
+          "lid_snap_hook"
+        ]
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0001": {
+      "BOD-0002": [
+        "lid_access_clear"
+      ]
+    },
+    "FRG-0003": {
+      "BOD-0001": [
+        "base_top_aperture"
+      ]
+    },
+    "FRG-0004": {
+      "BOD-0001": [
+        "base_front_access"
+      ]
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

@@ -1,0 +1,123 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASSY Ver3.0 - S05 authoring boundary: every S04-valid candidate</title><style>
+:root{--ink:#1b1f24;--muted:#6b7580;--rule:#d7dde4;--paper:#fff;--warn:#b3261e;
+--warnbg:#fdecea;--ok:#1a7f4b;--okbg:#eaf6ef;--code:#f5f7f9;--accent:#2f6fb2}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+color:var(--ink);background:var(--paper)}
+.wrap{max-width:1180px;margin:0 auto;padding:2.2rem 1.4rem 5rem}
+h1{font-size:1.9rem;margin:0 0 .3rem;letter-spacing:-.01em}
+h2{font-size:1.35rem;margin:2.8rem 0 .5rem;padding-top:1.1rem;border-top:2px solid var(--rule)}
+h3{font-size:1.02rem;margin:1.8rem 0 .35rem}
+p{margin:.5rem 0}
+code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+code{background:var(--code);padding:.1rem .3rem;border-radius:3px;font-size:.86em}
+pre{background:var(--code);border:1px solid var(--rule);border-radius:6px;padding:.8rem 1rem;
+overflow-x:auto;font-size:.8rem;line-height:1.5}
+table{border-collapse:collapse;width:100%;margin:.8rem 0;font-size:.86rem}
+th,td{border:1px solid var(--rule);padding:.45rem .6rem;text-align:left;vertical-align:top}
+th{background:#f2f5f8;font-weight:600}
+figure{margin:1.2rem 0 1.8rem}
+figure img{width:100%;height:auto;border:1px solid var(--rule);border-radius:6px;
+background:#fff}
+figcaption{font-size:.83rem;color:var(--muted);margin-top:.45rem}
+.src{display:inline-block;font-family:ui-monospace,monospace;font-size:.76rem;
+background:#eef2f6;border:1px solid var(--rule);border-radius:4px;padding:.15rem .45rem;
+margin:.3rem .3rem .3rem 0}
+.badge{display:inline-block;font-weight:700;font-size:.78rem;border-radius:4px;
+padding:.2rem .55rem;margin-right:.4rem}
+.rejected{background:var(--warnbg);color:var(--warn);border:1px solid var(--warn)}
+.accepted{background:var(--okbg);color:var(--ok);border:1px solid var(--ok)}
+.neutral{background:#eef2f6;color:var(--muted);border:1px solid var(--rule)}
+.callout{border-left:4px solid var(--warn);background:var(--warnbg);padding:.7rem 1rem;
+margin:1rem 0;border-radius:0 6px 6px 0}
+.callout.ok{border-left-color:var(--ok);background:var(--okbg)}
+.callout.info{border-left-color:var(--accent);background:#eef4fb}
+.chain{font-family:ui-monospace,monospace;font-size:.84rem;background:var(--code);
+border:1px solid var(--rule);border-radius:6px;padding:1rem;white-space:pre;overflow-x:auto}
+.muted{color:var(--muted)}
+.nav{position:sticky;top:0;background:rgba(255,255,255,.96);border-bottom:1px solid var(--rule);
+padding:.6rem 0;margin-bottom:1.2rem;font-size:.85rem;z-index:9}
+.nav a{color:var(--accent);text-decoration:none;margin-right:1rem}
+.nav a:hover{text-decoration:underline}
+ul{margin:.4rem 0 .4rem 1.2rem;padding:0}
+li{margin:.2rem 0}
+@media(prefers-color-scheme:dark){
+:root{--ink:#e6edf3;--muted:#9aa7b2;--rule:#30363d;--paper:#0d1117;--code:#161b22;
+--warnbg:#3a1d1a;--okbg:#132a1e}
+figure img{background:#fff}
+th{background:#161b22}
+.nav{background:rgba(13,17,23,.96)}
+}
+.pass{color:var(--ok);font-weight:700}.fail{color:var(--warn);font-weight:700}td.k{white-space:nowrap}</style></head><body><div class='wrap'>
+<h1>ASSY Ver3.0 - S05 authoring boundary: every S04-valid candidate</h1><p class='muted'>BM-001 upstream rebuilt deterministically (zero provider calls) | one fresh DeepSeek S05 call per candidate through the new semantic boundary | S06 and S07 are deterministic and consume the accepted S05 result</p>
+<div class='callout info'><strong>Evidence rule.</strong> Every figure states its SOURCE. A response the write boundary refused is stamped <span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span> and is never drawn as the design. Only a branch whose S05 patch was APPLIED is visualized, and from its canonical standing rows.</div>
+<div class='callout '><strong>0 of 6</strong> S04-valid candidates completed S05 &rarr; S06 &rarr; S07. S05 is <strong>NOT CLOSED</strong>.</div>
+<h2>Matrix</h2><table><tr><th>Candidate</th><th>S05 write ACCEPTED</th><th>structural_problems == []</th><th>outstanding S05 duties == 0</th><th>settlement_readiness == True</th><th>S06 settled</th><th>S07 built real B-reps</th><th>carried spatial/geometric evidence passes</th></tr>
+<tr><td class='k'><a href='#CND-0001'><strong>CND-0001</strong></a></td><td class='pass'>PASS</td><td class='pass'>PASS</td><td class='pass'>PASS</td><td class='pass'>PASS</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+<tr><td class='k'><a href='#CND-0002'><strong>CND-0002</strong></a></td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+<tr><td class='k'><a href='#CND-0003'><strong>CND-0003</strong></a></td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+<tr><td class='k'><a href='#CND-0004'><strong>CND-0004</strong></a></td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+<tr><td class='k'><a href='#CND-0005'><strong>CND-0005</strong></a></td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+<tr><td class='k'><a href='#CND-0006'><strong>CND-0006</strong></a></td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td><td class='fail'>FAIL</td></tr>
+</table>
+<h2 id='CND-0001'>CND-0001</h2>
+<span class='badge accepted'>S05 ACCEPTED</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 3, Configuration 2, ConstraintRelation 6, Envelope 3, FunctionalRegion 4, Interface 4, Joint 3, MobilityExpectation 1, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 4, State 2, SweptVolume 4, Transition 2, TransitionRequirement 2</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-C1AD91761F07</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SUCCESS</code>, 11342 chars, 43.2s</td></tr><tr><th>Canonical standing S05</th><td>Constraint 4, Feature 16, KinematicRealization 9, Parameter 4</td></tr><tr><th>structural_problems</th><td>[]</td></tr><tr><th>outstanding duties</th><td>[]</td></tr><tr><th>settlement_readiness</th><td><code>True</code></td></tr><tr><th>S06</th><td>underdetermined</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; None</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>S06 report</h3><pre>rank 3 over 4 unknown(s); 3 direction(s) remain free: PRM-0001, PRM-0002, PRM-0003</pre>
+<h3>S07 compile problems</h3><pre>constraint CON-0001 carries no feasible settlement (none); the system was not settled feasible
+constraint CON-0002 carries no feasible settlement (none); the system was not settled feasible
+constraint CON-0003 carries no feasible settlement (none); the system was not settled feasible
+constraint CON-0004 carries no feasible settlement (none); the system was not settled feasible
+no scale authority: the basis is RELATIVE and its scale parameter PRM-0004 has no settled value
+POSE_NOT_DERIVABLE (s05): feature FEA-0014 is placed against feature FEA-0013, whose frame is not derivable</pre>
+<figure><a href='CND-0001/embodiment_overview.png'><img src='CND-0001/embodiment_overview.png' alt='embodiment_overview'></a><figcaption><strong>embodiment overview</strong> - Body-centric: every feature, its kind, polarity, placement datum, axis, interface, construction steps and terminal.</figcaption></figure>
+<figure><a href='CND-0001/kinematic_realizations.png'><img src='CND-0001/kinematic_realizations.png' alt='kinematic_realizations'></a><figcaption><strong>kinematic realizations</strong> - Feature(s) -&gt; KinematicRealization -&gt; Joint | ConstraintRelation, for every declared relation.</figcaption></figure>
+<figure><a href='CND-0001/interfaces.png'><img src='CND-0001/interfaces.png' alt='interfaces'></a><figcaption><strong>interfaces</strong> - Interface -&gt; the two bodies -&gt; the feature realizing each side, with the deterministic finding printed against it.</figcaption></figure>
+<figure><a href='CND-0001/parameter_constraint_graph.png'><img src='CND-0001/parameter_constraint_graph.png' alt='parameter_constraint_graph'></a><figcaption><strong>parameter constraint graph</strong> - Parameter -&gt; Constraint &lt;- Parameter, with units, roles and what no constraint determines.</figcaption></figure>
+<figure><a href='CND-0001/feature_map.png'><img src='CND-0001/feature_map.png' alt='feature_map'></a><figcaption><strong>feature map</strong> - Each feature at the committed datum it names, with the axis it states. Symbolic - nothing is drawn to scale.</figcaption></figure>
+<figure><a href='CND-0001/parameter_values.png'><img src='CND-0001/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0001/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0001/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0001/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0001/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0001/accepted_s05_state.json'>accepted_s05_state.json</a> <a class='src' href='CND-0001/s06_settlement.json'>s06_settlement.json</a> <a class='src' href='CND-0001/s07_artifact_report.json'>s07_artifact_report.json</a> <a class='src' href='CND-0001/s04_state.json'>s04_state.json</a></p>
+<h2 id='CND-0002'>CND-0002</h2>
+<span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 4, Configuration 2, ConstraintRelation 9, Envelope 4, FunctionalRegion 5, Interface 5, Joint 5, MobilityExpectation 2, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 6, State 2, SweptVolume 8, Transition 2, TransitionRequirement 2</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-08658A27B2A0</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SCHEMA_FAILURE</code>, 28000 chars, 45.8s</td></tr><tr><th>Canonical standing S05</th><td>NOTHING</td></tr><tr><th>structural_problems</th><td>-</td></tr><tr><th>outstanding duties</th><td>-</td></tr><tr><th>settlement_readiness</th><td><code>None</code></td></tr><tr><th>S06</th><td>NOT ENTERED &amp;mdash; S05 was refused; nothing stands to settle</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; S06 not entered</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>Write-boundary refusal</h3><pre>s05 response does not discharge this branch&#x27;s embodiment duties (3):
+  - parameter recess_depth (recess_depth) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it
+  - parameter recess_height (recess_height) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it
+  - parameter recess_width (recess_width) is named by no constraint; a parameter no constraint determines is a free direction the solver reports back and nothing can be built from it</pre>
+<figure><a href='CND-0002/parameter_values.png'><img src='CND-0002/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0002/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0002/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0002/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0002/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0002/s04_state.json'>s04_state.json</a></p>
+<h2 id='CND-0003'>CND-0003</h2>
+<span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 4, Configuration 3, ConstraintRelation 7, Envelope 4, FunctionalRegion 3, Interface 6, Joint 4, MobilityExpectation 2, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 4, State 3, SweptVolume 4, Transition 4, TransitionRequirement 4</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-DCCF0F3392A3</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SCHEMA_FAILURE</code>, 22391 chars, 42.0s</td></tr><tr><th>Canonical standing S05</th><td>NOTHING</td></tr><tr><th>structural_problems</th><td>-</td></tr><tr><th>outstanding duties</th><td>-</td></tr><tr><th>settlement_readiness</th><td><code>None</code></td></tr><tr><th>S06</th><td>NOT ENTERED &amp;mdash; S05 was refused; nothing stands to settle</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; S06 not entered</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>Write-boundary refusal</h3><pre>s05 response is not a semantic embodiment: feature base_plate solid parts[3] offset[1] declares kind {&#x27;kind&#x27;: &#x27;param&#x27;, &#x27;param&#x27;: &#x27;scl&#x27;, &#x27;unit&#x27;: &#x27;mm&#x27;, &#x27;role&#x27;: &#x27;SCALE&#x27;}; an expression is one of [&#x27;param&#x27;, &#x27;number&#x27;, &#x27;sum&#x27;, &#x27;difference&#x27;, &#x27;negate&#x27;, &#x27;scale_by&#x27;, &#x27;divide_by&#x27;]</pre>
+<figure><a href='CND-0003/parameter_values.png'><img src='CND-0003/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0003/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0003/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0003/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0003/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0003/s04_state.json'>s04_state.json</a></p>
+<h2 id='CND-0004'>CND-0004</h2>
+<span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 2, Configuration 2, ConstraintRelation 4, Envelope 2, FunctionalRegion 6, Interface 4, Joint 1, MobilityExpectation 1, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 2, State 2, SweptVolume 4, Transition 2, TransitionRequirement 2</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-9ABA0CB6173C</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SCHEMA_FAILURE</code>, 15939 chars, 37.5s</td></tr><tr><th>Canonical standing S05</th><td>NOTHING</td></tr><tr><th>structural_problems</th><td>-</td></tr><tr><th>outstanding duties</th><td>-</td></tr><tr><th>settlement_readiness</th><td><code>None</code></td></tr><tr><th>S06</th><td>NOT ENTERED &amp;mdash; S05 was refused; nothing stands to settle</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; S06 not entered</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>Write-boundary refusal</h3><pre>s05 response does not discharge this branch&#x27;s embodiment duties (2):
+  - realization_assignments[CRL-0108] states a side for BOD-0013, which the relation does not relate
+  - the relations that restrain JNT-0013 at coordinate 0.0 and at coordinate 2.0 are embodied by material in exactly the same place; one piece of geometry cannot produce a limit at two different positions of the same joint - the two limits sit at different coordinates and their geometry has to sit at different places too</pre>
+<figure><a href='CND-0004/parameter_values.png'><img src='CND-0004/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0004/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0004/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0004/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0004/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0004/s04_state.json'>s04_state.json</a></p>
+<h2 id='CND-0005'>CND-0005</h2>
+<span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 3, Configuration 3, ConstraintRelation 4, Envelope 3, FunctionalRegion 4, Interface 5, Joint 2, MobilityExpectation 2, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 3, State 3, SweptVolume 8, Transition 4, TransitionRequirement 4</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-59A744C18BF9</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SCHEMA_FAILURE</code>, 15787 chars, 32.8s</td></tr><tr><th>Canonical standing S05</th><td>NOTHING</td></tr><tr><th>structural_problems</th><td>-</td></tr><tr><th>outstanding duties</th><td>-</td></tr><tr><th>settlement_readiness</th><td><code>None</code></td></tr><tr><th>S06</th><td>NOT ENTERED &amp;mdash; S05 was refused; nothing stands to settle</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; S06 not entered</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>Write-boundary refusal</h3><pre>s05 response is not a semantic embodiment: feature key &#x27;hasp_stop_ry&#x27; is used twice; a local key names one record</pre>
+<figure><a href='CND-0005/parameter_values.png'><img src='CND-0005/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0005/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0005/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0005/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0005/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0005/s04_state.json'>s04_state.json</a></p>
+<h2 id='CND-0006'>CND-0006</h2>
+<span class='badge rejected'>REJECTED - NOT DESIGNSTATE</span>
+<table><tr><th>S04 (accepted canonical DesignState)</th><td>Body 3, Configuration 3, ConstraintRelation 5, Envelope 3, FunctionalRegion 4, Interface 6, Joint 4, MobilityExpectation 3, PhysicalInteraction 5, ReferenceScale 1, RigidGroup 4, State 3, Transition 4, TransitionRequirement 4</td></tr><tr><th>Selection</th><td>synthetic scratch commitment <code>SLD-C048DBFE20F8</code> &mdash; NOT BM-001's decision</td></tr><tr><th>DeepSeek S05</th><td><code>SCHEMA_FAILURE</code>, 28798 chars, 51.7s</td></tr><tr><th>Canonical standing S05</th><td>NOTHING</td></tr><tr><th>structural_problems</th><td>-</td></tr><tr><th>outstanding duties</th><td>-</td></tr><tr><th>settlement_readiness</th><td><code>None</code></td></tr><tr><th>S06</th><td>NOT ENTERED &amp;mdash; S05 was refused; nothing stands to settle</td></tr><tr><th>S07</th><td>NOT ENTERED &amp;mdash; S06 not entered</td></tr></table>
+<div class='callout'><strong>Geometric evidence:</strong> FAIL &amp;mdash; 0 blocking finding(s) </div>
+<h3>Write-boundary refusal</h3><pre>s05 response is not a semantic embodiment: feature key &#x27;handle_access_clear&#x27; is used twice; a local key names one record</pre>
+<figure><a href='CND-0006/parameter_values.png'><img src='CND-0006/parameter_values.png' alt='parameter_values'></a><figcaption><strong>parameter values</strong> - Parameter | meaning | unit | bounds | settled value | status.</figcaption></figure>
+<p class='muted'>Evidence: <a class='src' href='CND-0006/duty_manifest.json'>duty_manifest.json</a> <a class='src' href='CND-0006/carried_spatial_duties.json'>carried_spatial_duties.json</a> <a class='src' href='CND-0006/prompt.txt'>prompt.txt</a> <a class='src' href='CND-0006/raw_model_response.txt'>raw_model_response.txt</a> <a class='src' href='CND-0006/s04_state.json'>s04_state.json</a></p>
+</div></body></html>

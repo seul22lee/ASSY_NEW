@@ -175,6 +175,12 @@ CAUSE_FINDINGS = "FINDINGS"
 #: not contain. Distinct from FINDINGS, where the geometry exists and the
 #: numbers do not hold - the two ask for different work and are never mixed.
 CAUSE_PREREQUISITES = "EMBODIMENT_PREREQUISITES"
+#: THE WRITE BOUNDARY REFUSED THE RESPONSE, and the reasons are being handed to
+#: its author. Not a re-roll of the same question - a different one, asked with
+#: evidence the author has never seen: a patch is atomic, so one malformed field
+#: discards an answer that was otherwise whole, and the refusal reasons reached
+#: no one. The stage is told what was refused and restates the embodiment.
+CAUSE_REFUSED = "RESPONSE_REFUSED"
 CAUSE_UPSTREAM_REVISION = "UPSTREAM_REVISION"
 
 _STANDING, _STALE = "STANDING", "STALE"

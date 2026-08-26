@@ -1,0 +1,1 @@
+The images show two versions of the same mechanical assembly, rendered from solid geometry. The blue is the stationary base, orange is the moving lid, and green is a hinge pin. It is meant to be one coherent hinged closure with a latch. The FIRST FOUR images are VERSION 1: lid closed, then lid open, and the LAST FOUR images are VERSION 2: the same two states after a redesign.

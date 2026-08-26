@@ -1,0 +1,419 @@
+{
+ "bodies": [
+  {
+   "elements": [
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "housing_block",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "housing_wall*2 + channel_width",
+      "housing_wall*2 + channel_height",
+      200
+     ],
+     "why": "Main block of housing, centered at origin, length 200mm (4 units)"
+    },
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "channel_cut",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width",
+      "channel_height",
+      200
+     ],
+     "why": "Internal channel for drawer"
+    },
+    {
+     "at": [
+      0,
+      "channel_height/2 + housing_wall/2 - slot_width/2",
+      100
+     ],
+     "name": "side_slot_fill",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "channel_width + housing_wall*2",
+      "slot_width",
+      200
+     ],
+     "why": "Material for upper slot, later subtracted"
+    },
+    {
+     "at": [
+      0,
+      "channel_height/2 + housing_wall/2",
+      100
+     ],
+     "name": "upper_slot",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width",
+      "slot_width",
+      200
+     ],
+     "why": "Upper guide slot for drawer rib"
+    },
+    {
+     "at": [
+      0,
+      "-channel_height/2 - housing_wall/2 + slot_width/2",
+      100
+     ],
+     "name": "side_slot_fill2",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "channel_width + housing_wall*2",
+      "slot_width",
+      200
+     ],
+     "why": "Material for lower slot, later subtracted"
+    },
+    {
+     "at": [
+      0,
+      "-channel_height/2 - housing_wall/2",
+      100
+     ],
+     "name": "lower_slot",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width",
+      "slot_width",
+      200
+     ],
+     "why": "Lower guide slot for drawer rib"
+    },
+    {
+     "at": [
+      -100,
+      0,
+      100
+     ],
+     "clears": "FRG-0018",
+     "name": "front_aperture",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      "channel_width"
+     ],
+     "why": "Aperture at front (X=-150? Actually -100 is center of front wall) to allow access to drawer face"
+    },
+    {
+     "at": [
+      100,
+      0,
+      100
+     ],
+     "name": "rear_opening",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      "channel_width"
+     ],
+     "why": "Opening at rear for possible access or assembly"
+    },
+    {
+     "at": [
+      -85,
+      0,
+      100
+     ],
+     "name": "front_stop_lug",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      10
+     ],
+     "why": "Stop face for drawer at closed position (IFC-0019)"
+    },
+    {
+     "at": [
+      85,
+      0,
+      100
+     ],
+     "name": "rear_stop_lug",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      10
+     ],
+     "why": "Stop face for drawer at open position (IFC-0018)"
+    }
+   ],
+   "summary": "Stationary housing with internal rectangular channel, side slots for drawer ribs, front aperture, rear support, and stop faces.",
+   "upstream_body": "BOD-0012"
+  },
+  {
+   "elements": [
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "drawer_body",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "channel_width - 2*drawer_clearance",
+      "channel_height - 2*drawer_clearance",
+      160
+     ],
+     "why": "Main drawer body, slightly smaller than channel"
+    },
+    {
+     "at": [
+      0,
+      "(channel_height - 2*drawer_clearance)/2 + rib_height/2",
+      100
+     ],
+     "name": "upper_guide_rib",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      160,
+      "rib_height",
+      "rib_width"
+     ],
+     "why": "Upper guide rib on top of drawer"
+    },
+    {
+     "at": [
+      0,
+      "-(channel_height - 2*drawer_clearance)/2 - rib_height/2",
+      100
+     ],
+     "name": "lower_guide_rib",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      160,
+      "rib_height",
+      "rib_width"
+     ],
+     "why": "Lower guide rib on bottom"
+    },
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "storage_hollow",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width - 4*drawer_clearance",
+      "channel_height - 4*drawer_clearance",
+      140
+     ],
+     "why": "Internal storage volume"
+    },
+    {
+     "at": [
+      -80,
+      0,
+      100
+     ],
+     "name": "front_pull_face",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height - 2*drawer_clearance",
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Front face of drawer for grasping"
+    },
+    {
+     "at": [
+      80,
+      0,
+      100
+     ],
+     "name": "rear_panel",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height - 2*drawer_clearance",
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Rear panel of drawer"
+    },
+    {
+     "at": [
+      0,
+      "-(channel_height - 2*drawer_clearance)/2 - 2.5",
+      100
+     ],
+     "name": "bottom_panel",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      5,
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Bottom panel of drawer"
+    },
+    {
+     "at": [
+      0,
+      0,
+      "-(channel_width - 2*drawer_clearance)/2 - 2.5"
+     ],
+     "name": "side_panel_left",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      "channel_height - 2*drawer_clearance",
+      5
+     ],
+     "why": "Left side panel"
+    },
+    {
+     "at": [
+      0,
+      0,
+      "(channel_width - 2*drawer_clearance)/2 + 2.5"
+     ],
+     "name": "side_panel_right",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      "channel_height - 2*drawer_clearance",
+      5
+     ],
+     "why": "Right side panel"
+    }
+   ],
+   "summary": "Drawer that slides inside the housing channel. Has side guide ribs, front face for pulling, and internal storage volume.",
+   "upstream_body": "BOD-0013"
+  }
+ ],
+ "design_summary": "A stationary housing (BOD-0012) with a rectangular internal channel along X, and a drawer (BOD-0013) that slides in this channel. The drawer has two side guide ribs that run in slots in the housing, a front pull face (functional region FRG-0013), and a stop shoulder at the rear. The housing provides an aperture at X=-3 for access to the drawer's front face. Friction hold is achieved by a slight interference or textured contact on the guides, and open/closed positions are limited by stop faces at the front and rear of the housing.",
+ "dimensions": [
+  {
+   "name": "housing_wall",
+   "unit": "mm",
+   "value": 5,
+   "why": "Typical wall thickness for a machined or cast housing"
+  },
+  {
+   "name": "guide_clearance",
+   "unit": "mm",
+   "value": 0.2,
+   "why": "Sliding clearance for prismatic guide"
+  },
+  {
+   "name": "channel_width",
+   "unit": "mm",
+   "value": 100,
+   "why": "Width of internal channel for drawer"
+  },
+  {
+   "name": "channel_height",
+   "unit": "mm",
+   "value": 70,
+   "why": "Height of internal channel for drawer"
+  },
+  {
+   "name": "drawer_clearance",
+   "unit": "mm",
+   "value": 1,
+   "why": "Clearance around drawer in channel"
+  },
+  {
+   "name": "rib_height",
+   "unit": "mm",
+   "value": 8,
+   "why": "Height of guide rib on drawer"
+  },
+  {
+   "name": "rib_width",
+   "unit": "mm",
+   "value": 5,
+   "why": "Width of guide rib on drawer"
+  },
+  {
+   "name": "slot_width",
+   "relation": "rib_width + guide_clearance",
+   "unit": "mm",
+   "why": "Slot must be slightly wider than rib for sliding"
+  },
+  {
+   "name": "stop_overlap",
+   "unit": "mm",
+   "value": 3,
+   "why": "Overlap for stop faces to provide positive engagement"
+  }
+ ],
+ "intended_physical_relationships": [
+  {
+   "a": "BOD-0013/upper_guide_rib",
+   "b": "BOD-0012/upper_slot",
+   "clearance": "guide_clearance",
+   "purpose": "Provides prismatic guide and prevents vertical/lateral movement",
+   "upstream": "IFC-0016"
+  },
+  {
+   "a": "BOD-0013/lower_guide_rib",
+   "b": "BOD-0012/lower_slot",
+   "clearance": "guide_clearance",
+   "purpose": "Provides prismatic guide and prevents vertical/lateral movement",
+   "upstream": "IFC-0017"
+  },
+  {
+   "a": "BOD-0013/rear_panel",
+   "b": "BOD-0012/rear_stop_lug",
+   "clearance": 0,
+   "purpose": "Limits drawer travel at open position",
+   "upstream": "IFC-0018"
+  },
+  {
+   "a": "BOD-0013/front_pull_face",
+   "b": "BOD-0012/front_stop_lug",
+   "clearance": 0,
+   "purpose": "Limits drawer travel at closed position",
+   "upstream": "IFC-0019"
+  }
+ ],
+ "scale_mm_per_unit": 50,
+ "state_expectations": [
+  {
+   "expect": "Drawer fully inserted, front face flush or slightly recessed behind housing front, rear stop face not engaged, front stop face in contact with drawer front face.",
+   "state": "CFG-0008"
+  },
+  {
+   "expect": "Drawer pulled out 100mm (2 units), rear stop face in contact with housing rear stop lug, front face accessible through aperture.",
+   "state": "CFG-0009"
+  }
+ ]
+}

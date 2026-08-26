@@ -1,0 +1,393 @@
+{
+ "bodies": [
+  {
+   "elements": [
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "housing_block",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "housing_wall*2 + channel_width",
+      "housing_wall*2 + channel_height",
+      200
+     ],
+     "why": "Main block of housing, centered at origin, length 200mm."
+    },
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "channel_cut",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width",
+      "channel_height",
+      200
+     ],
+     "why": "Internal channel for drawer."
+    },
+    {
+     "at": [
+      0,
+      "channel_height/2 + rail_height/2",
+      100
+     ],
+     "name": "upper_guide_rail",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      200,
+      "rail_height",
+      "rail_width"
+     ],
+     "why": "Upper guide rail on housing, protrudes into channel."
+    },
+    {
+     "at": [
+      0,
+      "-channel_height/2 - rail_height/2",
+      100
+     ],
+     "name": "lower_guide_rail",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      200,
+      "rail_height",
+      "rail_width"
+     ],
+     "why": "Lower guide rail on housing, protrudes into channel."
+    },
+    {
+     "at": [
+      -100,
+      0,
+      100
+     ],
+     "clears": "FRG-0018",
+     "name": "front_aperture",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      "channel_width"
+     ],
+     "why": "Aperture at front for access to drawer face."
+    },
+    {
+     "at": [
+      100,
+      0,
+      100
+     ],
+     "name": "rear_opening",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      "channel_width"
+     ],
+     "why": "Opening at rear for possible access or assembly."
+    },
+    {
+     "at": [
+      -85,
+      0,
+      100
+     ],
+     "name": "front_stop_lug",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      10
+     ],
+     "why": "Stop face for drawer at closed position."
+    },
+    {
+     "at": [
+      85,
+      0,
+      100
+     ],
+     "name": "rear_stop_lug",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height",
+      10
+     ],
+     "why": "Stop face for drawer at open position."
+    }
+   ],
+   "summary": "Stationary housing with internal channel, guide rails, front aperture, rear opening, and stop lugs.",
+   "upstream_body": "BOD-0012"
+  },
+  {
+   "elements": [
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "drawer_body",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      "channel_width - 2*drawer_clearance",
+      "channel_height - 2*drawer_clearance",
+      160
+     ],
+     "why": "Main drawer body, slightly smaller than channel."
+    },
+    {
+     "at": [
+      0,
+      "(channel_height - 2*drawer_clearance)/2 + groove_depth/2",
+      100
+     ],
+     "name": "upper_groove",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      160,
+      "groove_depth",
+      "groove_width"
+     ],
+     "why": "Upper guide groove on drawer, receives upper rail."
+    },
+    {
+     "at": [
+      0,
+      "-(channel_height - 2*drawer_clearance)/2 - groove_depth/2",
+      100
+     ],
+     "name": "lower_groove",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      160,
+      "groove_depth",
+      "groove_width"
+     ],
+     "why": "Lower guide groove on drawer, receives lower rail."
+    },
+    {
+     "at": [
+      0,
+      0,
+      100
+     ],
+     "name": "storage_hollow",
+     "op": "subtract",
+     "shape": "box",
+     "size": [
+      "channel_width - 4*drawer_clearance",
+      "channel_height - 4*drawer_clearance",
+      140
+     ],
+     "why": "Internal storage volume."
+    },
+    {
+     "at": [
+      -80,
+      0,
+      100
+     ],
+     "name": "front_pull_face",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height - 2*drawer_clearance",
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Front face of drawer for grasping."
+    },
+    {
+     "at": [
+      80,
+      0,
+      100
+     ],
+     "name": "rear_panel",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      10,
+      "channel_height - 2*drawer_clearance",
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Rear panel of drawer."
+    },
+    {
+     "at": [
+      0,
+      "-(channel_height - 2*drawer_clearance)/2 - 2.5",
+      100
+     ],
+     "name": "bottom_panel",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      5,
+      "channel_width - 2*drawer_clearance"
+     ],
+     "why": "Bottom panel of drawer."
+    },
+    {
+     "at": [
+      0,
+      0,
+      "-(channel_width - 2*drawer_clearance)/2 - 2.5"
+     ],
+     "name": "side_panel_left",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      "channel_height - 2*drawer_clearance",
+      5
+     ],
+     "why": "Left side panel."
+    },
+    {
+     "at": [
+      0,
+      0,
+      "(channel_width - 2*drawer_clearance)/2 + 2.5"
+     ],
+     "name": "side_panel_right",
+     "op": "add",
+     "shape": "box",
+     "size": [
+      140,
+      "channel_height - 2*drawer_clearance",
+      5
+     ],
+     "why": "Right side panel."
+    }
+   ],
+   "summary": "Drawer with guide grooves, front face, internal storage volume, and stop faces.",
+   "upstream_body": "BOD-0013"
+  }
+ ],
+ "design_summary": "A stationary housing (BOD-0012) with a rectangular internal channel along X and two side guide rails. A drawer (BOD-0013) slides along the channel, with guide grooves on its sides that engage with the rails for controlled motion. The drawer has a front face for grasping, an internal storage volume, and a rear stop face. The housing has an aperture at the front for drawer access and stop lugs at front and rear to limit travel. The open and closed states are clearly defined, with the drawer sliding along the rails.",
+ "dimensions": [
+  {
+   "name": "housing_wall",
+   "unit": "mm",
+   "value": 8,
+   "why": "Thicker housing wall to provide robust structure and support for guide rails."
+  },
+  {
+   "name": "guide_clearance",
+   "unit": "mm",
+   "value": 0.4,
+   "why": "Sliding clearance for smooth motion while maintaining alignment."
+  },
+  {
+   "name": "channel_width",
+   "unit": "mm",
+   "value": 100,
+   "why": "Width of internal channel for drawer, based on required storage and proportions."
+  },
+  {
+   "name": "channel_height",
+   "unit": "mm",
+   "value": 70,
+   "why": "Height of internal channel for drawer, based on required storage and proportions."
+  },
+  {
+   "name": "drawer_clearance",
+   "unit": "mm",
+   "value": 2,
+   "why": "Clearance around drawer to prevent binding while maintaining alignment."
+  },
+  {
+   "name": "rail_width",
+   "unit": "mm",
+   "value": 6,
+   "why": "Width of guide rail on housing, provides sufficient surface for contact."
+  },
+  {
+   "name": "rail_height",
+   "unit": "mm",
+   "value": 10,
+   "why": "Height of guide rail on housing, ensures proper engagement with drawer grooves."
+  },
+  {
+   "name": "groove_width",
+   "relation": "rail_width + 2*guide_clearance",
+   "unit": "mm",
+   "why": "Groove on drawer must be slightly wider than rail to allow sliding."
+  },
+  {
+   "name": "groove_depth",
+   "unit": "mm",
+   "value": 5,
+   "why": "Depth of groove on drawer, ensures rail is captured and movement is constrained."
+  },
+  {
+   "name": "stop_overlap",
+   "unit": "mm",
+   "value": 5,
+   "why": "Overlap for stop faces to provide positive engagement."
+  }
+ ],
+ "intended_physical_relationships": [
+  {
+   "a": "BOD-0013/upper_groove",
+   "b": "BOD-0012/upper_guide_rail",
+   "clearance": "guide_clearance",
+   "purpose": "Provides prismatic guide and prevents vertical/lateral movement.",
+   "upstream": "IFC-0016"
+  },
+  {
+   "a": "BOD-0013/lower_groove",
+   "b": "BOD-0012/lower_guide_rail",
+   "clearance": "guide_clearance",
+   "purpose": "Provides prismatic guide and prevents vertical/lateral movement.",
+   "upstream": "IFC-0017"
+  },
+  {
+   "a": "BOD-0013/rear_panel",
+   "b": "BOD-0012/rear_stop_lug",
+   "clearance": 0,
+   "purpose": "Limits drawer travel at open position.",
+   "upstream": "IFC-0018"
+  },
+  {
+   "a": "BOD-0013/front_pull_face",
+   "b": "BOD-0012/front_stop_lug",
+   "clearance": 0,
+   "purpose": "Limits drawer travel at closed position.",
+   "upstream": "IFC-0019"
+  }
+ ],
+ "scale_mm_per_unit": 50,
+ "state_expectations": [
+  {
+   "expect": "Drawer fully inserted, front face flush or slightly recessed behind housing front, rear stop face not engaged, front stop face in contact with drawer front face.",
+   "state": "CFG-0008"
+  },
+  {
+   "expect": "Drawer pulled out 100mm (2 units), rear stop face in contact with housing rear stop lug, front face accessible through aperture.",
+   "state": "CFG-0009"
+  }
+ ]
+}

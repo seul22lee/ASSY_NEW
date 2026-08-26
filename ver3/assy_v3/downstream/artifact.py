@@ -28,8 +28,9 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from . import canonical_io, compiler, ir, kinematics
-from .findings import (BODY_INTERFERENCE, EMBODIMENT_INCOMPLETE, FEATURE_OUTSIDE_REGION,
-                       MATING_NOT_REALIZED, NOT_EVALUABLE, TRAVEL_BLOCKED, Finding, blocking)
+from .findings import (ASSEMBLY_BLOCKED, BODY_INTERFERENCE, EMBODIMENT_INCOMPLETE,
+                       FEATURE_OUTSIDE_REGION, MATING_NOT_REALIZED, NOT_EVALUABLE,
+                       TRAVEL_BLOCKED, Finding, blocking)
 
 
 @dataclass
@@ -41,6 +42,12 @@ class ArtifactReport:
     feature_map: Dict[str, Dict[str, str]] = field(default_factory=dict)   # feature -> {body, polarity}
     states: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     transitions: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    #: assembly step -> what its insertion path met on the way in.
+    assembly: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    #: The spatial duties this evidence was asked against, derived from the
+    #: SAME manifest s05 was given. One derivation, two stages: s07 cannot be
+    #: judging the design against a different list from the one it was built to.
+    spatial_duties: Dict[str, Any] = field(default_factory=dict)
     exports: Dict[str, Any] = field(default_factory=dict)
     findings: List[Finding] = field(default_factory=list)
     basis: Optional[str] = None
@@ -61,6 +68,8 @@ class ArtifactReport:
                 "body_validity": dict(self.body_validity),
                 "feature_map": {k: dict(v) for k, v in sorted(self.feature_map.items())},
                 "states": dict(self.states), "transitions": dict(self.transitions),
+                "assembly": dict(self.assembly),
+                "spatial_duties": dict(self.spatial_duties),
                 "exports": dict(self.exports),
                 "findings": [f.as_record() for f in self.findings],
                 "workable": self.workable}
@@ -134,7 +143,12 @@ def _listing(value) -> List[Any]:
 
 def validate(state, branch: Optional[str], result: compiler.CompileResult,
              out_dir: Optional[str] = None) -> ArtifactReport:
+    from . import duty_manifest as _dm
+    from .embodiment import rows_from_state
+
     report = ArtifactReport(branch=branch)
+    manifest = _dm.from_rows(rows_from_state(state, branch), branch=branch)
+    report.spatial_duties = manifest.as_record()
     K = compiler.kernel()
     bodies = _rows(state, branch, "Body")
     joints = _rows(state, branch, "Joint")
@@ -163,8 +177,9 @@ def validate(state, branch: Optional[str], result: compiler.CompileResult,
     body_of_feature = {f["entity_id"]: f.get("body") for f in features}
     sides: Dict[str, Dict[str, List[str]]] = {}          # interface -> body -> feature ids
     for f in features:
-        if f.get("interface"):
-            sides.setdefault(f["interface"], {}).setdefault(f.get("body"), []).append(f["entity_id"])
+        from .embodiment import _named_interfaces
+        for named in _named_interfaces(f):
+            sides.setdefault(named, {}).setdefault(f.get("body"), []).append(f["entity_id"])
     declared_pairs: Dict[frozenset, List[Dict[str, Any]]] = {}
     for i in interfaces:
         bs = [b for b in (i.get("bodies") or []) if isinstance(b, str)]
@@ -288,6 +303,57 @@ def validate(state, branch: Optional[str], result: compiler.CompileResult,
         report.transitions[tid] = {"sampling_declaration": declaration, "samples": rows,
                                    "blocked": any(f.kind == TRAVEL_BLOCKED for f in t_findings)}
         report.findings += t_findings
+    # ---- assembly: each body has to reach its place -------------------
+    # THE PATH IS FREE SPACE WHILE THE BODY TRAVELS IT. Sampled along the
+    # insertion direction s04 declared, against the bodies already seated by
+    # order - the seated position itself is excluded, because arriving in
+    # contact is what an interface IS. Nothing is designed here and nothing is
+    # moved in the design: the same solid is asked where it would have been.
+    steps = sorted((r for r in _rows(state, branch, "AssemblyStep") if r.get("body")),
+                   key=lambda r: (r.get("order_index") if isinstance(r.get("order_index"), int)
+                                  else 0, r.get("entity_id")))
+    seated_state = next(iter(sorted(states)), None)
+    if steps and seated_state:
+        law, posed, _pairs, _ig, _f = pose_and_judge(
+            _mapping(states[seated_state].get("joint_coordinates")),
+            "assembly", ASSEMBLY_BLOCKED)
+        placed_before: List[str] = []
+        for step in steps:
+            bid, sid = step["body"], step["entity_id"]
+            direction = step.get("insertion_direction")
+            if bid not in posed or not (isinstance(direction, (list, tuple))
+                                        and len(direction) == 3):
+                placed_before.append(bid)
+                continue
+            unit = [float(c) for c in direction]
+            norm = sum(c * c for c in unit) ** 0.5
+            if norm <= 0 or not placed_before:
+                placed_before.append(bid)
+                continue
+            unit = [c / norm for c in unit]
+            reach = max(compiler.bbox_extent(K, posed[bid])) or 1.0
+            blocked = []
+            for k in (1, 2, 3):
+                offset = [-c * reach * k / 3.0 for c in unit]
+                moved = compiler.translated(K, posed[bid], offset)
+                for other in placed_before:
+                    if other not in posed:
+                        continue
+                    geom = compiler.pair_geometry(K, moved, posed[other])
+                    if geom["shared_volume"] > compiler.INTERFERENCE_VOLUME_TOLERANCE:
+                        blocked.append((other, k, geom["shared_volume"]))
+            report.assembly[sid] = {"body": bid, "insertion_direction": list(unit),
+                                    "reach": reach, "against": list(placed_before),
+                                    "blocked": [list(b) for b in blocked]}
+            if blocked:
+                report.findings.append(Finding(
+                    ASSEMBLY_BLOCKED, "s05", (sid, bid) + tuple(sorted({b[0] for b in blocked})),
+                    "assembly step %s: %s cannot reach its place along %s - it shares volume "
+                    "with %s while travelling"
+                    % (sid, bid, direction, ", ".join(sorted({b[0] for b in blocked}))),
+                    evidence={"samples": [list(b) for b in blocked]}))
+            placed_before.append(bid)
+
     if out_dir:
         for bid, body in sorted(compiled.items()):
             exports["stl_per_body"][bid] = compiler.export_stl(

@@ -1,0 +1,168 @@
+{
+ "axisless_datums": [],
+ "bodies": [
+  "BOD-0014",
+  "BOD-0015",
+  "BOD-0016"
+ ],
+ "branch": "CND-0006",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0014",
+    "BOD-0015"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0020",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0014",
+    "BOD-0015"
+   ],
+   "interaction_kind": "INTERFERENCE_FIT",
+   "interface": "IFC-0021",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0015",
+    "BOD-0016"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0022",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0015",
+    "BOD-0016"
+   ],
+   "interaction_kind": "INTERFERENCE_FIT",
+   "interface": "IFC-0023",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0016",
+    "BOD-0014"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0024",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0016",
+    "BOD-0014"
+   ],
+   "interaction_kind": "INTERFERENCE_FIT",
+   "interface": "IFC-0025",
+   "mating": {},
+   "needs_governing_constraint": true
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0014"
+   ],
+   "descriptor": "COMPLIANT (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0014"
+  },
+  {
+   "bodies": [
+    "BOD-0014",
+    "BOD-0015"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0015"
+  },
+  {
+   "bodies": [
+    "BOD-0015",
+    "BOD-0016"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0016"
+  },
+  {
+   "bodies": [
+    "BOD-0014",
+    "BOD-0016"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0017"
+  },
+  {
+   "bodies": [
+    "BOD-0014",
+    "BOD-0014"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-1001"
+  },
+  {
+   "bodies": [
+    "BOD-0015",
+    "BOD-0014"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-1002"
+  },
+  {
+   "bodies": [
+    "BOD-0016",
+    "BOD-0015"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-1003"
+  },
+  {
+   "bodies": [
+    "BOD-0016",
+    "BOD-0014"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-1004"
+  },
+  {
+   "bodies": [
+    "BOD-0016",
+    "BOD-0015"
+   ],
+   "descriptor": "blocks RY",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-1005"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0006",
+  "required": true
+ }
+}

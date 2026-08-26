@@ -252,14 +252,22 @@ OPCODE_SEMANTICS = {
     "CYLINDER": "the solid of radius r, axis +Z of the frame from z=0 to z=height, "
                 "centred on the frame origin in X and Y",
     "SPHERE": "the solid of radius r centred on the frame origin",
-    "TRANSLATE": "the operand moved by (dx, dy, dz) in the feature frame; an omitted "
+    # WHAT THE KERNEL DOES, and only that. These are read by TWO surfaces - the
+    # step program the compiler executes, where an input is an earlier step
+    # named as an operand, and the semantic solid tree s05 authors, where an
+    # input is a child node. Saying "input" keeps ONE statement of the geometry
+    # for both; WHERE the inputs come from is each surface's own rule, stated in
+    # FEATURE_LOCAL_CSG_SEMANTICS for the step program and in the solid-tree
+    # grammar for the tree. Writing "operand ... steps of THIS feature" here made
+    # the geometry and one surface's bookkeeping the same sentence, so s05's
+    # prompt could not describe a tree without teaching steps.
+    "TRANSLATE": "the input moved by (dx, dy, dz) in the feature frame; an omitted "
                  "component is zero",
-    "ROTATE": "the operand rotated by angle (degrees) about the named body axis "
+    "ROTATE": "the input rotated by angle (degrees) about the named body axis "
               "through the frame origin",
-    "UNION": "the operands fused - all of them steps of THIS feature",
-    "CUT": "the first operand with every later operand removed - all of them steps of THIS "
-           "feature; never the body, which no step names",
-    "INTERSECT": "the common volume of the operands",
+    "UNION": "the inputs fused",
+    "CUT": "the first input with every later input removed",
+    "INTERSECT": "the common volume of the inputs",
 }
 
 #: UNIT G. WHAT A FEATURE'S CONSTRUCTION IS, and what it is NOT.
@@ -276,18 +284,25 @@ OPCODE_SEMANTICS = {
 #: is not an operand and is never in scope. Such a step is malformed however it
 #: is written, and a single-operand CUT is refused on arity before its intent
 #: can even be read.
-CONSTRUCTION_SEMANTICS = (
+POLARITY_SEMANTICS = (
     "A FEATURE'S CONSTRUCTION BUILDS ITS OWN SOLID, and that solid is ALWAYS POSITIVE "
     "material - the shape of the thing itself. A bore is the cylinder that will be removed, "
     "constructed as a cylinder; a boss is the cylinder that will be added, constructed the "
     "same way. WHETHER IT IS ADDED OR REMOVED IS ITS KIND, not a step: the body is the union "
     "of its ADDITIVE features with its SUBTRACTIVE features removed, and that composition "
-    "happens at the BODY, after every feature is built. "
+    "happens at the BODY, after every feature is built.")
+#: The half that describes a STEP PROGRAM, which is what the compiler executes
+#: and what `Step.parse` enforces. s05 no longer writes steps - it writes a
+#: solid tree - so its prompt renders POLARITY_SEMANTICS and states the
+#: boolean rule in the tree's own words. The IR keeps both, joined, because
+#: the compiler's contract is still about statements.
+FEATURE_LOCAL_CSG_SEMANTICS = (
     "CUT, UNION and INTERSECT are FEATURE-LOCAL CSG: they shape this feature's own solid out "
     "of two or more of ITS OWN earlier steps - a bore with a relief, a boss with a flat. Each "
     "needs at least two operands, because that is what combining two solids means. A "
     "SUBTRACTIVE feature must NOT write CUT to mean \"remove this from the body\": the body "
     "is not an operand, no step may name it, and its kind has already said so.")
+CONSTRUCTION_SEMANTICS = POLARITY_SEMANTICS + " " + FEATURE_LOCAL_CSG_SEMANTICS
 #: What each opcode parameter IS, so a value in the wrong unit is refused
 #: rather than fed to a kernel that assumes millimetres and degrees.
 OPCODE_PARAMETER_KINDS = {
@@ -350,9 +365,11 @@ def frame_axes(axis: str) -> Tuple[Tuple[float, float, float], Tuple[float, floa
 # joint coordinates. A feature is placed by naming a DATUM in that authority -
 # a Joint, the body's Envelope, a FunctionalRegion, or another feature of the
 # same body - plus an `offset` (three expressions in the kernel length unit,
-# along the arrangement axes) and its own `axis`. A joint datum's axis IS the
-# joint's declared axis_direction: stating it is redundant and must agree;
-# stating a different one is a second truth and is refused. An envelope or a
+# along the arrangement axes) and its own `axis`. A DATUM LOCATES AND AN AXIS
+# ORIENTS: at a joint the axis defaults to the joint's axis_direction, and a
+# feature may state a different one, meaning "located here, oriented
+# otherwise". NEITHER FACT SAYS THE FEATURE EMBODIES ANYTHING - that is a
+# KinematicRealization's to say. An envelope or a
 # region is an axis-aligned box in the arrangement frame, so its frame IS the
 # arrangement frame: a feature placed against one that names no axis takes
 # the arrangement's +Z. A feature placed against another feature inherits
@@ -486,7 +503,10 @@ class FeatureSpec:
     kind: str
     placement: Placement
     steps: Tuple[Step, ...]
-    interface: Optional[str] = None
+    #: The interactions this feature realizes a side of. MANY, because one
+    #: physical feature can bear on several - a rail face under two carriages,
+    #: a pin through two bores.
+    interfaces: Tuple[str, ...] = ()
 
     @staticmethod
     def parse(record: Dict[str, Any]) -> "FeatureSpec":
@@ -520,9 +540,15 @@ class FeatureSpec:
         if len(finals) != 1:
             raise IRError("%s has %d unconsumed steps (%s); exactly one result IS the feature"
                           % (where, len(finals), ", ".join(finals)))
+        raw_interfaces = record.get("interfaces")
+        if raw_interfaces is None:
+            interfaces: Tuple[str, ...] = ()
+        elif isinstance(raw_interfaces, list) and all(isinstance(i, str) for i in raw_interfaces):
+            interfaces = tuple(raw_interfaces)
+        else:
+            raise IRError("%s interfaces is not a list of Interface ids" % where)
         return FeatureSpec(entity_id=str(eid), body=body, kind=kind.strip().upper(),
-                           placement=placement, steps=tuple(steps),
-                           interface=record.get("interface") or None)
+                           placement=placement, steps=tuple(steps), interfaces=interfaces)
 
     @property
     def terminal(self) -> str:
@@ -680,9 +706,9 @@ def feature_record_problems(record: Dict[str, Any], known: Known) -> List[str]:
         # place a FACE at the joint it belongs to without claiming the face
         # points along the hinge axis.
         #
-        # WHAT REALIZES THE JOINT IS THEREFORE NOT "ANY FEATURE PLACED AT IT" -
-        # it is one placed at it ON ITS AXIS, which
-        # `downstream.embodiment.joint_realization_findings` is what asks.
+        # AND NEITHER FACT IS REALIZATION. What geometry embodies this joint is
+        # a KinematicRealization's declared claim, read only from there
+        # (`downstream.embodiment.realization_findings`).
         declared = str((known.joint_axes or {}).get(datum) or "").strip().upper()
         if axis_vector(declared) is None and spec.placement.axis is None:
             # a joint that points nowhere (FIXED, axis NONE) is a location only:

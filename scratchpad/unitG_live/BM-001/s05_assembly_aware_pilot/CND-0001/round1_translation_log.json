@@ -1,0 +1,121 @@
+{
+ "accepted": true,
+ "assembly_sequence": [
+  {
+   "access": "Free space above",
+   "action": "Place base on a flat surface with the open top facing up.",
+   "component": "BOD-0001",
+   "final_retention": "Gravity holds it in place.",
+   "insertion_direction": [
+    0,
+    0,
+    1
+   ],
+   "step": 1
+  },
+  {
+   "access": "Open ends of base hinge knuckles",
+   "action": "Insert the hinge pin into the base hinge knuckles from the +Y side until it passes through both knuckles.",
+   "component": "BOD-0003",
+   "final_retention": "Pin will be captured by the lid hinge knuckle after assembly; a snap ring or peened end could be used but here the lid holds it.",
+   "insertion_direction": [
+    0,
+    1,
+    0
+   ],
+   "step": 2
+  },
+  {
+   "access": "Open top of base and the lid hinge knuckle opening",
+   "action": "Slide the lid hinge knuckle over the exposed pin, aligning its bore with the pin, and push the lid downward until the lid plate sits flush with the top of the base. The snap tab will deflect outward as it passes over the front wall and then snap into the latch recess.",
+   "component": "BOD-0002",
+   "final_retention": "Lid is retained by the hinge pin (in the knuckle) and the snap tab engagement.",
+   "insertion_direction": [
+    0,
+    -1,
+    0
+   ],
+   "step": 3
+  }
+ ],
+ "choices": [
+  "the SCALE parameter takes the model's own scale_mm_per_unit = 1.0",
+  "vector-valued dimensions read as triples: ['lid_plate_size']",
+  "KRL for JNT-0002 includes BOD-0001/hinge_bore_base because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0001/latch_recess because the design's mating set names it",
+  "KRL for JNT-0002 includes BOD-0002/hinge_bore_lid because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0002/snap_hook because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0002/snap_tab_beam because the design's mating set names it",
+  "KRL for JNT-0002 includes BOD-0003/pin_shaft because the design's mating set names it",
+  "KRL for CRL-0001 (external reaction site RSR-0001) uses the retained body's own material; upstream names no interface for it",
+  "KRL for CRL-0002 from its own provider_site IFC-0001",
+  "KRL for CRL-0003 from its own provider_site IFC-0002",
+  "KRL for CRL-0005 from its own provider_site IFC-0004",
+  "KRL for CRL-0006 (external reaction site RSR-0002) uses the retained body's own material; upstream names no interface for it",
+  "KRL for JNT-0001 from PERMIT_MOTION at IFC-0002"
+ ],
+ "counts": {
+  "constraints": 15,
+  "features": 15,
+  "fixed_by_choice": 14,
+  "fixed_by_relation": 0,
+  "kinematic_realizations": 8,
+  "parameters": 15
+ },
+ "mating_sets": [
+  {
+   "fit": "pin_diameter + 0.1",
+   "name": "Hinge joint",
+   "participants": [
+    {
+     "body": "BOD-0003",
+     "element": "pin_shaft",
+     "role": "Pin shaft"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "hinge_bore_base",
+     "role": "Base bore"
+    },
+    {
+     "body": "BOD-0002",
+     "element": "hinge_bore_lid",
+     "role": "Lid bore"
+    }
+   ],
+   "upstream": [
+    "IFC-0001",
+    "IFC-0002",
+    "JNT-0002",
+    "PHI-0001"
+   ]
+  },
+  {
+   "fit": "latch_recess_depth = snap_hook_height",
+   "name": "Snap latch",
+   "participants": [
+    {
+     "body": "BOD-0002",
+     "element": "snap_tab_beam",
+     "role": "Cantilever beam"
+    },
+    {
+     "body": "BOD-0002",
+     "element": "snap_hook",
+     "role": "Hook"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "latch_recess",
+     "role": "Recess"
+    }
+   ],
+   "upstream": [
+    "IFC-0004",
+    "JNT-0003",
+    "PHI-0002"
+   ]
+  }
+ ],
+ "write_boundary_problems": []
+}

@@ -1,0 +1,30 @@
+1. Major visible mechanical problems:
+   - The hinge pin in the orange (BOD-0002) is not aligned with the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The latch in the orange (BOD-0002) is not engaged with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not rotating about the hinge pin; it appears to be stuck in place.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The knuckle in the orange (BOD-0002) is not aligned with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The lid in the orange (BOD-0002) is not engaging with the corresponding slot in the blue (BOD-0001) and green (BOD-0003) parts.
+   - The base in the orange (BOD-0001) is not connected to the lid in the orange (BOD-0002) or green (BOD-0003) parts.
+   - The pin in the orange (BOD-0002) is not passing through the corresponding hole in the blue (BOD-000

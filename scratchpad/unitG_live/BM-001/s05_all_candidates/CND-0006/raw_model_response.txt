@@ -1,0 +1,827 @@
+{
+  "features": [
+    {
+      "key": "main_body_wall",
+      "body": "BOD-0014",
+      "feature_kind": "STOCK",
+      "geometry": "Main container body wall forming the base and lid as a single molded part",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0201"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 90},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 50},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 50}
+      }
+    },
+    {
+      "key": "living_hinge_flexure",
+      "body": "BOD-0014",
+      "feature_kind": "RIB",
+      "geometry": "Thin section of material connecting the lid and base, forming the living hinge",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0014"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "BLOCK",
+          "dx": {"kind": "param", "param": "hinge_width", "unit": "mm"},
+          "dy": {"kind": "param", "param": "hinge_thickness", "unit": "mm"},
+          "dz": {"kind": "param", "param": "w_all", "unit": "mm"}
+        },
+        "relief": [
+          {
+            "shape": "BLOCK",
+            "dx": {"kind": "param", "param": "hinge_width", "unit": "mm"},
+            "dy": {"kind": "param", "param": "hinge_notch", "unit": "mm"},
+            "dz": {"kind": "param", "param": "w_all", "unit": "mm"}
+          }
+        ]
+      }
+    },
+    {
+      "key": "handle_pivot_boss_left",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for handle pivot on one side",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "negate", "of": {"kind": "param", "param": "boss_gap", "unit": "mm"}},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_boss", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "handle_pivot_boss_right",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for handle pivot on the other side",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "param", "param": "boss_gap", "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_boss", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_link_pivot_boss_left",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for link pivot on one side",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "negate", "of": {"kind": "param", "param": "boss_gap", "unit": "mm"}},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_boss", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_link_pivot_boss_right",
+      "body": "BOD-0014",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss for link pivot on the other side",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "param", "param": "boss_gap", "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_boss", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "handle_pivot_bore",
+      "body": "BOD-0014",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore through the handle pivot boss",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_pin", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "link_pivot_bore",
+      "body": "BOD-0014",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore through the link pivot boss",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "param", "param": "r_pin", "unit": "mm"},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "access_aperture_clear",
+      "body": "BOD-0014",
+      "feature_kind": "HOLE",
+      "geometry": "Large opening for access to the interior of the container",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0020"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 60},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 50},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 20}
+      }
+    },
+    {
+      "key": "handle_access_clear",
+      "body": "BOD-0014",
+      "feature_kind": "HOLE",
+      "geometry": "Opening to allow finger access to the handle region",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0021"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 50},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 40},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 16}
+      }
+    },
+    {
+      "key": "handle_lever",
+      "body": "BOD-0015",
+      "feature_kind": "STOCK",
+      "geometry": "Rigid handle lever body",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0202"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 20},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 16},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 14}
+      }
+    },
+    {
+      "key": "handle_pivot_bore_at_lid",
+      "body": "BOD-0015",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore for handle pivot to lid",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "sum", "terms": [{"kind": "param", "param": "r_pin", "unit": "mm"}, {"kind": "param", "param": "clearance", "unit": "mm"}]},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "handle_pivot_bore_at_link",
+      "body": "BOD-0015",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore for handle pivot to link",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0016"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "sum", "terms": [{"kind": "param", "param": "r_pin", "unit": "mm"}, {"kind": "param", "param": "clearance", "unit": "mm"}]},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "handle_access_clear",
+      "body": "BOD-0015",
+      "feature_kind": "HOLE",
+      "geometry": "Opening to allow finger access to the handle grip surface",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0019"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 8},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 8}
+      }
+    },
+    {
+      "key": "toggle_link",
+      "body": "BOD-0016",
+      "feature_kind": "STOCK",
+      "geometry": "Rigid toggle link body",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0203"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 90},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 30}
+      }
+    },
+    {
+      "key": "link_pivot_bore_at_handle",
+      "body": "BOD-0016",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore for link pivot to handle",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0016"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "sum", "terms": [{"kind": "param", "param": "r_pin", "unit": "mm"}, {"kind": "param", "param": "clearance", "unit": "mm"}]},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "link_pivot_bore_at_base",
+      "body": "BOD-0016",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore for link pivot to base",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": {"kind": "sum", "terms": [{"kind": "param", "param": "r_pin", "unit": "mm"}, {"kind": "param", "param": "clearance", "unit": "mm"}]},
+        "height": {"kind": "param", "param": "boss_width", "unit": "mm"}
+      }
+    },
+    {
+      "key": "snap_arm_lid",
+      "body": "BOD-0014",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on lid to retain handle",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": -5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "snap_arm_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "snap_arm_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "snap_arm_handle",
+      "body": "BOD-0015",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on handle to engage with lid snap",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "snap_arm_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "snap_arm_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "snap_arm_link_side1",
+      "body": "BOD-0016",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on link to engage with handle snap",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0016"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": -5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "snap_arm_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "snap_arm_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "snap_arm_link_side2",
+      "body": "BOD-0016",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Snap arm on link to engage with base snap",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": -5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "snap_arm_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "snap_arm_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "base_snap_keeper",
+      "body": "BOD-0014",
+      "feature_kind": "KEEPER",
+      "geometry": "Keeper on base to engage with link snap",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0017"
+        },
+        "axis": "+Z",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 5},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 10}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "keeper_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "keeper_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "keeper_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "stop_face_open",
+      "body": "BOD-0014",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on lid to limit open position of handle; positioned at the joint angle for open configuration",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": -20},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 20}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "stop_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "stop_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "stop_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "stop_face_closed",
+      "body": "BOD-0014",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on lid to limit closed position of handle; positioned at the joint angle for closed configuration",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0015"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 20},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 20}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "stop_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "stop_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "stop_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "stop_face_toggle",
+      "body": "BOD-0015",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on handle to limit toggle position relative to link; positioned at the toggle configuration",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0016"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": 15}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "stop_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "stop_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "stop_length", "unit": "mm"}
+      }
+    },
+    {
+      "key": "link_stop_face",
+      "body": "BOD-0016",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on link to limit toggle position relative to handle; positioned at the toggle configuration",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0016"
+        },
+        "axis": "+Y",
+        "offset": [
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "number", "value": 0, "unit": "mm"},
+          {"kind": "scale_by", "of": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"}, "factor": -15}
+        ]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "param", "param": "stop_thickness", "unit": "mm"},
+        "dy": {"kind": "param", "param": "stop_width", "unit": "mm"},
+        "dz": {"kind": "param", "param": "stop_length", "unit": "mm"}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "GEOMETRIC_RELATION",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "r_boss", "unit": "mm"},
+      "rhs": {"kind": "sum", "terms": [{"kind": "param", "param": "r_pin", "unit": "mm"}, {"kind": "param", "param": "w_all", "unit": "mm"}]}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": ">=",
+      "lhs": {"kind": "param", "param": "clearance", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 0.2, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "boss_width", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "boss_gap", "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "snap_arm_width", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "boss_width", "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "keeper_width", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "snap_arm_width", "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "snap_arm_length", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "keeper_length", "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hinge_width", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 10, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hinge_thickness", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 1.5, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "hinge_notch", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "stop_thickness", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "stop_width", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 4, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "stop_length", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 20, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "w_all", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 3, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "r_pin", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "boss_gap", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "L", "unit": "mm", "role": "SCALE"},
+      "rhs": {"kind": "number", "value": 1, "unit": "mm"}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0014": {
+      "BOD-0014": ["living_hinge_flexure"]
+    },
+    "JNT-0015": {
+      "BOD-0014": ["handle_pivot_boss_left", "handle_pivot_boss_right", "handle_pivot_bore"],
+      "BOD-0015": ["handle_pivot_bore_at_lid"]
+    },
+    "JNT-0016": {
+      "BOD-0015": ["handle_pivot_bore_at_link"],
+      "BOD-0016": ["link_pivot_bore_at_handle"]
+    },
+    "JNT-0017": {
+      "BOD-0014": ["base_link_pivot_boss_left", "base_link_pivot_boss_right", "link_pivot_bore"],
+      "BOD-0016": ["link_pivot_bore_at_base"]
+    },
+    "CRL-1001": {
+      "BOD-0014": ["living_hinge_flexure"]
+    },
+    "CRL-1002": {
+      "BOD-0015": ["handle_pivot_bore_at_lid"],
+      "BOD-0014": ["handle_pivot_boss_left", "handle_pivot_boss_right", "handle_pivot_bore"]
+    },
+    "CRL-1003": {
+      "BOD-0016": ["link_pivot_bore_at_handle"],
+      "BOD-0015": ["handle_pivot_bore_at_link"]
+    },
+    "CRL-1004": {
+      "BOD-0016": ["link_pivot_bore_at_base"],
+      "BOD-0014": ["base_link_pivot_boss_left", "base_link_pivot_boss_right", "link_pivot_bore"]
+    },
+    "CRL-1005": {
+      "BOD-0016": ["link_stop_face"],
+      "BOD-0015": ["stop_face_toggle"]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0020": {
+      "sides": {
+        "BOD-0014": ["handle_pivot_bore"],
+        "BOD-0015": ["handle_pivot_bore_at_lid"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "DESIGN_CHOICE",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "clearance", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.2, "unit": "mm"}
+      }
+    },
+    "IFC-0021": {
+      "sides": {
+        "BOD-0014": ["snap_arm_lid"],
+        "BOD-0015": ["snap_arm_handle"]
+      },
+      "governing_constraint": {
+        "kind": "INTERFERENCE_FREE",
+        "basis": "STATED_BOUND",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+      }
+    },
+    "IFC-0022": {
+      "sides": {
+        "BOD-0015": ["handle_pivot_bore_at_link"],
+        "BOD-0016": ["link_pivot_bore_at_handle"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "DESIGN_CHOICE",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "clearance", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.2, "unit": "mm"}
+      }
+    },
+    "IFC-0023": {
+      "sides": {
+        "BOD-0015": ["snap_arm_handle"],
+        "BOD-0016": ["snap_arm_link_side1"]
+      },
+      "governing_constraint": {
+        "kind": "INTERFERENCE_FREE",
+        "basis": "STATED_BOUND",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "snap_arm_thickness", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+      }
+    },
+    "IFC-0024": {
+      "sides": {
+        "BOD-0016": ["link_pivot_bore_at_base"],
+        "BOD-0014": ["link_pivot_bore"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "DESIGN_CHOICE",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "clearance", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.2, "unit": "mm"}
+      }
+    },
+    "IFC-0025": {
+      "sides": {
+        "BOD-0016": ["snap_arm_link_side2"],
+        "BOD-0014": ["base_snap_keeper"]
+      },
+      "governing_constraint": {
+        "kind": "INTERFERENCE_FREE",
+        "basis": "STATED_BOUND",
+        "relation": ">=",
+        "lhs": {"kind": "param", "param": "keeper_thickness", "unit": "mm"},
+        "rhs": {"kind": "number", "value": 0.5, "unit": "mm"}
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0019": {
+      "BOD-0015": ["handle_access_clear"]
+    },
+    "FRG-0020": {
+      "BOD-0014": ["access_aperture_clear"]
+    },
+    "FRG-0021": {
+      "BOD-0014": ["handle_access_clear"]
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "The snap arms and keepers for the interference fits are placed nominally at the respective joints, but the exact interference amount and geometry (e.g., ramp angles, deflection) are not fully specified.",
+      "why_open": "The design duties require interference fit interfaces but do not provide the required interference depth or engagement geometry. A specific interference value and snap geometry are needed to ensure retention without plastic deformation.",
+      "alternatives": [
+        "Design snap arms with a ramp and a defined undercut to provide a snap-fit retention.",
+        "Use a separate fastener (e.g., screw) to achieve retention, but that would add parts and cost.",
+        "Adjust the snap geometry to rely on friction fit alone, but that may not provide secure retention."
+      ],
+      "alternatives_kind": "mechanism design choice",
+      "kept_open_by": ["IFC-0021", "IFC-0023", "IFC-0025"],
+      "blocks": ["Full realization of interference fit interfaces and the latching function."]
+    }
+  ]
+}

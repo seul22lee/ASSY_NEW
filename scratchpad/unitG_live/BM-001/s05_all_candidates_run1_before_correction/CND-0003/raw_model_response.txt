@@ -1,0 +1,1054 @@
+{
+  "parameters": [
+    {
+      "key": "scale_len",
+      "symbol": "L",
+      "unit": "mm",
+      "role": "SCALE"
+    },
+    {
+      "key": "wall_thickness",
+      "symbol": "wt",
+      "unit": "mm"
+    },
+    {
+      "key": "pin_diameter",
+      "symbol": "pd",
+      "unit": "mm"
+    },
+    {
+      "key": "bearing_clearance",
+      "symbol": "bc",
+      "unit": "mm"
+    },
+    {
+      "key": "joint_housing_diameter",
+      "symbol": "jh",
+      "unit": "mm"
+    },
+    {
+      "key": "pivot_boss_diameter",
+      "symbol": "pb",
+      "unit": "mm"
+    },
+    {
+      "key": "base_stock_length",
+      "symbol": "Lb",
+      "unit": "mm"
+    },
+    {
+      "key": "base_stock_width",
+      "symbol": "Wb",
+      "unit": "mm"
+    },
+    {
+      "key": "base_stock_height",
+      "symbol": "Hb",
+      "unit": "mm"
+    },
+    {
+      "key": "lid_stock_length",
+      "symbol": "Ll",
+      "unit": "mm"
+    },
+    {
+      "key": "lid_stock_width",
+      "symbol": "Wl",
+      "unit": "mm"
+    },
+    {
+      "key": "lid_stock_height",
+      "symbol": "Hl",
+      "unit": "mm"
+    },
+    {
+      "key": "lever_stock_length",
+      "symbol": "Lv",
+      "unit": "mm"
+    },
+    {
+      "key": "lever_stock_width",
+      "symbol": "Wv",
+      "unit": "mm"
+    },
+    {
+      "key": "lever_stock_height",
+      "symbol": "Hv",
+      "unit": "mm"
+    },
+    {
+      "key": "link_stock_length",
+      "symbol": "Lk",
+      "unit": "mm"
+    },
+    {
+      "key": "link_stock_width",
+      "symbol": "Wk",
+      "unit": "mm"
+    },
+    {
+      "key": "link_stock_height",
+      "symbol": "Hk",
+      "unit": "mm"
+    },
+    {
+      "key": "stop_overlap",
+      "symbol": "so",
+      "unit": "mm"
+    },
+    {
+      "key": "stop_height",
+      "symbol": "sh",
+      "unit": "mm"
+    },
+    {
+      "key": "stop_thickness",
+      "symbol": "st",
+      "unit": "mm"
+    },
+    {
+      "key": "latch_contact_width",
+      "symbol": "lcw",
+      "unit": "mm"
+    }
+  ],
+  "features": [
+    {
+      "key": "base_stock",
+      "body": "BOD-0008",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular base block",
+      "placement": {
+        "datum": "ENV-0008",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "base_stock_length"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "base_stock_width"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "base_stock_height"
+        }
+      }
+    },
+    {
+      "key": "base_support_pad",
+      "body": "BOD-0008",
+      "feature_kind": "FACE",
+      "geometry": "Lower surface of base stock for desktop support",
+      "placement": {
+        "datum": "base_stock",
+        "axis": "-Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "base_stock_length"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "base_stock_width"
+        },
+        "dz": {
+          "kind": "number",
+          "value": 0.1,
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "base_hinge_boss",
+      "body": "BOD-0008",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss at hinge joint JNT-0009 on base",
+      "placement": {
+        "datum": "JNT-0009",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "pivot_boss_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "base_stock_width"
+        }
+      }
+    },
+    {
+      "key": "base_link_boss",
+      "body": "BOD-0008",
+      "feature_kind": "BOSS",
+      "geometry": "Cylindrical boss at toggle joint JNT-0012 on base",
+      "placement": {
+        "datum": "JNT-0012",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "pivot_boss_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "base_stock_width"
+        }
+      }
+    },
+    {
+      "key": "base_stop_face",
+      "body": "BOD-0008",
+      "feature_kind": "STOP",
+      "geometry": "Vertical face that stops lid rotation at closed position",
+      "placement": {
+        "datum": "FRG-0012",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "stop_overlap"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "base_stock_width"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "stop_height"
+        }
+      }
+    },
+    {
+      "key": "base_latch_contact",
+      "body": "BOD-0008",
+      "feature_kind": "FACE",
+      "geometry": "Contact face for latch lever (IFC-0014)",
+      "placement": {
+        "datum": "base_stock",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "latch_contact_width"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "base_stock_width"
+        },
+        "dz": {
+          "kind": "number",
+          "value": 0.1,
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "lid_stock",
+      "body": "BOD-0009",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular lid block",
+      "placement": {
+        "datum": "ENV-0009",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "lid_stock_length"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "lid_stock_width"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "lid_stock_height"
+        }
+      }
+    },
+    {
+      "key": "lid_hinge_bore",
+      "body": "BOD-0009",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for hinge joint JNT-0009 in lid",
+      "placement": {
+        "datum": "JNT-0009",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "lid_stock_width"
+        }
+      }
+    },
+    {
+      "key": "lid_lever_bore",
+      "body": "BOD-0009",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for latch lever joint JNT-0010 in lid",
+      "placement": {
+        "datum": "JNT-0010",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "lid_stock_width"
+        }
+      }
+    },
+    {
+      "key": "lid_stop_face",
+      "body": "BOD-0009",
+      "feature_kind": "FACE",
+      "geometry": "Face that contacts base stop when closed",
+      "placement": {
+        "datum": "lid_stock",
+        "axis": "-Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "stop_overlap"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "lid_stock_width"
+        },
+        "dz": {
+          "kind": "number",
+          "value": 0.1,
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "lever_stock",
+      "body": "BOD-0010",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular lever block",
+      "placement": {
+        "datum": "ENV-0010",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "lever_stock_length"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "lever_stock_width"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "lever_stock_height"
+        }
+      }
+    },
+    {
+      "key": "lever_hinge_bore",
+      "body": "BOD-0010",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for latch lever joint JNT-0010 on lever",
+      "placement": {
+        "datum": "JNT-0010",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "lever_stock_width"
+        }
+      }
+    },
+    {
+      "key": "lever_link_bore",
+      "body": "BOD-0010",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for toggle link joint JNT-0011 on lever",
+      "placement": {
+        "datum": "JNT-0011",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "lever_stock_width"
+        }
+      }
+    },
+    {
+      "key": "lever_contact_face",
+      "body": "BOD-0010",
+      "feature_kind": "FACE",
+      "geometry": "Contact face on lever for base (IFC-0014)",
+      "placement": {
+        "datum": "lever_stock",
+        "axis": "-Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "latch_contact_width"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "lever_stock_width"
+        },
+        "dz": {
+          "kind": "number",
+          "value": 0.1,
+          "unit": "mm"
+        }
+      }
+    },
+    {
+      "key": "link_stock",
+      "body": "BOD-0011",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular toggle link block",
+      "placement": {
+        "datum": "ENV-0011",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {
+          "kind": "param",
+          "param": "link_stock_length"
+        },
+        "dy": {
+          "kind": "param",
+          "param": "link_stock_width"
+        },
+        "dz": {
+          "kind": "param",
+          "param": "link_stock_height"
+        }
+      }
+    },
+    {
+      "key": "link_base_bore",
+      "body": "BOD-0011",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for toggle joint JNT-0012 on link",
+      "placement": {
+        "datum": "JNT-0012",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "link_stock_width"
+        }
+      }
+    },
+    {
+      "key": "link_lever_bore",
+      "body": "BOD-0011",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for toggle link joint JNT-0011 on link",
+      "placement": {
+        "datum": "JNT-0011",
+        "axis": "+Y"
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {
+          "kind": "divide_by",
+          "of": {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          "divisor": 2
+        },
+        "height": {
+          "kind": "param",
+          "param": "link_stock_width"
+        }
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_definition",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "scale_len"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 1,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "base_stock_len_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "base_stock_length"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 4
+      }
+    },
+    {
+      "key": "base_stock_width_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "base_stock_width"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 2
+      }
+    },
+    {
+      "key": "base_stock_height_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "base_stock_height"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 2
+      }
+    },
+    {
+      "key": "lid_stock_len_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lid_stock_length"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 4
+      }
+    },
+    {
+      "key": "lid_stock_width_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lid_stock_width"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 2
+      }
+    },
+    {
+      "key": "lid_stock_height_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lid_stock_height"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1
+      }
+    },
+    {
+      "key": "lever_stock_len_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lever_stock_length"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1
+      }
+    },
+    {
+      "key": "lever_stock_width_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lever_stock_width"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1
+      }
+    },
+    {
+      "key": "lever_stock_height_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "lever_stock_height"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1.5
+      }
+    },
+    {
+      "key": "link_stock_len_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "link_stock_length"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 2.5
+      }
+    },
+    {
+      "key": "link_stock_width_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "link_stock_width"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1
+      }
+    },
+    {
+      "key": "link_stock_height_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "link_stock_height"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 0.75
+      }
+    },
+    {
+      "key": "joint_housing_diameter_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "joint_housing_diameter"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 10,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "bearing_clearance_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "bearing_clearance"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 0.5,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "pin_diameter_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "pin_diameter"
+      },
+      "rhs": {
+        "kind": "difference",
+        "left": {
+          "kind": "param",
+          "param": "joint_housing_diameter"
+        },
+        "right": {
+          "kind": "scale_by",
+          "of": {
+            "kind": "param",
+            "param": "bearing_clearance"
+          },
+          "factor": 2
+        }
+      }
+    },
+    {
+      "key": "pivot_boss_diameter_env",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "pivot_boss_diameter"
+      },
+      "rhs": {
+        "kind": "sum",
+        "terms": [
+          {
+            "kind": "param",
+            "param": "joint_housing_diameter"
+          },
+          {
+            "kind": "scale_by",
+            "of": {
+              "kind": "param",
+              "param": "wall_thickness"
+            },
+            "factor": 2
+          }
+        ]
+      }
+    },
+    {
+      "key": "wall_thickness_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "wall_thickness"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 2,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "stop_overlap_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "stop_overlap"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 5,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "stop_height_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "stop_height"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 0.5
+      }
+    },
+    {
+      "key": "stop_thickness_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "stop_thickness"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 2,
+        "unit": "mm"
+      }
+    },
+    {
+      "key": "latch_contact_width_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "latch_contact_width"
+      },
+      "rhs": {
+        "kind": "scale_by",
+        "of": {
+          "kind": "param",
+          "param": "scale_len"
+        },
+        "factor": 1
+      }
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0009": [
+      "base_hinge_boss",
+      "lid_hinge_bore"
+    ],
+    "JNT-0010": [
+      "lid_lever_bore",
+      "lever_hinge_bore"
+    ],
+    "JNT-0011": [
+      "lever_link_bore",
+      "link_lever_bore"
+    ],
+    "JNT-0012": [
+      "base_link_boss",
+      "link_base_bore"
+    ],
+    "CRL-0101": [
+      "base_support_pad"
+    ],
+    "CRL-0102": [
+      "base_support_pad"
+    ],
+    "CRL-0103": [
+      "base_hinge_boss",
+      "lid_hinge_bore"
+    ],
+    "CRL-0104": [
+      "lid_lever_bore",
+      "lever_hinge_bore"
+    ],
+    "CRL-0105": [
+      "lever_link_bore",
+      "link_lever_bore"
+    ],
+    "CRL-0106": [
+      "base_link_boss",
+      "link_base_bore"
+    ],
+    "CRL-0107": [
+      "base_latch_contact",
+      "lever_contact_face"
+    ]
+  },
+  "interface_assignments": {
+    "IFC-0010": {
+      "sides": {
+        "BOD-0008": [
+          "base_hinge_boss"
+        ],
+        "BOD-0009": [
+          "lid_hinge_bore"
+        ]
+      },
+      "governing_constraint": "bearing_clearance_choice"
+    },
+    "IFC-0011": {
+      "sides": {
+        "BOD-0008": [
+          "base_link_boss"
+        ],
+        "BOD-0011": [
+          "link_base_bore"
+        ]
+      },
+      "governing_constraint": "bearing_clearance_choice"
+    },
+    "IFC-0012": {
+      "sides": {
+        "BOD-0009": [
+          "lid_lever_bore"
+        ],
+        "BOD-0010": [
+          "lever_hinge_bore"
+        ]
+      },
+      "governing_constraint": "bearing_clearance_choice"
+    },
+    "IFC-0013": {
+      "sides": {
+        "BOD-0010": [
+          "lever_link_bore"
+        ],
+        "BOD-0011": [
+          "link_lever_bore"
+        ]
+      },
+      "governing_constraint": "bearing_clearance_choice"
+    },
+    "IFC-0014": {
+      "sides": {
+        "BOD-0008": [
+          "base_latch_contact"
+        ],
+        "BOD-0010": [
+          "lever_contact_face"
+        ]
+      }
+    },
+    "IFC-0015": {
+      "sides": {
+        "BOD-0008": [
+          "base_stop_face"
+        ],
+        "BOD-0009": [
+          "lid_stop_face"
+        ]
+      }
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

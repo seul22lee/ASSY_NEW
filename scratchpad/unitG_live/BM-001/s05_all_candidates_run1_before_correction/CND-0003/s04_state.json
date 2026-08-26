@@ -1,0 +1,2325 @@
+{
+ "SOURCE": "accepted canonical DesignState (deterministic replay; zero provider calls)",
+ "branch": "CND-0003",
+ "counts": {
+  "Body": 4,
+  "Configuration": 3,
+  "ConstraintRelation": 7,
+  "Envelope": 4,
+  "FunctionalRegion": 3,
+  "Interface": 6,
+  "Joint": 4,
+  "MobilityExpectation": 2,
+  "PhysicalInteraction": 5,
+  "ReferenceScale": 1,
+  "RigidGroup": 4,
+  "State": 3,
+  "SweptVolume": 4,
+  "Transition": 4,
+  "TransitionRequirement": 4
+ },
+ "entities": {
+  "Body": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0008",
+    "instance_identity": "single instance",
+    "role": "Stationary base that provides storage volume, reacts desktop loads, and carries hinge and latch pivots"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0003",
+     "OBL-0008"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0009",
+    "instance_identity": "single instance",
+    "role": "Moving lid that closes the storage volume and carries the latch lever pivot"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0004",
+     "OBL-0005",
+     "OBL-0006",
+     "OBL-0015",
+     "OBL-0018"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0010",
+    "instance_identity": "single instance",
+    "role": "Latch lever that the user actuates directly and that engages the over-centre toggle"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Body",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0004",
+     "OBL-0006",
+     "OBL-0015"
+    ],
+    "created_by_stage": "s03",
+    "entity_id": "BOD-0011",
+    "instance_identity": "single instance",
+    "role": "Toggle link that connects the latch lever to the base and creates the over-centre geometry"
+   }
+  ],
+  "Configuration": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Configuration",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "bodies_present": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011"
+    ],
+    "distinguishing_basis": [
+     {
+      "differs_from": [
+       "CFG-0006",
+       "CFG-0007"
+      ],
+      "dof": "RY",
+      "joint": "JNT-0009"
+     }
+    ],
+    "entity_id": "CFG-0005",
+    "expected_mobility": [],
+    "kind": "OPERATIONAL",
+    "name": "Open"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Configuration",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "bodies_present": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011"
+    ],
+    "distinguishing_basis": [
+     {
+      "differs_from": [
+       "CFG-0005"
+      ],
+      "dof": "RY",
+      "joint": "JNT-0009"
+     },
+     {
+      "differs_from": [
+       "CFG-0007"
+      ],
+      "dof": "RY",
+      "joint": "JNT-0010"
+     }
+    ],
+    "entity_id": "CFG-0006",
+    "expected_mobility": [],
+    "kind": "OPERATIONAL",
+    "name": "Closed unlatched"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Configuration",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "bodies_present": [
+     "BOD-0008",
+     "BOD-0009",
+     "BOD-0010",
+     "BOD-0011"
+    ],
+    "distinguishing_basis": [
+     {
+      "differs_from": [
+       "CFG-0005"
+      ],
+      "dof": "RY",
+      "joint": "JNT-0009"
+     },
+     {
+      "differs_from": [
+       "CFG-0006"
+      ],
+      "dof": "RY",
+      "joint": "JNT-0010"
+     }
+    ],
+    "entity_id": "CFG-0007",
+    "expected_mobility": [],
+    "kind": "OPERATIONAL",
+    "name": "Closed latched"
+   }
+  ],
+  "ConstraintRelation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "driver": "DECLARED_SCENARIO",
+    "entity_id": "CRL-0101",
+    "provider_reaction_site": "RSR-0001",
+    "retained_group": "RGP-0011"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RY",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0007"
+    ],
+    "driver": "LOAD",
+    "entity_id": "CRL-0102",
+    "provider_reaction_site": "RSR-0002",
+    "retained_group": "RGP-0011"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "entity_id": "CRL-0103",
+    "provider_body": "BOD-0008",
+    "provider_site": "IFC-0010",
+    "retained_group": "RGP-0012"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "entity_id": "CRL-0104",
+    "provider_body": "BOD-0009",
+    "retained_group": "RGP-0013"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "entity_id": "CRL-0105",
+    "provider_body": "BOD-0010",
+    "retained_group": "RGP-0014"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "TX",
+     "TY",
+     "TZ",
+     "RX",
+     "RZ"
+    ],
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "driver": "KINEMATIC_NECESSITY",
+    "entity_id": "CRL-0106",
+    "provider_body": "BOD-0008",
+    "retained_group": "RGP-0014"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "ConstraintRelation",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_superseded": [
+     {
+      "field": "defeat_specification",
+      "prior_value": null,
+      "provenance": "s03b:relations",
+      "reason": "release principle completed",
+      "stage": "s03"
+     },
+     {
+      "field": "blocked_relative_motions",
+      "prior_value": null,
+      "provenance": "s03b:relations",
+      "reason": "owner stage completed the release evidence of a restraint a transition releases",
+      "stage": "s03"
+     }
+    ],
+    "_validity": "STANDING",
+    "blocked_dofs": [
+     "RY"
+    ],
+    "blocked_relative_motions": [
+     {
+      "dof": "RY",
+      "joint": "JNT-0010"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0011"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0012"
+     }
+    ],
+    "configurations": [
+     "CFG-0007"
+    ],
+    "defeat_specification": "The applied load pushes the provider body BOD-0008 aside at IFC-0014, disengaging the restraint and allowing the retained group RGP-0013 to rotate.",
+    "driver": "LOAD",
+    "entity_id": "CRL-0107",
+    "provider_body": "BOD-0008",
+    "provider_site": "IFC-0014",
+    "retained_group": "RGP-0013"
+   }
+  ],
+  "Envelope": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Envelope",
+    "_premises": [
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04a:arrangement",
+    "_validity": "STANDING",
+    "body": "BOD-0008",
+    "commitment_class": "COMPARABLE",
+    "entity_id": "ENV-0008",
+    "extent": {
+     "centre": [
+      0,
+      0,
+      0
+     ],
+     "half_extent": [
+      2,
+      1,
+      1
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Envelope",
+    "_premises": [
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04a:arrangement",
+    "_validity": "STANDING",
+    "body": "BOD-0009",
+    "commitment_class": "COMPARABLE",
+    "entity_id": "ENV-0009",
+    "extent": {
+     "centre": [
+      0,
+      0,
+      1.5
+     ],
+     "half_extent": [
+      2,
+      1,
+      0.5
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Envelope",
+    "_premises": [
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04a:arrangement",
+    "_validity": "STANDING",
+    "body": "BOD-0010",
+    "commitment_class": "COMPARABLE",
+    "entity_id": "ENV-0010",
+    "extent": {
+     "centre": [
+      2.5,
+      0,
+      1.0
+     ],
+     "half_extent": [
+      0.5,
+      0.5,
+      0.75
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Envelope",
+    "_premises": [
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04a:arrangement",
+    "_validity": "STANDING",
+    "body": "BOD-0011",
+    "commitment_class": "COMPARABLE",
+    "entity_id": "ENV-0011",
+    "extent": {
+     "centre": [
+      1.5,
+      0,
+      1.0
+     ],
+     "half_extent": [
+      1.25,
+      0.5,
+      0.375
+     ]
+    },
+    "frame": "world",
+    "maturity": "PROVISIONAL",
+    "scale_basis": "RELATIVE"
+   }
+  ],
+  "FunctionalRegion": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "volume"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04a:arrangement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0010",
+    "owning_bodies": [
+     "BOD-0010"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [
+     "ACT-0001"
+    ],
+    "role": "ACCESS",
+    "volume": {
+     "centre": [
+      3.1,
+      0,
+      1.0
+     ],
+     "half_extent": [
+      0.25,
+      0.3,
+      0.5
+     ]
+    }
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "volume"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04a:arrangement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0011",
+    "owning_bodies": [
+     "BOD-0008"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [],
+    "role": "SUPPORT",
+    "volume": {
+     "centre": [
+      0,
+      0,
+      -1.0
+     ],
+     "half_extent": [
+      2,
+      1,
+      0.1
+     ]
+    }
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "volume"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04a:arrangement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "FunctionalRegion",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "entity_id": "FRG-0012",
+    "owning_bodies": [
+     "BOD-0008",
+     "BOD-0009"
+    ],
+    "reach_targets": [],
+    "required_by_actors": [],
+    "role": "KEEP_OUT",
+    "volume": {
+     "centre": [
+      0,
+      0,
+      0.3
+     ],
+     "half_extent": [
+      1.4,
+      0.7,
+      0.5
+     ]
+    }
+   }
+  ],
+  "Interface": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_superseded": [
+     {
+      "field": "feature",
+      "prior_value": null,
+      "provenance": "s03:topology",
+      "reason": "owner stage named which feature of the pair this interface is (feature identity)",
+      "stage": "s03"
+     }
+    ],
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0003",
+     "OBL-0009",
+     "OBL-0011",
+     "OBL-0019"
+    ],
+    "bodies": [
+     "BOD-0008",
+     "BOD-0009"
+    ],
+    "entity_id": "IFC-0010",
+    "feature": "HINGE_JOURNAL",
+    "interaction_kind": "CLEARANCE",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0015"
+    ],
+    "bodies": [
+     "BOD-0008",
+     "BOD-0011"
+    ],
+    "entity_id": "IFC-0011",
+    "interaction_kind": "CLEARANCE",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0015"
+    ],
+    "bodies": [
+     "BOD-0009",
+     "BOD-0010"
+    ],
+    "entity_id": "IFC-0012",
+    "interaction_kind": "CLEARANCE",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0002",
+     "OBL-0015"
+    ],
+    "bodies": [
+     "BOD-0010",
+     "BOD-0011"
+    ],
+    "entity_id": "IFC-0013",
+    "interaction_kind": "CLEARANCE",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0004",
+     "OBL-0006",
+     "OBL-0015"
+    ],
+    "bodies": [
+     "BOD-0008",
+     "BOD-0010"
+    ],
+    "entity_id": "IFC-0014",
+    "interaction_kind": "CONTACT",
+    "nominal": true
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "Interface",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_superseded": [
+     {
+      "field": "feature",
+      "prior_value": null,
+      "provenance": "s03:topology",
+      "reason": "owner stage named which feature of the pair this interface is (feature identity)",
+      "stage": "s03"
+     }
+    ],
+    "_validity": "STANDING",
+    "addresses_obligations": [
+     "OBL-0001",
+     "OBL-0008"
+    ],
+    "bodies": [
+     "BOD-0008",
+     "BOD-0009"
+    ],
+    "entity_id": "IFC-0015",
+    "feature": "STOP_FACE",
+    "interaction_kind": "CONTACT",
+    "nominal": true
+   }
+  ],
+  "Joint": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "frame_origin"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04b:placement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "Joint",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "+Y",
+    "child_group": "RGP-0012",
+    "dof": [
+     "RY"
+    ],
+    "entity_id": "JNT-0009",
+    "frame_ids": [
+     "FRM-JNT-0009"
+    ],
+    "frame_origin": [
+     -2.0,
+     0.0,
+     1.0
+    ],
+    "joint_type": "REVOLUTE",
+    "parent_group": "RGP-0011"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "frame_origin"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04b:placement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "Joint",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "+Y",
+    "child_group": "RGP-0013",
+    "dof": [
+     "RY"
+    ],
+    "entity_id": "JNT-0010",
+    "frame_ids": [
+     "FRM-JNT-0010"
+    ],
+    "frame_origin": [
+     2.0,
+     0.0,
+     1.0
+    ],
+    "joint_type": "REVOLUTE",
+    "parent_group": "RGP-0012"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "frame_origin"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04b:placement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "Joint",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "+Y",
+    "child_group": "RGP-0014",
+    "dof": [
+     "RY"
+    ],
+    "entity_id": "JNT-0011",
+    "frame_ids": [
+     "FRM-JNT-0011"
+    ],
+    "frame_origin": [
+     2.75,
+     0.0,
+     1.2
+    ],
+    "joint_type": "REVOLUTE",
+    "parent_group": "RGP-0013"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_extensions": [
+     {
+      "fields": [
+       "frame_origin"
+      ],
+      "premises": [
+       "SCL-CND-0003"
+      ],
+      "provenance": "s04b:placement",
+      "stage": "s04"
+     }
+    ],
+    "_family": "Joint",
+    "_premises": [
+     "CND-0003",
+     "SCL-CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "axis_direction": "+Y",
+    "child_group": "RGP-0014",
+    "dof": [
+     "RY"
+    ],
+    "entity_id": "JNT-0012",
+    "frame_ids": [
+     "FRM-JNT-0012"
+    ],
+    "frame_origin": [
+     0.25,
+     0.0,
+     1.0
+    ],
+    "joint_type": "REVOLUTE",
+    "parent_group": "RGP-0011"
+   }
+  ],
+  "MobilityExpectation": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "MobilityExpectation",
+    "_premises": [
+     "CFG-0005",
+     "CRL-0101",
+     "CRL-0103",
+     "CRL-0104",
+     "CRL-0106",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "CND-0003"
+    ],
+    "_provenance": "s03:derivation",
+    "_validity": "STANDING",
+    "configuration": "CFG-0005",
+    "dispositions": [
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RY",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "by_joint": "JNT-0009",
+      "configuration": "CFG-0005",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "by_joint": "JNT-0010",
+      "configuration": "CFG-0005",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "by_joint": "JNT-0012",
+      "configuration": "CFG-0005",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0005",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     }
+    ],
+    "entity_id": "MEX-CFG-0005"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "MobilityExpectation",
+    "_premises": [
+     "CFG-0006",
+     "CRL-0101",
+     "CRL-0103",
+     "CRL-0104",
+     "CRL-0106",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "CND-0003"
+    ],
+    "_provenance": "s03:derivation",
+    "_validity": "STANDING",
+    "configuration": "CFG-0006",
+    "dispositions": [
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RY",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0101",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "DECLARED_SCENARIO",
+      "provider_body": null,
+      "provider_reaction_site": "RSR-0001",
+      "rigid_group": "RGP-0011"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "by_joint": "JNT-0009",
+      "configuration": "CFG-0006",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0103",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0012"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "by_joint": "JNT-0010",
+      "configuration": "CFG-0006",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0104",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0009",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0013"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TY",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "TZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RX",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "by_joint": "JNT-0012",
+      "configuration": "CFG-0006",
+      "derived_by": "s03:derivation",
+      "disposition": "INTENDED",
+      "dof": "RY",
+      "rigid_group": "RGP-0014"
+     },
+     {
+      "blocked_direction": null,
+      "configuration": "CFG-0006",
+      "constraint_relation": "CRL-0106",
+      "defeat_specification": null,
+      "derived_by": "s03:derivation",
+      "disposition": "BLOCKED_BY",
+      "dof": "RZ",
+      "driver": "KINEMATIC_NECESSITY",
+      "provider_body": "BOD-0008",
+      "provider_reaction_site": null,
+      "rigid_group": "RGP-0014"
+     }
+    ],
+    "entity_id": "MEX-CFG-0006"
+   }
+  ],
+  "PhysicalInteraction": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0010",
+    "configurations": [
+     "CFG-0005",
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "discharges_effect": "PEO-0001",
+    "effect": "PERMIT_MOTION",
+    "entity_id": "PHI-0101",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0014",
+    "configurations": [
+     "CFG-0007"
+    ],
+    "discharges_effect": "PEO-0002",
+    "effect": "PREVENT_MOTION",
+    "entity_id": "PHI-0102",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0013",
+    "discharges_effect": "PEO-0003",
+    "effect": "TRANSMIT_FORCE",
+    "entity_id": "PHI-0103",
+    "groups": [
+     "RGP-0013",
+     "RGP-0014",
+     "RGP-0011"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0015",
+    "configurations": [
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "discharges_effect": "PEO-0004",
+    "effect": "LOCATE",
+    "entity_id": "PHI-0104",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "PhysicalInteraction",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "at_interface": "IFC-0015",
+    "configurations": [
+     "CFG-0006",
+     "CFG-0007"
+    ],
+    "discharges_effect": "PEO-0005",
+    "effect": "CONTAIN",
+    "entity_id": "PHI-0105",
+    "groups": [
+     "RGP-0011",
+     "RGP-0012"
+    ]
+   }
+  ],
+  "ReferenceScale": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "ReferenceScale",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s04a:arrangement",
+    "_validity": "STANDING",
+    "absolute": null,
+    "basis": "RELATIVE",
+    "commitment_class": "COMPARABLE",
+    "entity_id": "SCL-CND-0003",
+    "note": "No absolute dimension was provided; all values are in consistent relative units."
+   }
+  ],
+  "RigidGroup": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0008",
+    "entity_id": "RGP-0011",
+    "is_default": true,
+    "members": [
+     "BOD-0008"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0009",
+    "entity_id": "RGP-0012",
+    "is_default": true,
+    "members": [
+     "BOD-0009"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0010",
+    "entity_id": "RGP-0013",
+    "is_default": true,
+    "members": [
+     "BOD-0010"
+    ]
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "RigidGroup",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03:topology",
+    "_validity": "STANDING",
+    "body": "BOD-0011",
+    "entity_id": "RGP-0014",
+    "is_default": true,
+    "members": [
+     "BOD-0011"
+    ]
+   }
+  ],
+  "State": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "State",
+    "_premises": [
+     "CFG-0005",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "configuration": "CFG-0005",
+    "entity_id": "STA-CFG-0005",
+    "joint_coordinates": {
+     "JNT-0009": 50.0,
+     "JNT-0010": -108.55,
+     "JNT-0011": 131.73,
+     "JNT-0012": 73.18
+    },
+    "name": "CFG-0005"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "State",
+    "_premises": [
+     "CFG-0006",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "configuration": "CFG-0006",
+    "entity_id": "STA-CFG-0006",
+    "joint_coordinates": {
+     "JNT-0009": 0.0,
+     "JNT-0010": -14.87,
+     "JNT-0011": 10.32,
+     "JNT-0012": -4.55
+    },
+    "name": "CFG-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "State",
+    "_premises": [
+     "CFG-0007",
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "SCL-CND-0003",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "configuration": "CFG-0007",
+    "entity_id": "STA-CFG-0007",
+    "joint_coordinates": {
+     "JNT-0009": 0.0,
+     "JNT-0010": 14.87,
+     "JNT-0011": -10.32,
+     "JNT-0012": 4.55
+    },
+    "name": "CFG-0007"
+   }
+  ],
+  "SweptVolume": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "SweptVolume",
+    "_premises": [
+     "ENV-0008",
+     "JNT-0012",
+     "RGP-0011",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRN-0102",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:computation",
+    "_validity": "STANDING",
+    "entity_id": "SWV-TRN-0102-RGP-0011",
+    "fidelity": "SAMPLED",
+    "occupancy": {
+     "aabb": [
+      [
+       -2.1515671732186874,
+       -1,
+       -1.1721873118607322
+      ],
+      [
+       2.153142930385472,
+       1,
+       1.1784903405278713
+      ]
+     ]
+    },
+    "rigid_group": "RGP-0011",
+    "sampling_declaration": {
+     "adaptive": false,
+     "interior_samples": 7,
+     "kind": "UNIFORM",
+     "method": "AABB_UNION_OF_DISCRETE_POSES",
+     "samples": 9
+    },
+    "transition": "TRN-0102"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "SweptVolume",
+    "_premises": [
+     "ENV-0009",
+     "JNT-0010",
+     "RGP-0012",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRN-0102",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:computation",
+    "_validity": "STANDING",
+    "entity_id": "SWV-TRN-0102-RGP-0012",
+    "fidelity": "SAMPLED",
+    "occupancy": {
+     "aabb": [
+      [
+       -2.1226690896471014,
+       -1,
+       -0.02650705839483769
+      ],
+      [
+       2.2566267645987095,
+       1,
+       2.993017639656936
+      ]
+     ]
+    },
+    "rigid_group": "RGP-0012",
+    "sampling_declaration": {
+     "adaptive": false,
+     "interior_samples": 7,
+     "kind": "UNIFORM",
+     "method": "AABB_UNION_OF_DISCRETE_POSES",
+     "samples": 9
+    },
+    "transition": "TRN-0102"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "SweptVolume",
+    "_premises": [
+     "ENV-0008",
+     "JNT-0012",
+     "RGP-0011",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRN-0103",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:computation",
+    "_validity": "STANDING",
+    "entity_id": "SWV-TRN-0103-RGP-0011",
+    "fidelity": "SAMPLED",
+    "occupancy": {
+     "aabb": [
+      [
+       -2.1515671732186874,
+       -1,
+       -1.1721873118607322
+      ],
+      [
+       2.153142930385472,
+       1,
+       1.1784903405278713
+      ]
+     ]
+    },
+    "rigid_group": "RGP-0011",
+    "sampling_declaration": {
+     "adaptive": false,
+     "interior_samples": 7,
+     "kind": "UNIFORM",
+     "method": "AABB_UNION_OF_DISCRETE_POSES",
+     "samples": 9
+    },
+    "transition": "TRN-0103"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "SweptVolume",
+    "_premises": [
+     "ENV-0009",
+     "JNT-0010",
+     "RGP-0012",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRN-0103",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:computation",
+    "_validity": "STANDING",
+    "entity_id": "SWV-TRN-0103-RGP-0012",
+    "fidelity": "SAMPLED",
+    "occupancy": {
+     "aabb": [
+      [
+       -2.1226690896471014,
+       -1,
+       -0.02650705839483769
+      ],
+      [
+       2.2566267645987095,
+       1,
+       2.993017639656936
+      ]
+     ]
+    },
+    "rigid_group": "RGP-0012",
+    "sampling_declaration": {
+     "adaptive": false,
+     "interior_samples": 7,
+     "kind": "UNIFORM",
+     "method": "AABB_UNION_OF_DISCRETE_POSES",
+     "samples": 9
+    },
+    "transition": "TRN-0103"
+   }
+  ],
+  "Transition": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Transition",
+    "_premises": [
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "SCL-CND-0003",
+     "STA-CFG-0005",
+     "STA-CFG-0006",
+     "TRQ-0101",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "changed_coordinates": [
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ],
+    "entity_id": "TRN-0101",
+    "from_state": "STA-CFG-0005",
+    "path": {
+     "moving_groups": [
+      "RGP-0011",
+      "RGP-0012",
+      "RGP-0013",
+      "RGP-0014"
+     ]
+    },
+    "realizes_requirement": "TRQ-0101",
+    "to_state": "STA-CFG-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Transition",
+    "_premises": [
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRQ-0102",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "changed_coordinates": [
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ],
+    "entity_id": "TRN-0102",
+    "from_state": "STA-CFG-0006",
+    "path": {
+     "moving_groups": [
+      "RGP-0011",
+      "RGP-0012",
+      "RGP-0013",
+      "RGP-0014"
+     ]
+    },
+    "realizes_requirement": "TRQ-0102",
+    "to_state": "STA-CFG-0007"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Transition",
+    "_premises": [
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "SCL-CND-0003",
+     "STA-CFG-0006",
+     "STA-CFG-0007",
+     "TRQ-0103",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "changed_coordinates": [
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ],
+    "entity_id": "TRN-0103",
+    "from_state": "STA-CFG-0007",
+    "path": {
+     "moving_groups": [
+      "RGP-0011",
+      "RGP-0012",
+      "RGP-0013",
+      "RGP-0014"
+     ]
+    },
+    "realizes_requirement": "TRQ-0103",
+    "to_state": "STA-CFG-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s04",
+    "_family": "Transition",
+    "_premises": [
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012",
+     "RGP-0011",
+     "RGP-0012",
+     "RGP-0013",
+     "RGP-0014",
+     "SCL-CND-0003",
+     "STA-CFG-0005",
+     "STA-CFG-0006",
+     "TRQ-0104",
+     "CND-0003"
+    ],
+    "_provenance": "s04b:placement",
+    "_validity": "STANDING",
+    "changed_coordinates": [
+     "JNT-0009",
+     "JNT-0010",
+     "JNT-0011",
+     "JNT-0012"
+    ],
+    "entity_id": "TRN-0104",
+    "from_state": "STA-CFG-0006",
+    "path": {
+     "moving_groups": [
+      "RGP-0011",
+      "RGP-0012",
+      "RGP-0013",
+      "RGP-0014"
+     ]
+    },
+    "realizes_requirement": "TRQ-0104",
+    "to_state": "STA-CFG-0005"
+   }
+  ],
+  "TransitionRequirement": [
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "TransitionRequirement",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "entity_id": "TRQ-0101",
+    "from_configuration": "CFG-0005",
+    "released_constraints": [],
+    "required_relative_motions": [
+     {
+      "dof": "RY",
+      "joint": "JNT-0009"
+     }
+    ],
+    "to_configuration": "CFG-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "TransitionRequirement",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "entity_id": "TRQ-0102",
+    "from_configuration": "CFG-0006",
+    "released_constraints": [],
+    "required_relative_motions": [
+     {
+      "dof": "RY",
+      "joint": "JNT-0010"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0011"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0012"
+     }
+    ],
+    "to_configuration": "CFG-0007"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "TransitionRequirement",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "entity_id": "TRQ-0103",
+    "from_configuration": "CFG-0007",
+    "released_constraints": [
+     "CRL-0107"
+    ],
+    "required_relative_motions": [
+     {
+      "dof": "RY",
+      "joint": "JNT-0010"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0011"
+     },
+     {
+      "dof": "RY",
+      "joint": "JNT-0012"
+     }
+    ],
+    "to_configuration": "CFG-0006"
+   },
+   {
+    "_authority": "AUTHORITATIVE",
+    "_created_by": "s03",
+    "_family": "TransitionRequirement",
+    "_premises": [
+     "CND-0003"
+    ],
+    "_provenance": "s03b:relations",
+    "_validity": "STANDING",
+    "entity_id": "TRQ-0104",
+    "from_configuration": "CFG-0006",
+    "released_constraints": [],
+    "required_relative_motions": [
+     {
+      "dof": "RY",
+      "joint": "JNT-0009"
+     }
+    ],
+    "to_configuration": "CFG-0005"
+   }
+  ]
+ },
+ "state_hash": "26966a68bdf35f8f24bec19e704972ffaadd9a0962f493d74db19dfa01266486"
+}

@@ -1,0 +1,445 @@
+{
+  "features": [
+    {
+      "key": "bod12_base",
+      "body": "BOD-0012",
+      "feature_kind": "STOCK",
+      "geometry": "Outer housing block with internal cavity cleared by subtractive features",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0012"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 6},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 4}
+      }
+    },
+    {
+      "key": "bod12_guide_slot",
+      "body": "BOD-0012",
+      "feature_kind": "SLOT",
+      "geometry": "Slot for prismatic guidance along +X",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8}
+      }
+    },
+    {
+      "key": "bod12_face_guide",
+      "body": "BOD-0012",
+      "feature_kind": "FACE",
+      "geometry": "Guide surface for drawer side",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 1},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8}
+      }
+    },
+    {
+      "key": "bod12_stop_low",
+      "body": "BOD-0012",
+      "feature_kind": "STOP",
+      "geometry": "Stop face at X=-1.0 (closed)",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X",
+        "offset": [{"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": -1.0}, 0, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8}
+      }
+    },
+    {
+      "key": "bod12_stop_high",
+      "body": "BOD-0012",
+      "feature_kind": "STOP",
+      "geometry": "Stop face at X=1.0 (open)",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X",
+        "offset": [{"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 1.0}, 0, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.8}
+      }
+    },
+    {
+      "key": "bod12_pocket_aperture",
+      "body": "BOD-0012",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Clearance for front access aperture FRG-0014",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0014"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 1.0},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.8}
+      }
+    },
+    {
+      "key": "bod12_pocket_large",
+      "body": "BOD-0012",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Clearance for large aperture FRG-0018",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0018"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 3.6},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 3.6}
+      }
+    },
+    {
+      "key": "bod13_base",
+      "body": "BOD-0013",
+      "feature_kind": "STOCK",
+      "geometry": "Drawer body block",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0013"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 3},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 3}
+      }
+    },
+    {
+      "key": "bod13_guide_rail",
+      "body": "BOD-0013",
+      "feature_kind": "RAIL",
+      "geometry": "Rail that slides in the housing slot",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4}
+      }
+    },
+    {
+      "key": "bod13_face_guide",
+      "body": "BOD-0013",
+      "feature_kind": "FACE",
+      "geometry": "Guide face contacting housing",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 5},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4}
+      }
+    },
+    {
+      "key": "bod13_pull",
+      "body": "BOD-0013",
+      "feature_kind": "FACE",
+      "geometry": "Pull surface for user actuation",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.4},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.8},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.6}
+      }
+    },
+    {
+      "key": "bod13_pocket_front",
+      "body": "BOD-0013",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Clearance for front access FRG-0013",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0013"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.4},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.8},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.6}
+      }
+    },
+    {
+      "key": "bod13_pocket_side",
+      "body": "BOD-0013",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Clearance for side access FRG-0015",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0015"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.4},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.6},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.4}
+      }
+    },
+    {
+      "key": "bod13_stop_low",
+      "body": "BOD-0013",
+      "feature_kind": "STOP",
+      "geometry": "Stop face at X=-1.0 (closed)",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X",
+        "offset": [{"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": -1.0}, 0, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4}
+      }
+    },
+    {
+      "key": "bod13_stop_high",
+      "body": "BOD-0013",
+      "feature_kind": "STOP",
+      "geometry": "Stop face at X=1.0 (open)",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0013"
+        },
+        "axis": "+X",
+        "offset": [{"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 1.0}, 0, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 0.2},
+        "dy": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4},
+        "dz": {"kind": "scale_by", "of": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"}, "factor": 2.4}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "scale", "unit": "mm", "role": "SCALE"},
+      "rhs": {"kind": "number", "value": 10, "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "slot_width", "unit": "mm"}
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {"kind": "param", "param": "guide_height", "unit": "mm"},
+      "rhs": {"kind": "param", "param": "slot_height", "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "slot_width", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 28, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "slot_height", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 28, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 24, "unit": "mm"}
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"kind": "param", "param": "guide_height", "unit": "mm"},
+      "rhs": {"kind": "number", "value": 24, "unit": "mm"}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0013": {
+      "BOD-0012": ["bod12_guide_slot"],
+      "BOD-0013": ["bod13_guide_rail"]
+    },
+    "CRL-0108": {
+      "BOD-0012": ["bod12_base"],
+      "BOD-0013": ["bod13_base"]
+    },
+    "CRL-0109": {
+      "BOD-0013": ["bod13_face_guide"],
+      "BOD-0012": ["bod12_face_guide"]
+    },
+    "CRL-0110": {
+      "BOD-0013": ["bod13_stop_low"],
+      "BOD-0012": ["bod12_stop_low"]
+    },
+    "CRL-0111": {
+      "BOD-0013": ["bod13_stop_high"],
+      "BOD-0012": ["bod12_stop_high"]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0016": {
+      "sides": {
+        "BOD-0012": ["bod12_face_guide"],
+        "BOD-0013": ["bod13_face_guide"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+        "rhs": {"kind": "param", "param": "slot_width", "unit": "mm"}
+      }
+    },
+    "IFC-0017": {
+      "sides": {
+        "BOD-0012": ["bod12_face_guide"],
+        "BOD-0013": ["bod13_face_guide"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+        "rhs": {"kind": "param", "param": "slot_width", "unit": "mm"}
+      }
+    },
+    "IFC-0018": {
+      "sides": {
+        "BOD-0012": ["bod12_stop_low"],
+        "BOD-0013": ["bod13_stop_low"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+        "rhs": {"kind": "param", "param": "slot_width", "unit": "mm"}
+      }
+    },
+    "IFC-0019": {
+      "sides": {
+        "BOD-0012": ["bod12_stop_high"],
+        "BOD-0013": ["bod13_stop_high"]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {"kind": "param", "param": "guide_width", "unit": "mm"},
+        "rhs": {"kind": "param", "param": "slot_width", "unit": "mm"}
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0013": {
+      "BOD-0013": ["bod13_pocket_front"]
+    },
+    "FRG-0014": {
+      "BOD-0012": ["bod12_pocket_aperture"]
+    },
+    "FRG-0015": {
+      "BOD-0013": ["bod13_pocket_side"]
+    },
+    "FRG-0018": {
+      "BOD-0012": ["bod12_pocket_large"]
+    }
+  },
+  "realizations": [],
+  "unresolved": [
+    {
+      "decision": "Friction hold parameters",
+      "why_open": "Friction coefficient and normal force require material pair selection and surface finish, not yet specified.",
+      "alternatives": [],
+      "alternatives_kind": "",
+      "kept_open_by": ["OBL-0016"],
+      "blocks": ["ACC-0004"]
+    }
+  ]
+}

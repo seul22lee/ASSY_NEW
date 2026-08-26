@@ -1,0 +1,1118 @@
+{
+ "SOURCE": "raw DeepSeek response (recorded verbatim from the live run; NOT DesignState)",
+ "VERDICT": "REJECTED - NOT DESIGNSTATE",
+ "branch": "CND-0001",
+ "json_parse_error": null,
+ "model": {
+  "execution_status": "SUCCESS",
+  "model_id_requested": "deepseek-chat",
+  "model_id_served": "deepseek-v4-flash",
+  "model_substitution": "provider served 'deepseek-v4-flash' for requested 'deepseek-chat'; recorded rather than assumed equivalent",
+  "model_version_string": "deepseek-v4-flash",
+  "provider_id": "deepseek"
+ },
+ "prompt_sha256": "4a62fc32e97c201160be6a6456ffa78def0131de57072964803c92f661a52fd1",
+ "raw_chars": 14315,
+ "response": {
+  "constraints": [
+   {
+    "basis": "STATED_BOUND",
+    "expression": {
+     "lhs": {
+      "args": [
+       {
+        "ref": "PRM-0001"
+       },
+       {
+        "const": 100,
+        "unit": "1"
+       }
+      ],
+      "op": "*"
+     },
+     "relation": ">=",
+     "rhs": {
+      "args": [
+       {
+        "ref": "PRM-0002"
+       },
+       {
+        "ref": "PRM-0006"
+       }
+      ],
+      "op": "+"
+     }
+    },
+    "id": "CON-0001",
+    "kind": "ENVELOPE",
+    "parameters": [
+     "PRM-0001",
+     "PRM-0002",
+     "PRM-0006"
+    ]
+   },
+   {
+    "basis": "GEOMETRIC_RELATION",
+    "expression": {
+     "lhs": {
+      "args": [
+       {
+        "ref": "PRM-0002"
+       },
+       {
+        "ref": "PRM-0003"
+       }
+      ],
+      "op": "+"
+     },
+     "relation": ">=",
+     "rhs": {
+      "args": [
+       {
+        "ref": "PRM-0002"
+       },
+       {
+        "ref": "PRM-0003"
+       }
+      ],
+      "op": "+"
+     }
+    },
+    "governs_interface": "IFC-0001",
+    "id": "CON-0002",
+    "kind": "DIMENSIONAL",
+    "parameters": [
+     "PRM-0002",
+     "PRM-0003"
+    ]
+   },
+   {
+    "basis": "GEOMETRIC_RELATION",
+    "expression": {
+     "lhs": {
+      "args": [
+       {
+        "ref": "PRM-0002"
+       },
+       {
+        "ref": "PRM-0003"
+       }
+      ],
+      "op": "+"
+     },
+     "relation": ">=",
+     "rhs": {
+      "args": [
+       {
+        "ref": "PRM-0002"
+       },
+       {
+        "ref": "PRM-0003"
+       }
+      ],
+      "op": "+"
+     }
+    },
+    "governs_interface": "IFC-0002",
+    "id": "CON-0003",
+    "kind": "CLEARANCE",
+    "parameters": [
+     "PRM-0002",
+     "PRM-0003"
+    ]
+   },
+   {
+    "basis": "STATED_BOUND",
+    "expression": {
+     "lhs": {
+      "args": [
+       {
+        "ref": "PRM-0001"
+       },
+       {
+        "const": 4,
+        "unit": "1"
+       }
+      ],
+      "op": "*"
+     },
+     "relation": ">=",
+     "rhs": {
+      "args": [
+       {
+        "ref": "PRM-0005"
+       },
+       {
+        "ref": "PRM-0006"
+       }
+      ],
+      "op": "+"
+     }
+    },
+    "id": "CON-0004",
+    "kind": "ENVELOPE",
+    "parameters": [
+     "PRM-0001",
+     "PRM-0005",
+     "PRM-0006"
+    ]
+   },
+   {
+    "basis": "STATED_BOUND",
+    "expression": {
+     "lhs": {
+      "args": [
+       {
+        "ref": "PRM-0001"
+       },
+       {
+        "const": 10,
+        "unit": "1"
+       }
+      ],
+      "op": "*"
+     },
+     "relation": ">=",
+     "rhs": {
+      "args": [
+       {
+        "ref": "PRM-0004"
+       },
+       {
+        "ref": "PRM-0006"
+       }
+      ],
+      "op": "+"
+     }
+    },
+    "id": "CON-0005",
+    "kind": "ENVELOPE",
+    "parameters": [
+     "PRM-0001",
+     "PRM-0004",
+     "PRM-0006"
+    ]
+   }
+  ],
+  "features": [
+   {
+    "body": "BOD-0001",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 100,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 40,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       }
+      }
+     }
+    ],
+    "feature_kind": "STOCK",
+    "geometry": "Base box envelope block",
+    "id": "FEA-0001",
+    "interface": null,
+    "placement": {
+     "axis": "+Z",
+     "datum": "ENV-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0001",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 40,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "ref": "PRM-0002"
+       }
+      }
+     }
+    ],
+    "feature_kind": "BORE",
+    "geometry": "Hinge bore in base knuckle, receives pin",
+    "id": "FEA-0002",
+    "interface": "IFC-0001",
+    "placement": {
+     "axis": "+Y",
+     "datum": "JNT-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0001",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 40,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "args": [
+         {
+          "ref": "PRM-0002"
+         },
+         {
+          "ref": "PRM-0003"
+         }
+        ],
+        "op": "+"
+       }
+      }
+     }
+    ],
+    "feature_kind": "HOLE",
+    "geometry": "Clearance bore in base for pin passage",
+    "id": "FEA-0003",
+    "interface": "IFC-0001",
+    "placement": {
+     "axis": "+Y",
+     "datum": "JNT-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0001",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 10,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 20,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 5,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       }
+      }
+     },
+     {
+      "id": "B2",
+      "operands": [
+       "B1"
+      ],
+      "operation": "TRANSLATE",
+      "parameters": {
+       "dx": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dy": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dz": {
+        "ref": "PRM-0004"
+       }
+      }
+     }
+    ],
+    "feature_kind": "KEEPER",
+    "geometry": "Snap keeper recess in base front wall",
+    "id": "FEA-0004",
+    "interface": "IFC-0004",
+    "placement": {
+     "axis": "+Z",
+     "datum": "ENV-0001",
+     "offset": [
+      {
+       "args": [
+        {
+         "ref": "PRM-0001"
+        },
+        {
+         "const": 40,
+         "unit": "1"
+        }
+       ],
+       "op": "*"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "args": [
+        {
+         "ref": "PRM-0001"
+        },
+        {
+         "const": 10,
+         "unit": "1"
+        }
+       ],
+       "op": "*"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0001",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 100,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "ref": "PRM-0006"
+       }
+      }
+     }
+    ],
+    "feature_kind": "STOP",
+    "geometry": "Stop face on base rim for lid contact",
+    "id": "FEA-0005",
+    "interface": "IFC-0003",
+    "placement": {
+     "axis": "+Z",
+     "datum": "ENV-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "args": [
+        {
+         "ref": "PRM-0001"
+        },
+        {
+         "const": 20,
+         "unit": "1"
+        }
+       ],
+       "op": "*"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0002",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 100,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 10,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       }
+      }
+     }
+    ],
+    "feature_kind": "STOCK",
+    "geometry": "Lid plate envelope block",
+    "id": "FEA-0006",
+    "interface": null,
+    "placement": {
+     "axis": "+Z",
+     "datum": "ENV-0002",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0002",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "args": [
+         {
+          "ref": "PRM-0002"
+         },
+         {
+          "ref": "PRM-0003"
+         }
+        ],
+        "op": "+"
+       }
+      }
+     }
+    ],
+    "feature_kind": "BORE",
+    "geometry": "Hinge bore in lid knuckle, clearance fit on pin",
+    "id": "FEA-0007",
+    "interface": "IFC-0002",
+    "placement": {
+     "axis": "+Y",
+     "datum": "JNT-0002",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0002",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 8,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 10,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 4,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       }
+      }
+     },
+     {
+      "id": "B2",
+      "operands": [
+       "B1"
+      ],
+      "operation": "TRANSLATE",
+      "parameters": {
+       "dx": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dy": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dz": {
+        "args": [
+         {
+          "ref": "PRM-0005"
+         },
+         {
+          "ref": "PRM-0006"
+         }
+        ],
+        "op": "+"
+       }
+      }
+     },
+     {
+      "id": "B3",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 8,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 10,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "ref": "PRM-0005"
+       }
+      }
+     },
+     {
+      "id": "B4",
+      "operands": [
+       "B3"
+      ],
+      "operation": "TRANSLATE",
+      "parameters": {
+       "dx": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dy": {
+        "const": 0,
+        "unit": "mm"
+       },
+       "dz": {
+        "ref": "PRM-0006"
+       }
+      }
+     }
+    ],
+    "feature_kind": "SNAP_ARM",
+    "geometry": "Cantilever snap tab on lid front",
+    "id": "FEA-0008",
+    "interface": "IFC-0004",
+    "placement": {
+     "axis": "+Z",
+     "datum": "FRG-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0002",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "BOX",
+      "parameters": {
+       "dx": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 100,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dy": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "dz": {
+        "ref": "PRM-0006"
+       }
+      }
+     }
+    ],
+    "feature_kind": "STOP",
+    "geometry": "Contact face on lid lower surface",
+    "id": "FEA-0009",
+    "interface": "IFC-0003",
+    "placement": {
+     "axis": "-Z",
+     "datum": "ENV-0002",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "args": [
+        {
+         "ref": "PRM-0001"
+        },
+        {
+         "const": -5,
+         "unit": "1"
+        }
+       ],
+       "op": "*"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0003",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "ref": "PRM-0002"
+       }
+      }
+     }
+    ],
+    "feature_kind": "STOCK",
+    "geometry": "Pin stock cylinder",
+    "id": "FEA-0010",
+    "interface": null,
+    "placement": {
+     "axis": "+Y",
+     "datum": "ENV-0003",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0003",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "ref": "PRM-0002"
+       }
+      }
+     }
+    ],
+    "feature_kind": "PIN",
+    "geometry": "Hinge pin cylinder",
+    "id": "FEA-0011",
+    "interface": "IFC-0001",
+    "placement": {
+     "axis": "+Y",
+     "datum": "JNT-0001",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   },
+   {
+    "body": "BOD-0003",
+    "construction": [
+     {
+      "id": "B1",
+      "operation": "CYLINDER",
+      "parameters": {
+       "height": {
+        "args": [
+         {
+          "ref": "PRM-0001"
+         },
+         {
+          "const": 60,
+          "unit": "1"
+         }
+        ],
+        "op": "*"
+       },
+       "radius": {
+        "ref": "PRM-0002"
+       }
+      }
+     }
+    ],
+    "feature_kind": "PIN",
+    "geometry": "Pin portion interfacing with lid bore",
+    "id": "FEA-0012",
+    "interface": "IFC-0002",
+    "placement": {
+     "axis": "+Y",
+     "datum": "JNT-0002",
+     "offset": [
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      },
+      {
+       "const": 0,
+       "unit": "mm"
+      }
+     ]
+    }
+   }
+  ],
+  "kinematic_realizations": [
+   {
+    "id": "KRL-0001",
+    "participating_features": [
+     "FEA-0002",
+     "FEA-0011"
+    ],
+    "realizes": "JNT-0001"
+   },
+   {
+    "id": "KRL-0002",
+    "participating_features": [
+     "FEA-0007",
+     "FEA-0012"
+    ],
+    "realizes": "JNT-0002"
+   },
+   {
+    "id": "KRL-0003",
+    "participating_features": [
+     "FEA-0008"
+    ],
+    "realizes": "JNT-0003"
+   },
+   {
+    "id": "KRL-0004",
+    "participating_features": [
+     "FEA-0002",
+     "FEA-0011"
+    ],
+    "realizes": "CRL-0002"
+   },
+   {
+    "id": "KRL-0005",
+    "participating_features": [
+     "FEA-0007",
+     "FEA-0012"
+    ],
+    "realizes": "CRL-0003"
+   },
+   {
+    "id": "KRL-0006",
+    "participating_features": [
+     "FEA-0004",
+     "FEA-0008"
+    ],
+    "realizes": "CRL-0005"
+   }
+  ],
+  "parameters": [
+   {
+    "id": "PRM-0001",
+    "role": "SCALE",
+    "symbol": "s",
+    "unit": "mm"
+   },
+   {
+    "id": "PRM-0002",
+    "symbol": "r_pin",
+    "unit": "mm"
+   },
+   {
+    "id": "PRM-0003",
+    "symbol": "c_clear",
+    "unit": "mm"
+   },
+   {
+    "id": "PRM-0004",
+    "symbol": "h_keeper",
+    "unit": "mm"
+   },
+   {
+    "id": "PRM-0005",
+    "symbol": "t_arm",
+    "unit": "mm"
+   },
+   {
+    "id": "PRM-0006",
+    "symbol": "t_wall",
+    "unit": "mm"
+   }
+  ],
+  "realizations": [],
+  "unresolved": []
+ },
+ "run": "live08"
+}

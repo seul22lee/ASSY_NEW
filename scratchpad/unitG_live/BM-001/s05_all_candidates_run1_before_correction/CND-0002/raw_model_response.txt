@@ -1,0 +1,463 @@
+{
+  "parameters": [
+    {"key": "scale", "symbol": "s", "unit": "mm", "role": "SCALE"},
+    {"key": "wall_thickness", "symbol": "wt", "unit": "mm"},
+    {"key": "flexure_thickness", "symbol": "ft", "unit": "mm"},
+    {"key": "flexure_width", "symbol": "fw", "unit": "mm"},
+    {"key": "flexure_length", "symbol": "fl", "unit": "mm"},
+    {"key": "boss_radius_06", "symbol": "r06", "unit": "mm"},
+    {"key": "boss_radius_07", "symbol": "r07", "unit": "mm"},
+    {"key": "pin_radius", "symbol": "rp", "unit": "mm"},
+    {"key": "recess_radius_04", "symbol": "rr04", "unit": "mm"},
+    {"key": "recess_radius_05", "symbol": "rr05", "unit": "mm"},
+    {"key": "clearance_04_05", "symbol": "cl04_05", "unit": "mm"},
+    {"key": "clearance_05_07", "symbol": "cl05_07", "unit": "mm"},
+    {"key": "clearance_04_07", "symbol": "cl04_07", "unit": "mm"}
+  ],
+  "features": [
+    {
+      "key": "base_stock",
+      "body": "BOD-0004",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular box forming base container, spanning envelope ENV-0004.",
+      "placement": {
+        "datum": "ENV-0004",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 6}
+      }
+    },
+    {
+      "key": "base_latch_recess",
+      "body": "BOD-0004",
+      "feature_kind": "SLOT",
+      "geometry": "Recess in base for latch clip tip, located at front edge.",
+      "placement": {
+        "datum": "JNT-0006",
+        "axis": "+Z",
+        "offset": [
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 4},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 1}
+      }
+    },
+    {
+      "key": "base_hinge_bore",
+      "body": "BOD-0004",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore to receive flexure pin, at hinge location.",
+      "placement": {
+        "datum": "JNT-0006",
+        "axis": "+Y",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"op": "param", "param": "pin_radius"},
+        "height": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8}
+      }
+    },
+    {
+      "key": "base_contact_face",
+      "body": "BOD-0004",
+      "feature_kind": "FACE",
+      "geometry": "Flat rim face for contact with lid.",
+      "placement": {
+        "datum": "ENV-0004",
+        "axis": "+Z",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 3}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8},
+        "dz": {"op": "param", "param": "wall_thickness"}
+      }
+    },
+    {
+      "key": "lid_stock",
+      "body": "BOD-0005",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular box forming lid, spanning envelope ENV-0005.",
+      "placement": {
+        "datum": "ENV-0005",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 4}
+      }
+    },
+    {
+      "key": "lid_hinge_bore",
+      "body": "BOD-0005",
+      "feature_kind": "BORE",
+      "geometry": "Cylindrical bore to receive flexure pin, at hinge location.",
+      "placement": {
+        "datum": "JNT-0007",
+        "axis": "+Y",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"op": "param", "param": "pin_radius"},
+        "height": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8}
+      }
+    },
+    {
+      "key": "lid_contact_face",
+      "body": "BOD-0005",
+      "feature_kind": "FACE",
+      "geometry": "Flat rim face for contact with base.",
+      "placement": {
+        "datum": "ENV-0005",
+        "axis": "-Z",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8},
+        "dz": {"op": "param", "param": "wall_thickness"}
+      }
+    },
+    {
+      "key": "lid_clip_socket",
+      "body": "BOD-0005",
+      "feature_kind": "SLOT",
+      "geometry": "Pocket in lid to receive latch clip, at front edge.",
+      "placement": {
+        "datum": "JNT-0008",
+        "axis": "+Z",
+        "offset": [
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 10},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 0.5}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 4},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 3}
+      }
+    },
+    {
+      "key": "flexure_stock",
+      "body": "BOD-0006",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular plate forming flexure, spanning envelope ENV-0006.",
+      "placement": {
+        "datum": "ENV-0006",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 1},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 1}
+      }
+    },
+    {
+      "key": "flexure_web",
+      "body": "BOD-0006",
+      "feature_kind": "RIB",
+      "geometry": "Thin web section in middle of flexure plate, providing compliance.",
+      "placement": {
+        "datum": "JNT-0004",
+        "axis": "+Y",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "param", "param": "flexure_thickness"},
+        "dy": {"op": "param", "param": "flexure_width"},
+        "dz": {"op": "param", "param": "flexure_length"}
+      }
+    },
+    {
+      "key": "flexure_pin",
+      "body": "BOD-0006",
+      "feature_kind": "PIN",
+      "geometry": "Cylindrical pin extending along hinge axis, engages base and lid bores.",
+      "placement": {
+        "datum": "JNT-0006",
+        "axis": "+Y",
+        "offset": [
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"op": "param", "param": "pin_radius"},
+        "height": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 8}
+      }
+    },
+    {
+      "key": "clip_stock",
+      "body": "BOD-0007",
+      "feature_kind": "STOCK",
+      "geometry": "Rectangular plate forming latch clip, spanning envelope ENV-0007.",
+      "placement": {
+        "datum": "ENV-0007",
+        "axis": "+Z"
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 1},
+        "dy": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 4},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2}
+      }
+    },
+    {
+      "key": "clip_arm",
+      "body": "BOD-0007",
+      "feature_kind": "SNAP_ARM",
+      "geometry": "Cantilever arm extending forward from clip body, providing latching engagement.",
+      "placement": {
+        "datum": "JNT-0005",
+        "axis": "+Z",
+        "offset": [
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 1},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "BOX",
+        "dx": {"op": "param", "param": "flexure_thickness"},
+        "dy": {"op": "param", "param": "flexure_width"},
+        "dz": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2}
+      }
+    },
+    {
+      "key": "clip_tip",
+      "body": "BOD-0007",
+      "feature_kind": "KEEPER",
+      "geometry": "Protruding tip at end of clip arm, engages base recess.",
+      "placement": {
+        "datum": "JNT-0005",
+        "axis": "+Z",
+        "offset": [
+          {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2},
+          {"op": "number", "value": 0, "unit": "mm"},
+          {"op": "number", "value": 0, "unit": "mm"}
+        ]
+      },
+      "solid": {
+        "op": "CYLINDER",
+        "radius": {"op": "param", "param": "recess_radius_04"},
+        "height": {"op": "param", "param": "wall_thickness"}
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "key": "scale_factor",
+      "kind": "DIMENSIONAL",
+      "basis": "STATED_BOUND",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "scale"},
+      "rhs": {"op": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "wall_thick_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "wall_thickness"},
+      "rhs": {"op": "number", "value": 2, "unit": "mm"}
+    },
+    {
+      "key": "flexure_thick_choice",
+      "kind": "DIMENSIONAL",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "flexure_thickness"},
+      "rhs": {"op": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "flexure_width_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "flexure_width"},
+      "rhs": {"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 2}
+    },
+    {
+      "key": "flexure_length_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "flexure_length"},
+      "rhs": {"op": "sum", "terms": [{"op": "scale_by", "of": {"op": "param", "param": "scale"}, "factor": 4}, {"op": "param", "param": "wall_thickness"}]}
+    },
+    {
+      "key": "pin_radius_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "pin_radius"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "flexure_thickness"}, {"op": "number", "value": 1, "unit": "mm"}]}
+    },
+    {
+      "key": "boss_radius_06_rel",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "boss_radius_06"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "pin_radius"}, {"op": "param", "param": "wall_thickness"}]}
+    },
+    {
+      "key": "boss_radius_07_rel",
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "boss_radius_07"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "pin_radius"}, {"op": "param", "param": "wall_thickness"}]}
+    },
+    {
+      "key": "recess_radius_04_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "recess_radius_04"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "flexure_thickness"}, {"op": "number", "value": 1, "unit": "mm"}]}
+    },
+    {
+      "key": "recess_radius_05_rel",
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "recess_radius_05"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "flexure_thickness"}, {"op": "number", "value": 1, "unit": "mm"}]}
+    },
+    {
+      "key": "clearance_04_05_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "clearance_04_05"},
+      "rhs": {"op": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "clearance_05_07_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "clearance_05_07"},
+      "rhs": {"op": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "clearance_04_07_choice",
+      "kind": "CLEARANCE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {"op": "param", "param": "clearance_04_07"},
+      "rhs": {"op": "number", "value": 1, "unit": "mm"}
+    },
+    {
+      "key": "ifc_0006_fit",
+      "kind": "INTERFERENCE_FREE",
+      "basis": "STATED_BOUND",
+      "relation": ">=",
+      "lhs": {"op": "param", "param": "boss_radius_06"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "pin_radius"}, {"op": "number", "value": 0, "unit": "mm"}]}
+    },
+    {
+      "key": "ifc_0007_fit",
+      "kind": "INTERFERENCE_FREE",
+      "basis": "STATED_BOUND",
+      "relation": ">=",
+      "lhs": {"op": "param", "param": "boss_radius_07"},
+      "rhs": {"op": "sum", "terms": [{"op": "param", "param": "pin_radius"}, {"op": "number", "value": 0, "unit": "mm"}]}
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0004": ["flexure_web"],
+    "JNT-0005": ["clip_arm"],
+    "JNT-0006": ["flexure_pin", "base_hinge_bore"],
+    "JNT-0007": ["flexure_pin", "lid_hinge_bore"],
+    "JNT-0008": ["clip_stock", "lid_clip_socket"],
+    "CRL-0010": ["base_stock"],
+    "CRL-0011": ["base_stock"],
+    "CRL-0012": ["flexure_stock", "lid_hinge_bore"],
+    "CRL-0013": ["clip_arm", "lid_contact_face"],
+    "CRL-0014": ["flexure_pin", "base_hinge_bore"],
+    "CRL-0015": ["flexure_pin", "lid_hinge_bore"],
+    "CRL-0016": ["clip_stock", "lid_clip_socket"],
+    "CRL-0017": ["clip_tip", "base_latch_recess"],
+    "CRL-0018": ["clip_arm", "base_latch_recess"]
+  },
+  "interface_assignments": {
+    "IFC-0005": {
+      "sides": {
+        "BOD-0004": ["base_contact_face"],
+        "BOD-0005": ["lid_contact_face"]
+      }
+    },
+    "IFC-0006": {
+      "sides": {
+        "BOD-0004": ["base_hinge_bore"],
+        "BOD-0006": ["flexure_pin"]
+      },
+      "governing_constraint": "ifc_0006_fit"
+    },
+    "IFC-0007": {
+      "sides": {
+        "BOD-0005": ["lid_hinge_bore"],
+        "BOD-0006": ["flexure_pin"]
+      },
+      "governing_constraint": "ifc_0007_fit"
+    },
+    "IFC-0008": {
+      "sides": {
+        "BOD-0005": ["lid_clip_socket"],
+        "BOD-0007": ["clip_stock"]
+      }
+    },
+    "IFC-0009": {
+      "sides": {
+        "BOD-0004": ["base_latch_recess"],
+        "BOD-0007": ["clip_tip"]
+      }
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

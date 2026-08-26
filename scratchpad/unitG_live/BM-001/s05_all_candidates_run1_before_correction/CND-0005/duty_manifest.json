@@ -1,0 +1,129 @@
+{
+ "axisless_datums": [],
+ "bodies": [
+  "BOD-0101",
+  "BOD-0102",
+  "BOD-0103"
+ ],
+ "branch": "CND-0005",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0101",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0102",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0101",
+    "BOD-0103"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0103",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0104",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0105",
+   "mating": {},
+   "needs_governing_constraint": false
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0101",
+    "BOD-0102"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0101"
+  },
+  {
+   "bodies": [
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "descriptor": "REVOLUTE (dof RX, axis +X)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0102"
+  },
+  {
+   "bodies": [
+    "BOD-0102",
+    "BOD-0101"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0201"
+  },
+  {
+   "bodies": [
+    "BOD-0103",
+    "BOD-0102"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0202"
+  },
+  {
+   "bodies": [
+    "BOD-0102",
+    "BOD-0103"
+   ],
+   "descriptor": "blocks RY",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0203"
+  },
+  {
+   "bodies": [
+    "BOD-0103",
+    "BOD-0101"
+   ],
+   "descriptor": "blocks RX",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0204"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0005",
+  "required": true
+ }
+}

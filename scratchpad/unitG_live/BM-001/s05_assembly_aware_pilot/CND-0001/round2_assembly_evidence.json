@@ -1,0 +1,207 @@
+{
+ "solver_status": "feasible",
+ "s07_ok": false,
+ "bodies": [
+  {
+   "body": "BOD-0001",
+   "solids": 2,
+   "volume_mm3": 84250.4
+  },
+  {
+   "body": "BOD-0002",
+   "solids": 2,
+   "volume_mm3": 23311.9
+  },
+  {
+   "body": "BOD-0003",
+   "solids": 1,
+   "volume_mm3": 816.8
+  }
+ ],
+ "states": {
+  "CLOSED": {
+   "state": "STA-CFG-0001",
+   "joint_coordinates": {
+    "JNT-0002": 0,
+    "JNT-0003": 5
+   },
+   "pairs": {
+    "BOD-0001|BOD-0002": {
+     "interpenetration_mm3": 373.17,
+     "closest_distance_mm": 0.0
+    },
+    "BOD-0001|BOD-0003": {
+     "interpenetration_mm3": 248.48,
+     "closest_distance_mm": 0.0
+    },
+    "BOD-0002|BOD-0003": {
+     "interpenetration_mm3": 0.0,
+     "closest_distance_mm": 14.0
+    }
+   }
+  },
+  "OPEN": {
+   "state": "STA-CFG-0002",
+   "joint_coordinates": {
+    "JNT-0002": -90,
+    "JNT-0003": 0
+   },
+   "pairs": {
+    "BOD-0001|BOD-0002": {
+     "interpenetration_mm3": 0.0,
+     "closest_distance_mm": 12.0
+    },
+    "BOD-0001|BOD-0003": {
+     "interpenetration_mm3": 248.48,
+     "closest_distance_mm": 0.0
+    },
+    "BOD-0002|BOD-0003": {
+     "interpenetration_mm3": 0.0,
+     "closest_distance_mm": 14.0
+    }
+   }
+  }
+ },
+ "declared": {
+  "mating_sets": [
+   {
+    "name": "Hinge Joint",
+    "purpose": "Allows lid rotation about the hinge axis relative to the base.",
+    "upstream": [
+     "IFC-0001",
+     "IFC-0002",
+     "JNT-0002",
+     "PHI-0001"
+    ],
+    "participants": [
+     {
+      "body": "BOD-0003",
+      "element": "pin_shaft",
+      "role": "Pin shaft"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "bore_base",
+      "role": "Base knuckle bore"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "bore_base2",
+      "role": "Base knuckle bore"
+     },
+     {
+      "body": "BOD-0002",
+      "element": "bore_lid",
+      "role": "Lid knuckle bore"
+     }
+    ],
+    "fit": null,
+    "motion_after": "Lid can rotate from 0\u00b0 (closed) to 90\u00b0 (open) about +Y axis, limited by stop."
+   },
+   {
+    "name": "Snap Latch",
+    "purpose": "Retains lid in closed position by hook engaging recess.",
+    "upstream": [
+     "IFC-0004",
+     "JNT-0003",
+     "PHI-0002"
+    ],
+    "participants": [
+     {
+      "body": "BOD-0002",
+      "element": "snap_beam",
+      "role": "Cantilever beam"
+     },
+     {
+      "body": "BOD-0002",
+      "element": "snap_hook",
+      "role": "Hook"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "latch_recess",
+      "role": "Recess"
+     }
+    ],
+    "fit": null,
+    "motion_after": "Snap tab can deflect to disengage when opening."
+   },
+   {
+    "name": "Hinge Stop",
+    "purpose": "Limits lid rotation to 90\u00b0 open.",
+    "upstream": [
+     "IFC-0003"
+    ],
+    "participants": [
+     {
+      "body": "BOD-0002",
+      "element": "lid_main",
+      "role": "Lid surface"
+     },
+     {
+      "body": "BOD-0001",
+      "element": "hinge_stop",
+      "role": "Stop ledge"
+     }
+    ],
+    "fit": null,
+    "motion_after": "No motion after contact."
+   }
+  ],
+  "assembly_sequence": [
+   {
+    "step": 1,
+    "component": "BOD-0001",
+    "action": "Place base on flat surface with open top up.",
+    "insertion_direction": [
+     0,
+     0,
+     1
+    ],
+    "access": "Free space above",
+    "final_retention": "Gravity holds it."
+   },
+   {
+    "step": 2,
+    "component": "BOD-0003",
+    "action": "Insert pin into base knuckles from +Y side until head contacts the outer face of the +Y knuckle.",
+    "insertion_direction": [
+     0,
+     -1,
+     0
+    ],
+    "access": "Open end of +Y knuckle",
+    "final_retention": "Pin is held by friction in base knuckles (interference fit) and later captured by lid knuckle."
+   },
+   {
+    "step": 3,
+    "component": "BOD-0002",
+    "action": "Slide lid knuckle onto pin from +Y side, aligning bore with pin, and push lid downward until it sits over the base opening. The snap tab will deflect outward as it passes the front wall, then engage the latch recess.",
+    "insertion_direction": [
+     0,
+     -1,
+     0
+    ],
+    "access": "Open end of +Y knuckle and top opening",
+    "final_retention": "Lid is retained by pin through knuckles and snap tab engagement."
+   }
+  ],
+  "state_expectations": [
+   {
+    "state": "CFG-0001",
+    "touching": "Lid plate underside contacts top flange; snap hook engages latch recess; hinge knuckles aligned.",
+    "engaged": "Snap hook is latched, preventing lid from opening.",
+    "free": "Hinge joint allows rotation but is blocked by latch.",
+    "still_assembled": "Base, lid, pin joined."
+   },
+   {
+    "state": "CFG-0002",
+    "touching": "Lid is rotated 90\u00b0 about Y; lid touches hinge stop; no latch engagement.",
+    "engaged": "Hinge stop contacts lid to prevent further rotation.",
+    "free": "Lid can rotate back to closed position.",
+    "still_assembled": "Base, lid, pin joined."
+   }
+  ]
+ },
+ "findings": []
+}

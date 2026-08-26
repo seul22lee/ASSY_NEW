@@ -72,10 +72,11 @@ authority_status:
   ir_authority:
     class: "OPERATIONAL"
     note: >
-      Unit F. The expression, constraint and construction grammar this stage
-      authors is the deterministic downstream's one grammar
+      Unit F. The expression, constraint and construction grammar this stage's
+      output is LOWERED INTO is the deterministic downstream's one grammar
       (`assy_v3/downstream/ir.py`), read at the write boundary; this section
-      explains that and defines nothing.
+      explains that and defines nothing. The provider no longer authors that
+      grammar directly - see `authoring_boundary`.
     authoritative_for_canonical_semantics: false
   placement_rule:
     class: "OPERATIONAL"
@@ -274,9 +275,11 @@ construction_polarity_rule:
 structured_outputs:
   # Canonical names (DESIGN_STATE_CONTRACT). `interface` is the typed trace to
   # the s03 Interface a feature realizes; `placement` is relative to an s04
-  # datum (a joint datum on the joint's axis IS the realization); `construction` is
+  # datum, which locates only - realization is a KinematicRealization and never a
+  # placement; `construction` is
   # the feature's own (Unit G).
   Feature: [entity_id, body, feature_kind, geometry, interface, placement, construction]
+  KinematicRealization: [entity_id, realizes, participating_features]
   Realization: [entity_id, addresses_obligations, participating_features, verification_predicate]
   Constraint: [entity_id, expression, parameters, kind, governs_interface]
   Parameter: [entity_id, symbol, unit, status]
@@ -361,10 +364,12 @@ ir_authority:
     expression node is exactly one of {ref}, {const, unit} or {op, args} with
     op in + - * /; a construction statement is an opcode from the closed
     vocabulary with its required parameters as such expressions; a feature
-    envelope's components are such expressions. s05 authors in it and the
-    write boundary reads it (`ir_validation`) before anything becomes
-    standing state, so a record the solver or the compiler cannot read is
-    never committed for them to refuse.
+    envelope's components are such expressions. s05's SEMANTIC response is
+    lowered into it by `assy_v3/downstream/lowering.py`, and the write boundary
+    reads it (`ir_validation`) before anything becomes standing state, so a
+    record the solver or the compiler cannot read is never committed for them
+    to refuse. What the provider may say is `assy_v3/downstream/semantic.py`;
+    this grammar is unchanged and remains the executable target.
   zero: >
     A coordinate at the body frame origin is the typed zero of the frame's
     unit - {"const": 0, "unit": "mm"} - a coordinate definition, not an
@@ -374,6 +379,52 @@ ir_authority:
     The parameters a feature envelope or a construction statement references
     are premises of that record: a revised declaration stales what named it;
     the settlement of a value does not (the boundary's owner rule).
+
+authoring_boundary:
+  class: "NORMATIVE"
+  what_the_provider_authors: >
+    MECHANICAL MEANING ONLY: feature kind, body, placement datum, orientation,
+    polarity (by kind), symbolic dimensions as parameter references, geometry
+    intent as a RECURSIVE SOLID TREE, which features embody which declared
+    relation (`realization_assignments`), which features realize which side of
+    which interface (`interface_assignments`) and the Constraint that governs
+    it where one is owed, constraints as typed linear relations, and the
+    obligations a realization discharges. New Features, Parameters and
+    Constraints are named by RESPONSE-LOCAL KEYS; canonical ids appear only
+    where a STANDING upstream entity is named.
+  what_production_derives: >
+    ALL COMPILER BOOKKEEPING: canonical entity ids, construction step ids,
+    construction step ordering, the dependency order that puts a child before
+    its consumer, the single terminal result, the KinematicRealization rows and
+    their ids, `Feature.interface`, `Constraint.governs_interface`, the
+    canonical expression AST, and `Constraint.parameters` - which is DERIVED
+    from the expression and may not be stated, because one fact written twice
+    is a mismatch waiting to happen.
+  unsayable: >
+    A canonical id for a record the response is creating; a reference to a
+    construction step; an ordering; a terminal; a single-operand CUT; the body
+    as an operand; a product or quotient of two parameters; a Constraint
+    `parameters` list; a KinematicRealization. Each was a recurring live
+    failure and each is now inexpressible rather than checked.
+  duty_manifest: >
+    `assy_v3/downstream/duty_manifest.py` derives every duty from the standing
+    s03/s04 branch BEFORE the provider is called - bodies needing material,
+    every joint and every blocking ConstraintRelation and the sides each
+    relates, every interface and its participant sides, s04's stated mating
+    geometry, the clearances owing a governing Constraint, the datums that lend
+    no orientation, and the scale authority. ONE object renders the prompt,
+    validates the response, decides structural completeness and answers the
+    settlement gate: a duty the prompt never raises cannot be a check, and a
+    check the prompt never raises cannot be a trap.
+  whole_or_nothing: >
+    The boundary runs in one sequence - parse, resolve local keys, validate
+    upstream references, exact duty coverage, body material, interface sides
+    and mating kinds and governing constraints, placement and orientation,
+    solid-tree validity, typed constraint validity, deterministic lowering,
+    executable-IR validation - and only then are operations built. A response
+    failing any of it is refused WHOLE. No partial embodiment is written for a
+    later round to repair, and a settlement-feedback round re-authors the
+    embodiment entirely rather than restating ids it no longer holds.
 
 placement_rule:
   placement: >
@@ -395,15 +446,33 @@ placement_rule:
     contract declares per kind. No construction exists that a feature does not
     own; placement, role, dimensions and construction trace to one record.
   joint_realization: >
-    Every axis-bearing joint is realized on EACH body it relates by at least
-    one feature placed AT that joint AND LYING ON ITS AXIS - the joint is the
-    feature's datum and the placement is the realization; no second field
-    restates it. A slide may be carried by rails, guides and stops: several
-    features at one joint on one body are several realizations. ON ITS AXIS is
-    load-bearing: a joint datum locates without orienting, so a feature may sit
-    at the joint with an axis of its own, and such a feature is positioned by
-    the joint without embodying it. Counting it would let a branch report a
-    hinge realized while the bore that makes it a hinge is missing. Poses are derived from the located
+    THREE FACTS, AND ONLY THE THIRD IS REALIZATION. `placement.datum` says WHERE
+    a feature sits and `placement.axis` says HOW IT IS ORIENTED; neither means
+    the feature embodies anything. A `KinematicRealization` - entity_id,
+    `realizes` (exactly one Joint or ConstraintRelation), `participating_features`
+    (non-empty) - says which s05 geometry embodies which upstream relation, and
+    is the only thing read as realization.
+    WHAT IS CHECKED IS COVERAGE: every Joint, and every ConstraintRelation that
+    blocks something, must be named by exactly ONE KinematicRealization, whose
+    participating features carry material on every side it relates. A
+    realization is a COMPLETE record, not a fragment - two rows each carrying
+    one side are not a realization between them - so two rails and two carriages
+    embodying one guided relation are one record naming all four features. NO
+    FEATURE AXIS IS COMPARED WITH THE TARGET'S and no joint class or feature
+    kind is consulted, because the geometry that embodies a relation need not be
+    aligned with it: transverse pads bearing on recess walls guide a slide, and
+    a rod in a plain bore may leave axial rotation deliberately free. An
+    alignment rule refuses both, and both are ordinary mechanical design.
+    WHICH SIDES ARE OWED follows the target: a Joint owes each body it relates;
+    a ConstraintRelation owes the retained side always and the provider body
+    when it names one, and owes NOTHING for a `provider_reaction_site` - that
+    provider is outside this design's bodies, and s05 neither invents a body for
+    it nor is refused for its absence.
+    THE TARGET STAYS THE AUTHORITY. Which DOFs a joint has, which a relation
+    blocks, in which configurations, and how a MobilityExpectation dispositions
+    them are upstream facts; the realization carries no coordinate, axis, DOF
+    list or mechanism-family classification, and restating one would be a second
+    answer to a question s03 has already answered. Poses are derived from the located
     joint frames and s04's joint coordinates (`downstream/kinematics`), which
     is the derivation the S04 and S07 contracts always said existed; the
     realizing features say what geometry carries the joint, never where it is.
@@ -439,9 +508,7 @@ deterministic_exit_checks:
   - id: S05-C1
     check: "every Interface has, on EACH participating body, a Feature naming it in `interface`; a feature may not name an interface the branch does not carry or that does not involve its body; a COMPLIANT joint spanning two bodies is malformed and excuses nothing"
   - id: S05-C2
-    check: "every blocking relation has a feature pair"
-  - id: S05-C3
-    check: "every declared limit has a PRODUCING feature pair"
+    check: "every ConstraintRelation that blocks something is named by exactly one KinematicRealization, whose participating features cover the retained side and, where the relation names one, the provider body; an external provider_reaction_site is owed no Feature"
   - id: S05-C4
     check: "every applicable obligation satisfiable at s05 (DISCHARGE) is cited by a Realization carrying a verification predicate; a preserved obligation (satisfiable upstream) or a non-applicable one may not be cited"
   - id: S05-C5
@@ -457,7 +524,7 @@ deterministic_exit_checks:
   - id: S05-C10
     check: "no Parameter value is set without a cited solver artifact"
   - id: S05-C11
-    check: "every axis-bearing joint is realized on EACH body it relates by at least one feature whose placement datum is that joint"
+    check: "every Joint is named by exactly one KinematicRealization, whose participating features cover each body the joint relates; a relation claimed by several records is a fragmented realization and is refused; every realization names a relation of this branch and features that exist. No feature axis, joint class or feature kind is consulted"
   - id: S05-C12
     check: "every body of the branch has material - at least one ADDITIVE feature"
   - id: S05-C14

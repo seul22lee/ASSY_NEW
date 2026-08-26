@@ -1,0 +1,144 @@
+{
+  "design_summary": "This mechanism is a lidded box with a hinge along the +Y edge on the -X side. The base (BOD-0001) is a stationary open-top box with two hinge knuckles on the -X side, a latch recess on the front wall (+Z), and a stop ledge on the top surface near the hinge to prevent over-rotation. The lid (BOD-0002) is a plate with a central hinge knuckle that aligns between the base knuckles and a cantilever snap tab on the opposite edge. The hinge pin (BOD-0003) is a cylinder that fits through the aligned bores, capturing the lid. Assembly: insert pin through base knuckles, then slide lid knuckle onto pin from +Y side, rotating the lid into place, with the snap tab deflecting over the front wall and engaging the recess. In the closed state, the snap tab holds the lid down and the stop ledge prevents rotation past 0°. In the open state, the lid is rotated 90° about Y, clear of the opening.",
+  "scale_mm_per_unit": 1,
+  "dimensions": [
+    {"name": "base_width", "value": 100, "unit": "mm", "why": "Overall width in X"},
+    {"name": "base_depth", "value": 60, "unit": "mm", "why": "Overall depth in Y"},
+    {"name": "base_height", "value": 40, "unit": "mm", "why": "Overall height including top flange"},
+    {"name": "wall_thickness", "value": 3, "unit": "mm", "why": "Standard injection molding wall thickness"},
+    {"name": "bottom_thickness", "value": 3, "unit": "mm", "why": "Bottom wall thickness"},
+    {"name": "top_ledge_thickness", "value": 3, "unit": "mm", "why": "Top flange thickness around opening"},
+    {"name": "cavity_depth", "value": 31, "unit": "mm", "why": "Interior depth from top of bottom to underside of top flange"},
+    {"name": "hinge_axis_x", "value": -48, "unit": "mm", "why": "X position of hinge axis, inset 2 mm from -X face"},
+    {"name": "knuckle_outer_diameter", "value": 10, "unit": "mm", "why": "Outer diameter of hinge knuckles"},
+    {"name": "knuckle_length", "value": 10, "unit": "mm", "why": "Length of each knuckle along Y"},
+    {"name": "pin_diameter", "value": 4, "unit": "mm", "why": "Hinge pin diameter"},
+    {"name": "pin_length", "value": 62, "unit": "mm", "why": "Pin length to span base knuckles and lid knuckle"},
+    {"name": "snap_tab_beam_length", "value": 20, "unit": "mm", "why": "Length of cantilever beam from lid edge"},
+    {"name": "snap_tab_beam_width", "value": 10, "unit": "mm", "why": "Width of snap tab along Y"},
+    {"name": "snap_tab_beam_thickness", "value": 2, "unit": "mm", "why": "Thickness of cantilever beam"},
+    {"name": "snap_hook_height", "value": 3, "unit": "mm", "why": "Height of hook protruding downward"},
+    {"name": "latch_recess_depth", "value": 3, "unit": "mm", "why": "Depth of recess in base front wall"},
+    {"name": "lid_plate_thickness", "value": 6, "unit": "mm", "why": "Thickness of lid plate"},
+    {"name": "lid_hinge_stop_angle", "value": 90, "unit": "deg", "why": "Desired open angle"},
+    {"name": "lid_hinge_stop_height", "value": 5, "unit": "mm", "why": "Height of stop ledge on base to limit lid rotation"}
+  ],
+  "bodies": [
+    {
+      "upstream_body": "BOD-0001",
+      "summary": "Base: a box with open top, side walls, bottom, and a top flange with a rectangular opening. Has two hinge knuckles on the -X side and a latch recess on the front wall (+Z). A stop ledge on the top flange near the hinge prevents over-rotation.",
+      "elements": [
+        {"op": "add", "shape": "box", "name": "outer_box", "size": ["base_width", "base_depth", "base_height"], "at": [0, 0, 0]},
+        {"op": "subtract", "shape": "box", "name": "cavity", "size": ["base_width - 2 * wall_thickness", "base_depth - 2 * wall_thickness", "cavity_depth"], "at": [0, 0, "bottom_thickness"]},
+        {"op": "subtract", "shape": "box", "name": "top_opening", "size": [80, 40, "top_ledge_thickness"], "at": [0, 0, "base_height"]},
+        {"op": "add", "shape": "cylinder", "name": "knuckle_base1", "radius": "knuckle_outer_diameter/2", "height": "knuckle_length", "at": ["hinge_axis_x", "base_depth/2 - knuckle_length/2", "base_height/2"], "axis": "+Y"},
+        {"op": "add", "shape": "cylinder", "name": "knuckle_base2", "radius": "knuckle_outer_diameter/2", "height": "knuckle_length", "at": ["hinge_axis_x", "-base_depth/2 + knuckle_length/2", "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "bore_base", "radius": "pin_diameter/2 + 0.1", "height": "knuckle_length + 0.2", "at": ["hinge_axis_x", "base_depth/2 - knuckle_length/2", "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "bore_base2", "radius": "pin_diameter/2 + 0.1", "height": "knuckle_length + 0.2", "at": ["hinge_axis_x", "-base_depth/2 + knuckle_length/2", "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "box", "name": "latch_recess", "size": ["wall_thickness", "snap_tab_beam_width", "latch_recess_depth"], "at": ["base_width/2 - wall_thickness/2", 0, "base_height - top_ledge_thickness - latch_recess_depth/2"]},
+        {"op": "add", "shape": "box", "name": "hinge_stop", "size": ["wall_thickness", "base_depth", "lid_hinge_stop_height"], "at": ["hinge_axis_x - wall_thickness/2", 0, "base_height - lid_hinge_stop_height/2"]}
+      ]
+    },
+    {
+      "upstream_body": "BOD-0003",
+      "summary": "Hinge pin: a cylindrical rod with a chamfered end for insertion and a small head at the other end to prevent over-insertion.",
+      "elements": [
+        {"op": "add", "shape": "cylinder", "name": "pin_shaft", "radius": "pin_diameter/2", "height": "pin_length", "at": ["hinge_axis_x", 0, "base_height/2"], "axis": "+Y"},
+        {"op": "add", "shape": "cylinder", "name": "pin_head", "radius": "pin_diameter/2 + 1", "height": 2, "at": ["hinge_axis_x", "pin_length/2", "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "chamfer", "radius": "pin_diameter/2", "height": 1, "at": ["hinge_axis_x", "-pin_length/2", "base_height/2"], "axis": "+Y"}
+      ]
+    },
+    {
+      "upstream_body": "BOD-0002",
+      "summary": "Lid: a rectangular plate with a central hinge knuckle on the -X edge and an integrated cantilever snap tab on the +X edge. The plate has a recess on its underside to clear the base's top flange when closed.",
+      "elements": [
+        {"op": "add", "shape": "box", "name": "lid_main", "size": ["base_width", "base_depth", "lid_plate_thickness"], "at": [0, 0, "base_height"]},
+        {"op": "subtract", "shape": "box", "name": "clearance_recess", "size": ["base_width - 2*wall_thickness - 4", "base_depth - 2*wall_thickness - 4", "lid_plate_thickness - wall_thickness"], "at": [0, 0, "base_height - (lid_plate_thickness - wall_thickness)/2"]},
+        {"op": "add", "shape": "cylinder", "name": "knuckle_lid", "radius": "knuckle_outer_diameter/2", "height": "knuckle_length", "at": ["hinge_axis_x", 0, "base_height + lid_plate_thickness/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "bore_lid", "radius": "pin_diameter/2 + 0.1", "height": "knuckle_length + 0.2", "at": ["hinge_axis_x", 0, "base_height + lid_plate_thickness/2"], "axis": "+Y"},
+        {"op": "add", "shape": "box", "name": "snap_beam", "size": ["snap_tab_beam_length", "snap_tab_beam_width", "snap_tab_beam_thickness"], "at": ["base_width/2 + snap_tab_beam_length/2", 0, "base_height + lid_plate_thickness"]},
+        {"op": "add", "shape": "box", "name": "snap_hook", "size": ["snap_hook_height", "snap_tab_beam_width", "snap_tab_beam_thickness"], "at": ["base_width/2 + snap_tab_beam_length + snap_hook_height/2", 0, "base_height + lid_plate_thickness - snap_hook_height/2"]}
+      ]
+    }
+  ],
+  "mating_sets": [
+    {
+      "name": "Hinge Joint",
+      "upstream_relationships": ["IFC-0001", "IFC-0002", "JNT-0002", "PHI-0001"],
+      "participants": [
+        {"body": "BOD-0003", "element": "pin_shaft", "role": "Pin shaft"},
+        {"body": "BOD-0001", "element": "bore_base", "role": "Base knuckle bore"},
+        {"body": "BOD-0001", "element": "bore_base2", "role": "Base knuckle bore"},
+        {"body": "BOD-0002", "element": "bore_lid", "role": "Lid knuckle bore"}
+      ],
+      "purpose": "Allows lid rotation about the hinge axis relative to the base.",
+      "fit": "pin_diameter + 0.1 clearance",
+      "motion_after_assembly": "Lid can rotate from 0° (closed) to 90° (open) about +Y axis, limited by stop."
+    },
+    {
+      "name": "Snap Latch",
+      "upstream_relationships": ["IFC-0004", "JNT-0003", "PHI-0002"],
+      "participants": [
+        {"body": "BOD-0002", "element": "snap_beam", "role": "Cantilever beam"},
+        {"body": "BOD-0002", "element": "snap_hook", "role": "Hook"},
+        {"body": "BOD-0001", "element": "latch_recess", "role": "Recess"}
+      ],
+      "purpose": "Retains lid in closed position by hook engaging recess.",
+      "fit": "latch_recess_depth = snap_hook_height",
+      "motion_after_assembly": "Snap tab can deflect to disengage when opening."
+    },
+    {
+      "name": "Hinge Stop",
+      "upstream_relationships": ["IFC-0003"],
+      "participants": [
+        {"body": "BOD-0002", "element": "lid_main", "role": "Lid surface"},
+        {"body": "BOD-0001", "element": "hinge_stop", "role": "Stop ledge"}
+      ],
+      "purpose": "Limits lid rotation to 90° open.",
+      "fit": "Contact when open",
+      "motion_after_assembly": "No motion after contact."
+    }
+  ],
+  "assembly_sequence": [
+    {
+      "step": 1,
+      "component": "BOD-0001",
+      "action": "Place base on flat surface with open top up.",
+      "insertion_direction": [0, 0, 1],
+      "access": "Free space above",
+      "final_retention": "Gravity holds it."
+    },
+    {
+      "step": 2,
+      "component": "BOD-0003",
+      "action": "Insert pin into base knuckles from +Y side until head contacts the outer face of the +Y knuckle.",
+      "insertion_direction": [0, -1, 0],
+      "access": "Open end of +Y knuckle",
+      "final_retention": "Pin is held by friction in base knuckles (interference fit) and later captured by lid knuckle."
+    },
+    {
+      "step": 3,
+      "component": "BOD-0002",
+      "action": "Slide lid knuckle onto pin from +Y side, aligning bore with pin, and push lid downward until it sits over the base opening. The snap tab will deflect outward as it passes the front wall, then engage the latch recess.",
+      "insertion_direction": [0, -1, 0],
+      "access": "Open end of +Y knuckle and top opening",
+      "final_retention": "Lid is retained by pin through knuckles and snap tab engagement."
+    }
+  ],
+  "state_expectations": [
+    {
+      "state": "CFG-0001",
+      "touching": "Lid plate underside contacts top flange; snap hook engages latch recess; hinge knuckles aligned.",
+      "engaged": "Snap hook is latched, preventing lid from opening.",
+      "free": "Hinge joint allows rotation but is blocked by latch.",
+      "still_assembled": "Base, lid, pin joined."
+    },
+    {
+      "state": "CFG-0002",
+      "touching": "Lid is rotated 90° about Y; lid touches hinge stop; no latch engagement.",
+      "engaged": "Hinge stop contacts lid to prevent further rotation.",
+      "free": "Lid can rotate back to closed position.",
+      "still_assembled": "Base, lid, pin joined."
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+ "axisless_datums": [],
+ "bodies": [
+  "BOD-0012",
+  "BOD-0013"
+ ],
+ "branch": "CND-0004",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0016",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0017",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0018",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0019",
+   "mating": {},
+   "needs_governing_constraint": false
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0012",
+    "BOD-0013"
+   ],
+   "descriptor": "PRISMATIC (dof TX, axis +X)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0013"
+  },
+  {
+   "bodies": [
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0001",
+   "family": "ConstraintRelation",
+   "target": "CRL-0108"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TY, TZ, RX, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0109"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0110"
+  },
+  {
+   "bodies": [
+    "BOD-0013",
+    "BOD-0012"
+   ],
+   "descriptor": "blocks TX",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0111"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0004",
+  "required": true
+ }
+}

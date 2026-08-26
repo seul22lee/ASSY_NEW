@@ -589,11 +589,17 @@ entity_families:
     fields_owned_by_s04b: [frame_origin]
     rules:
       - "A joint_type label alone is inert. A realization on each side is required (INV-008)."
+      - >
+        THAT REALIZATION IS A `KinematicRealization` naming this joint, whose
+        participating features cover each body the joint relates. The joint
+        remains the authority for the relation and its DOFs; the realization
+        says only which geometry embodies it, and is never inferred from where a
+        feature is placed or how it is oriented (Unit G).
       - "axis_direction is a unit vector in a named frame, and is owned by s03."
       - >
         The located FRAME (`frame_origin`, in the ReferenceScale basis) is
         owned by s04b at PROVISIONAL maturity and is THE placement authority as
-        located: s05 places the features that realize the joint AT it, and s07
+        located: s05 places the features that embody the joint against it, and s07
         derives every pose from it (Unit G). s06 settles parameters and never
         writes it. A settled embodiment that cannot stand where the frame is
         located is a typed finding routed to s04, whose revision - not a
@@ -867,12 +873,22 @@ entity_families:
     # the opposite on the strength of history that predates that rule.
     # The envelope is read by the one grammar at the boundary (`ir_validation`).
     #
-    # `interface` is the typed trace from a feature to the s03 Interface whose
-    # side it realizes. A feature that realizes an interaction names it;
+    # `interfaces` is the typed trace from a feature to the s03 Interfaces whose
+    # sides it realizes. A feature that realizes an interaction names it;
     # nothing infers it from prose or from the body alone, S05-C1 demands one
-    # per participating body per interface, and the interface is a premise of
-    # the feature so a revised interface stales the geometry that realized it.
-    optional_fields: [interface]
+    # per participating body per interface, and each named interface is a
+    # premise of the feature so a revised interaction stales the geometry that
+    # realized it.
+    #
+    # CARDINALITY IS MANY, and that is a mechanical fact rather than a
+    # convenience. ONE physical feature can bear on several declared
+    # interactions: a rail face carrying two carriages, a pin passing through
+    # two bores, a shaft journalled in two bearings, a wall contacted by two
+    # neighbours. It was `cardinality: one`, and the only ways to satisfy that
+    # were to duplicate the geometry - two Feature records for one physical
+    # face, which makes the body wrong and the occupancy double-counted - or to
+    # leave an interaction unrealized. Neither is the design.
+    optional_fields: [interfaces]
     # UNIT G. The whole feature - placement, construction, references - is read
     # by the one grammar in downstream/ir (`FeatureSpec`) before it stands.
     ir_validation: feature
@@ -892,11 +908,12 @@ entity_families:
       # at a joint MAY state a different axis, meaning "located by this joint,
       # oriented otherwise": a face whose normal crosses the hinge line, a snap
       # arm projecting across it. Refusing that was an over-constraint.
-      # What it costs is that a joint datum is no longer by itself a
-      # realization: a joint is realized only by a feature placed at it that
-      # LIES ON ITS AXIS (downstream.embodiment.joint_realization_findings), so
-      # a feature merely positioned by the joint cannot discharge the duty to
-      # embody it.
+      # NEITHER FACT MEANS THE FEATURE REALIZES ANYTHING. A datum is where a
+      # feature is; an axis is how it points. What geometry embodies an upstream
+      # relation is said by a KinematicRealization and read only from there
+      # (downstream.embodiment.realization_findings). Reading placement as
+      # realization let a feature that merely stood at a joint discharge the
+      # duty to embody it.
       # There is no independent origin: s04's arrangement frame is the world,
       # every body frame coincides with it at zero joint coordinates, and s07
       # derives every transform from the datum, the scale authority and the
@@ -954,10 +971,10 @@ entity_families:
         target: Body
         cardinality: one
         resolvable: false
-      interface:
+      interfaces:
         kind: reference
         target: Interface
-        cardinality: one
+        cardinality: many
         resolvable: false
         referent_population: COMMITTED_BRANCH
       feature_kind:
@@ -983,7 +1000,7 @@ entity_families:
     rules:
       - "OCCT/CAD face indices are never a persistent identity."
       - >
-        A feature realizes one side of ONE interface, named by `interface`, or
+        A feature realizes one side of each interface it names in `interfaces`, or
         realizes an obligation and names none. It never names an interface the
         selected branch does not carry, and it never creates one: an interaction
         is s03's to declare (Unit E).
@@ -1039,6 +1056,94 @@ entity_families:
     rules:
       - "Must cite the obligation IDs it discharges (INV-008)."
       - "A realization with no verification predicate discharges nothing."
+      - >
+        THIS FAMILY MEANS OBLIGATION DISCHARGE AND NOTHING ELSE. The geometry
+        that embodies a kinematic relation is a KinematicRealization; a family
+        carrying both subjects could not be read without asking which one a
+        given record meant.
+
+  KinematicRealization:
+    owned_by: s05
+    purpose: >
+      WHICH ACTUAL GEOMETRY EMBODIES ONE UPSTREAM KINEMATIC RELATION. A Joint
+      states an intended relation and its DOFs; a ConstraintRelation states what
+      is blocked, in which configurations, provided by what; a
+      MobilityExpectation dispositions each DOF. All of that is the demand, and
+      all of it is upstream. This family is the SUPPLY, and the only thing it
+      says: these s05 features are the material that embodies that relation.
+    field_semantics:
+      realizes:
+        # EXACTLY ONE upstream relation, of either kind. The generic multi-target
+        # reference validator resolves both; nothing here special-cases which.
+        kind: reference
+        target: [Joint, ConstraintRelation]
+        cardinality: one
+        resolvable: false
+        referent_population: INVOCATION_BRANCH
+      participating_features:
+        # THE MATERIAL. Many, and never empty: a relation between two sides is
+        # embodied by geometry on both, and one surface embodies no relation it
+        # is not touching. Which bodies are covered is read from the features'
+        # own `body`, not restated here.
+        #
+        # NAMED, NOT RESTED ON. These are a typed reference and NOT premises of
+        # the record; only `realizes` is. A claim's content is a set of ids and
+        # a target, derived from no feature's VALUE, so staling it when a
+        # diameter is revised is a false positive rather than currentness - and
+        # a live run proved the cost: every realization ended STALE, each
+        # structural round re-authored what the previous one had staled, and the
+        # solver never ran. Withdrawal is caught from STATE instead, every
+        # round: a claim naming a feature that is no feature of the branch is
+        # refused, and coverage counts standing features only.
+        kind: reference
+        target: Feature
+        cardinality: many
+        resolvable: false
+        referent_population: INVOCATION_BRANCH
+    required_fields: [entity_id, realizes, participating_features]
+    rules:
+      - >
+        IT CARRIES NO GEOMETRY AND NO KINEMATICS. No coordinate, no axis, no
+        DOF list, no permits/removes, no mechanism-family classification. The
+        TARGET remains the authority for what the relation is and which freedoms
+        it concerns; this record only names the material. A DOF list here would
+        be a second answer to a question s03 has already answered.
+      - >
+        REALIZATION IS DECLARED, NEVER INFERRED. It was inferred before - from a
+        feature being placed at a joint, then from its axis as well, and for a
+        restraint from whether a body carried a feature whose KIND was spelled
+        STOP, SHOULDER or KEEPER. Every one of those is a coincidence a design
+        can satisfy without embodying anything: a keeper sitting on a hinge axis
+        permits no rotation, and a feature named STOP restrains nothing by being
+        named. `placement.datum` says WHERE a feature is and `placement.axis`
+        says HOW IT IS ORIENTED; neither has ever meant that it realizes a
+        relation, and nothing may read them as if it did.
+      - >
+        ONE PER RELATION, AND COMPLETE. At most one KinematicRealization stands
+        for a given target in one committed branch, and it lists EVERY
+        participating feature. Coverage is never satisfied by unioning several
+        rows: two records each carrying one side of a relation are not a
+        realization between them - each states an embodiment that does not
+        embody, and reading them as a union means no record in state has to be
+        true on its own. Two rails and two carriages embodying one guided
+        relation are ONE record naming all four features.
+      - >
+        WHAT IS CHECKED IS COVERAGE, NOT SHAPE. That one record's participating
+        features must cover every side the target relates. No individual
+        feature's axis is compared to the target's, because the geometry that
+        embodies a relation need not be aligned with it: three transverse pads
+        bearing on three recess walls guide a slide, two rails and two carriages
+        embody one guided relation, and a rod in a plain bore may leave axial
+        rotation deliberately free.
+      - >
+        WHICH SIDES ARE OWED MATERIAL FOLLOWS THE TARGET'S OWN MODEL. A Joint
+        owes material on each body it relates. A ConstraintRelation owes the
+        RETAINED side always - the product material being held is this design's,
+        whatever holds it - and the PROVIDER BODY when it names one. When the
+        provider is a `provider_reaction_site`, the thing bearing the load is
+        OUTSIDE this design's body set: no Feature is demanded for it and no
+        Body is invented for it, because the external-provider relation is
+        upstream's and stays authoritative for that side.
 
   State:
     # Declared at S7-A. This family, Transition and SweptVolume carried NO

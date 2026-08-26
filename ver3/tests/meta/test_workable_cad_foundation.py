@@ -155,6 +155,11 @@ def hinge_embodiment(state, with_stop=False, scale_parameter=None):
                 interface="IFC-1", premises=["PRM-R"]),
         feature("FEA-B-PIN", "BOD-B", "PIN", "JNT-1", [cylinder("pin", REF("PRM-R"), MM(30))],
                 interface="IFC-1", premises=["PRM-R"]),
+        # WHAT EMBODIES THE HINGE, said rather than inferred from where the
+        # bore and the pin happen to sit.
+        Op("CREATE", "KinematicRealization", "KRL-1",
+           {"realizes": "JNT-1", "participating_features": ["FEA-A-BORE", "FEA-B-PIN"]},
+           "s05:embodiment", premise_refs=["JNT-1", "FEA-A-BORE", "FEA-B-PIN"]),
     ]
     if with_stop:
         # a block under the base plate's far end, beyond the hinge line: clear
@@ -380,11 +385,11 @@ class TestCompletenessMeansConstructible(unittest.TestCase):
                                   "construction": [cylinder("c", MM(1), MM(1))]}],
                     "parameters": []}
         c5 = s05.check_c5_program_totality(response, view)
-        self.assertTrue(any("lies on the joint's axis" in p for p in c5), c5)
+        self.assertEqual([], c5, "a feature at a joint may be oriented as it likes")
         c11 = s05.check_c11_joints_realized(response, view)
-        self.assertTrue(any("BOD-B" in p for p in c11), c11)
-        self.assertFalse(any("BOD-A" in p for p in c11),
-                         "a feature placed at the joint realizes it; no second field is read")
+        self.assertTrue(any("JNT-1" in p for p in c11), c11)
+        self.assertTrue(any("no KinematicRealization names it" in p for p in c11),
+                        "placement is not realization: the claim is what is read")
         c12 = s05.check_c12_bodies_built(response, view)
         self.assertEqual(2, len(c12), c12)
 
@@ -498,74 +503,67 @@ class TestTheModelIsShownTheLanguageTheBoundaryEnforces(unittest.TestCase):
         for op in ir.OPCODES:
             self.assertIn(op, grammar)
         self.assertIn('"datum"', grammar)
-        self.assertIn("negation", grammar)
+        self.assertIn("negate", grammar)
         for axis in ir.SIGNED_AXES:
             self.assertIn('"%s"' % axis, grammar)
         schema = " ".join(s05.S05Embodiment.render_response_schema().split())
-        self.assertIn("placement {datum, offset?, axis?}", schema)
-        self.assertIn("construction [{id, operation, operands?, parameters?, axis?}]", schema)
-        self.assertNotIn("envelope", schema)
-        self.assertNotIn("construction_statements", schema)
-        self.assertIn("role (optional)", schema)
-        # the placeholders are read from the template, not restated here: a
-        # hand-listed set says a section was added by failing to fill one in.
+        self.assertIn('"placement"', schema)
+        self.assertIn('"solid": <solid>', schema)
+        self.assertIn('"realization_assignments"', schema)
+        self.assertIn('"interface_assignments"', schema)
+        # THE BOOKKEEPING IS GONE FROM THE SURFACE, not merely unused. A schema
+        # that still teaches step ids leaves the old format as a fallback.
+        for retired in ("construction", "operands", "terminal", "kinematic_realizations",
+                        '"parameters"'):
+            self.assertNotIn(retired, schema,
+                             "%r is still taught by the response schema" % retired)
         slots = {name for _, name, _, _ in Formatter().parse(s05.PROMPT) if name}
         self.assertIn("STOCK", s05.PROMPT.format(**{k: "" for k in slots}))
 
-    def test_23b_every_reference_field_is_shown_with_what_it_may_name(self):
-        """A reference typed in the contract is rendered with its target
-        families, so which ids belong in `kept_open_by`, `blocks`, `joint` or
-        `interface` is read from the schema, never guessed from a name."""
-        schema = " ".join(s05.S05Embodiment.render_response_schema().split())
-        self.assertIn("kept_open_by -> Ambiguity | Freedom ids", schema)
-        self.assertIn("blocks -> ANY ids", schema)
-        self.assertIn("role (optional) in {SCALE}", schema)
-        self.assertIn("feature_kind in {", schema)
-        features_line = schema.split("realizations[]")[0]
-        self.assertNotIn("joint", features_line.replace("placement", ""),
-                         "realizing a joint is the placement, not a second field")
-        self.assertIn("interface (optional) -> Interface id", schema)
-        self.assertIn("governs_interface (optional) -> Interface id", schema)
+    def test_23b_new_objects_are_named_by_local_key_and_never_by_canonical_id(self):
+        """A canonical id for a record this response CREATES is unsayable.
 
-    def test_23c_joints_to_realize_are_rendered_from_the_topology(self):
-        """Like obligations, the joints an embodiment must realize are listed
-        from s03's joints and groups - each with its class, its declared axis,
-        whether s04 located it, and the bodies it relates - not left as a rule."""
+        The dangling-future-id class of failure is closed by the schema, not by
+        a check: the only ids in it name things the design has already
+        committed.
+        """
+        import re
+        schema = s05.S05Embodiment.render_response_schema()
+        self.assertEqual([], re.findall(r'"[A-Z][A-Z0-9]*-\d+"', schema),
+                         "the schema shows an instantiable canonical id")
+        self.assertIn('"key": "<local key>"', schema)
+        self.assertIn('"unit"', schema)
+        self.assertIn("<Body id>", schema)
+        self.assertIn("<Joint or ConstraintRelation id>", schema)
+
+    def test_23c_the_duties_are_rendered_from_the_topology_by_the_one_manifest(self):
+        """The relations an embodiment must realize are ENUMERATED from s03's
+        joints and groups - not left as a rule - and by the same manifest that
+        validates the response and answers the settlement gate."""
+        from ver3.assy_v3.downstream import duty_manifest
+
         state = DesignState(run_id="jd")
         hinge_upstream(state, joint_type="PRISMATIC", axis="+X")
-        view = {fam: state.standing(fam) for fam in ("Joint", "RigidGroup", "Body")}
-        block = s05.render_joint_duties(view)
-        for token in ("JNT-1", "PRISMATIC", "+X", "BOD-A, BOD-B", "frame located by s04",
-                      "datum JNT-1"):
+        view = {fam: state.standing(fam) for fam in
+                ("Joint", "RigidGroup", "Body", "Interface", "ConstraintRelation",
+                 "ReferenceScale")}
+        manifest = duty_manifest.from_rows(view)
+        block = manifest.render()
+        for token in ("JNT-1", "PRISMATIC", "+X", "BOD-A, BOD-B"):
             self.assertIn(token, block)
-        self.assertIn("none", s05.render_joint_duties({}))
-        state2 = DesignState(run_id="jd2")
-        hinge_upstream(state2, joint_type="FIXED", axis="+X", locate_joint=False)
-        self.assertIn("none", s05.render_joint_duties(
-            {fam: state2.standing(fam) for fam in ("Joint", "RigidGroup", "Body")}))
+        self.assertEqual(("JNT-1",), manifest.required_realization_targets())
+        self.assertIn("none", duty_manifest.from_rows({}).render())
         prompt = s05.S05Embodiment().prompt({"consumer_view": view})
-        self.assertIn("JOINTS TO REALIZE", prompt)
-        section = prompt.split("JOINTS TO REALIZE\n-----------------")[1].split("HARD REQUIREMENTS")[0]
+        self.assertIn("DUTIES OF THIS EMBODIMENT", prompt)
+        section = prompt.split("DUTIES OF THIS EMBODIMENT")[1].split("OBLIGATION DUTIES")[0]
         self.assertIn("JNT-1", section)
 
-    def test_24_to_operations_carries_datum_joint_scale_and_parameters_as_premises(self):
-        response = {"features": [{"id": "FEA-1", "body": "BOD-A", "feature_kind": "BORE",
-                                  "geometry": "x",
-                                  "placement": {"datum": "JNT-1", "offset": [REF("PRM-1"), MM(0), MM(0)]},
-                                  "construction": [cylinder("c", REF("PRM-2"), MM(1))]}],
-                    "realizations": [], "parameters": [{"id": "PRM-1", "symbol": "a", "unit": "mm"},
-                                                       {"id": "PRM-2", "symbol": "b", "unit": "mm"}],
-                    "constraints": [], "unresolved": []}
-        response["parameters"][0]["role"] = "SCALE"
-        ops = s05.S05Embodiment().to_operations(response, {"consumer_view": {
-            "ReferenceScale": [{"entity_id": "SCL-1"}]}})
-        f = next(op for op in ops if op.entity_type == "Feature")
-        for premise in ("BOD-A", "JNT-1", "SCL-1", "PRM-1", "PRM-2"):
-            self.assertIn(premise, f.premise_refs)
-        scale = next(op for op in ops if op.entity_type == "Parameter" and op.entity_id == "PRM-1")
-        self.assertEqual("SCALE", scale.fields["role"])
-        self.assertEqual([], [op for op in ops if op.entity_type == "ReferenceScale"],
-                         "s04's scale record is never written by s05")
+    # THE PRODUCER'S PREMISES moved to `test_s05_authoring_boundary`. The
+    # property - a Feature rests on its body, its datum, the scale that datum's
+    # coordinates are in, every interaction it realizes and every parameter it
+    # reads - is a property of the semantic boundary, and it is asserted where
+    # that boundary is exercised rather than against a fixture that has to
+    # guess which datum the builder chose.
 
 
 if __name__ == "__main__":                                       # pragma: no cover

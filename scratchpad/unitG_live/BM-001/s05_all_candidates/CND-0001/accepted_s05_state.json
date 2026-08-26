@@ -1,0 +1,1297 @@
+{
+ "Constraint": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Constraint",
+   "_premises": [
+    "PRM-0004",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "basis": "DESIGN_CHOICE",
+   "entity_id": "CON-0001",
+   "expression": {
+    "lhs": {
+     "ref": "PRM-0004"
+    },
+    "relation": "==",
+    "rhs": {
+     "const": 1.0,
+     "unit": "mm"
+    }
+   },
+   "kind": "GEOMETRIC_RELATION",
+   "parameters": [
+    "PRM-0004"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Constraint",
+   "_premises": [
+    "PRM-0002",
+    "PRM-0003",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "basis": "DESIGN_CHOICE",
+   "entity_id": "CON-0002",
+   "expression": {
+    "lhs": {
+     "ref": "PRM-0002"
+    },
+    "relation": "==",
+    "rhs": {
+     "ref": "PRM-0003"
+    }
+   },
+   "kind": "CLEARANCE",
+   "parameters": [
+    "PRM-0002",
+    "PRM-0003"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Constraint",
+   "_premises": [
+    "PRM-0001",
+    "PRM-0003",
+    "IFC-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "basis": "DESIGN_CHOICE",
+   "entity_id": "CON-0003",
+   "expression": {
+    "lhs": {
+     "ref": "PRM-0001"
+    },
+    "relation": "==",
+    "rhs": {
+     "ref": "PRM-0003"
+    }
+   },
+   "governs_interface": "IFC-0001",
+   "kind": "CLEARANCE",
+   "parameters": [
+    "PRM-0001",
+    "PRM-0003"
+   ]
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Constraint",
+   "_premises": [
+    "PRM-0002",
+    "PRM-0003",
+    "IFC-0002",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "basis": "DESIGN_CHOICE",
+   "entity_id": "CON-0004",
+   "expression": {
+    "lhs": {
+     "ref": "PRM-0002"
+    },
+    "relation": "==",
+    "rhs": {
+     "ref": "PRM-0003"
+    }
+   },
+   "governs_interface": "IFC-0002",
+   "kind": "CLEARANCE",
+   "parameters": [
+    "PRM-0002",
+    "PRM-0003"
+   ]
+  }
+ ],
+ "Feature": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "ENV-0001",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 100.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 60.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 20.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S2",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 100.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 60.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 20.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S3",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 90.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 50.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 15.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S4",
+     "operands": [
+      "S2",
+      "S3"
+     ],
+     "operation": "CUT"
+    },
+    {
+     "id": "S5",
+     "operands": [
+      "S1",
+      "S4"
+     ],
+     "operation": "UNION"
+    }
+   ],
+   "entity_id": "FEA-0001",
+   "feature_kind": "STOCK",
+   "geometry": "Main box body as a shallow rectangular tray with side and bottom walls, open at top to define storage volume.",
+   "placement": {
+    "axis": "+Z",
+    "datum": "ENV-0001",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "JNT-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 8.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S2",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 4.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S3",
+     "operands": [
+      "S1",
+      "S2"
+     ],
+     "operation": "CUT"
+    }
+   ],
+   "entity_id": "FEA-0002",
+   "feature_kind": "STOCK",
+   "geometry": "Knuckle protruding from base at hinge location, with bore for pin.",
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "IFC-0001",
+    "JNT-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 4.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0003",
+   "feature_kind": "BORE",
+   "geometry": "Bore through base hinge knuckle to accept hinge pin with interference fit.",
+   "interfaces": [
+    "IFC-0001"
+   ],
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "FRG-0003",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 80.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 40.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 10.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0004",
+   "feature_kind": "CLEARANCE_POCKET",
+   "geometry": "Recess inside base storage volume, open at top (part of top aperture).",
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0003",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "FRG-0003",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 80.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 40.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 2.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0005",
+   "feature_kind": "CLEARANCE_POCKET",
+   "geometry": "Opening at top of base for access to storage volume.",
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0003",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "FRG-0004",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 70.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 30.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 20.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0006",
+   "feature_kind": "CLEARANCE_POCKET",
+   "geometry": "Pocket at the front of the base (FRG-0004) to provide access for lifting the lid.",
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0004",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "IFC-0004",
+    "FRG-0004",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 5.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0007",
+   "feature_kind": "CLEARANCE_POCKET",
+   "geometry": "Recess in base front wall to receive the lid snap tab.",
+   "interfaces": [
+    "IFC-0004"
+   ],
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0004",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "IFC-0003",
+    "FRG-0004",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 80.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 5.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 2.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0008",
+   "feature_kind": "STOP",
+   "geometry": "Front wall top face; provides closing stop when lid contacts it.",
+   "interfaces": [
+    "IFC-0003"
+   ],
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0004",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0001",
+    "ENV-0001",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0001",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 100.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 60.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 1.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0009",
+   "feature_kind": "STOCK",
+   "geometry": "Bottom support pad for base.",
+   "placement": {
+    "axis": "-Z",
+    "datum": "ENV-0001",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": -20.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "IFC-0003",
+    "ENV-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 100.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 60.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 5.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0010",
+   "feature_kind": "STOCK",
+   "geometry": "Main lid plate.",
+   "interfaces": [
+    "IFC-0003"
+   ],
+   "placement": {
+    "axis": "+Z",
+    "datum": "ENV-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "JNT-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 8.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 8.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S2",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 8.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 4.0,
+       "unit": "mm"
+      }
+     }
+    },
+    {
+     "id": "S3",
+     "operands": [
+      "S1",
+      "S2"
+     ],
+     "operation": "CUT"
+    }
+   ],
+   "entity_id": "FEA-0011",
+   "feature_kind": "STOCK",
+   "geometry": "Knuckle on lid that interlocks with base knuckle; has bore for pin.",
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "IFC-0002",
+    "JNT-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 8.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 4.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0012",
+   "feature_kind": "BORE",
+   "geometry": "Bore through lid hinge knuckle for pin with clearance.",
+   "interfaces": [
+    "IFC-0002"
+   ],
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "IFC-0004",
+    "JNT-0003",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 8.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 3.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0013",
+   "feature_kind": "SNAP_ARM",
+   "geometry": "Cantilever snap tab on front edge of lid, able to deflect about the hinge axis of JNT-0003.",
+   "interfaces": [
+    "IFC-0004"
+   ],
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0003",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "IFC-0004",
+    "FEA-0013",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 4.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 3.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0014",
+   "feature_kind": "KEEPER",
+   "geometry": "Hook at end of snap tab to engage the base latch recess.",
+   "interfaces": [
+    "IFC-0004"
+   ],
+   "placement": {
+    "axis": "+Z",
+    "datum": "FEA-0013",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0002",
+    "FRG-0001",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0002",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "BOX",
+     "parameters": {
+      "dx": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dy": {
+       "const": 10.0,
+       "unit": "mm"
+      },
+      "dz": {
+       "const": 2.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0015",
+   "feature_kind": "CLEARANCE_POCKET",
+   "geometry": "Cutout on lid near snap tab to provide finger access.",
+   "placement": {
+    "axis": "+Z",
+    "datum": "FRG-0001",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "Feature",
+   "_premises": [
+    "BOD-0003",
+    "IFC-0001",
+    "IFC-0002",
+    "JNT-0002",
+    "SCL-CND-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "body": "BOD-0003",
+   "construction": [
+    {
+     "id": "S1",
+     "operation": "CYLINDER",
+     "parameters": {
+      "height": {
+       "const": 20.0,
+       "unit": "mm"
+      },
+      "radius": {
+       "const": 4.0,
+       "unit": "mm"
+      }
+     }
+    }
+   ],
+   "entity_id": "FEA-0016",
+   "feature_kind": "PIN",
+   "geometry": "Solid cylindrical hinge pin.",
+   "interfaces": [
+    "IFC-0001",
+    "IFC-0002"
+   ],
+   "placement": {
+    "axis": "+Y",
+    "datum": "JNT-0002",
+    "offset": [
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     },
+     {
+      "const": 0.0,
+      "unit": "mm"
+     }
+    ]
+   }
+  }
+ ],
+ "KinematicRealization": [
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "JNT-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0001",
+   "participating_features": [
+    "FEA-0002",
+    "FEA-0003",
+    "FEA-0016"
+   ],
+   "realizes": "JNT-0001"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "JNT-0002",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0002",
+   "participating_features": [
+    "FEA-0011",
+    "FEA-0012",
+    "FEA-0016"
+   ],
+   "realizes": "JNT-0002"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "JNT-0003",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0003",
+   "participating_features": [
+    "FEA-0013"
+   ],
+   "realizes": "JNT-0003"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0001",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0004",
+   "participating_features": [
+    "FEA-0001"
+   ],
+   "realizes": "CRL-0001"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0002",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0005",
+   "participating_features": [
+    "FEA-0016",
+    "FEA-0002",
+    "FEA-0003"
+   ],
+   "realizes": "CRL-0002"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0003",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0006",
+   "participating_features": [
+    "FEA-0011",
+    "FEA-0012",
+    "FEA-0016"
+   ],
+   "realizes": "CRL-0003"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0004",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0007",
+   "participating_features": [
+    "FEA-0013"
+   ],
+   "realizes": "CRL-0004"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0005",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0008",
+   "participating_features": [
+    "FEA-0013",
+    "FEA-0014",
+    "FEA-0007"
+   ],
+   "realizes": "CRL-0005"
+  },
+  {
+   "_authority": "AUTHORITATIVE",
+   "_created_by": "s05",
+   "_family": "KinematicRealization",
+   "_premises": [
+    "CRL-0006",
+    "CND-0001",
+    "SLD-C1AD91761F07"
+   ],
+   "_provenance": "s05:embodiment",
+   "_validity": "STANDING",
+   "entity_id": "KRL-0009",
+   "participating_features": [
+    "FEA-0001"
+   ],
+   "realizes": "CRL-0006"
+  }
+ ],
+ "Parameter": []
+}

@@ -1,0 +1,744 @@
+{
+  "features": [
+    {
+      "key": "base_stock",
+      "body": "BOD-0101",
+      "feature_kind": "STOCK",
+      "geometry": "Main rectangular body of the base, forming the side walls and bottom.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0101"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "RELIEVED",
+        "base": {
+          "shape": "BLOCK",
+          "dx": 50,
+          "dy": 30,
+          "dz": 20
+        },
+        "relief": [
+          {
+            "shape": "CYLINDER",
+            "radius": 10,
+            "height": 20
+          },
+          {
+            "shape": "CYLINDER",
+            "radius": 10,
+            "height": 20
+          }
+        ]
+      }
+    },
+    {
+      "key": "hinge_bore",
+      "body": "BOD-0101",
+      "feature_kind": "BORE",
+      "geometry": "Through bore for the hinge pin, axis along Y.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 8,
+        "height": 40
+      }
+    },
+    {
+      "key": "hinge_axial_face",
+      "body": "BOD-0101",
+      "feature_kind": "FACE",
+      "geometry": "Flat face on the base around the bore, perpendicular to Y, providing axial thrust bearing.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 30,
+        "dy": 5,
+        "dz": 30
+      }
+    },
+    {
+      "key": "base_stop_0",
+      "body": "BOD-0101",
+      "feature_kind": "STOP",
+      "geometry": "Stop pad on the base to limit lid rotation at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y",
+        "offset": [0, -20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "base_stop_90",
+      "body": "BOD-0101",
+      "feature_kind": "STOP",
+      "geometry": "Stop pad on the base to limit lid rotation at 90 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y",
+        "offset": [0, 20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "base_hasp_catch",
+      "body": "BOD-0101",
+      "feature_kind": "KEEPER",
+      "geometry": "Catch pocket on the base to engage hasp hook when latched.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0102"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 5,
+        "height": 10
+      }
+    },
+    {
+      "key": "base_hasp_stop_rx",
+      "body": "BOD-0101",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the base that limits hasp rotation about X at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X",
+        "offset": [0, 20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "lid_stock",
+      "body": "BOD-0102",
+      "feature_kind": "STOCK",
+      "geometry": "Main rectangular panel of the lid.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0102"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 50,
+        "dy": 30,
+        "dz": 10
+      }
+    },
+    {
+      "key": "hinge_pin",
+      "body": "BOD-0102",
+      "feature_kind": "PIN",
+      "geometry": "Integral hinge pin on the lid, axis along Y, fits into base bore.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 8,
+        "height": 30
+      }
+    },
+    {
+      "key": "hinge_thrust_collar",
+      "body": "BOD-0102",
+      "feature_kind": "SHOULDER",
+      "geometry": "Collar on the lid around the hinge pin, contacting base axial face.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 12,
+        "height": 5
+      }
+    },
+    {
+      "key": "lid_stop_0",
+      "body": "BOD-0102",
+      "feature_kind": "STOP",
+      "geometry": "Stop pad on the lid that contacts base stop at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y",
+        "offset": [0, -20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "lid_stop_90",
+      "body": "BOD-0102",
+      "feature_kind": "STOP",
+      "geometry": "Stop pad on the lid that contacts base stop at 90 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0101"
+        },
+        "axis": "+Y",
+        "offset": [0, 20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "hasp_pivot_bore",
+      "body": "BOD-0102",
+      "feature_kind": "BORE",
+      "geometry": "Through bore on the lid to receive hasp pin, axis along X.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 4,
+        "height": 20
+      }
+    },
+    {
+      "key": "hasp_pivot_boss",
+      "body": "BOD-0102",
+      "feature_kind": "BOSS",
+      "geometry": "Boss on the lid around the hasp pivot bore to provide bearing surface.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 8,
+        "height": 20
+      }
+    },
+    {
+      "key": "hasp_stop_ry",
+      "body": "BOD-0102",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the lid that limits hasp rotation about Y at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X",
+        "offset": [0, -20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "hasp_access_pocket",
+      "body": "BOD-0102",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket in the lid to keep FRG-0102 free for finger access.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0102"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 20,
+        "height": 15
+      }
+    },
+    {
+      "key": "hasp_aperture_pocket",
+      "body": "BOD-0102",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket in the lid to keep FRG-0103 free for hasp access.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0103"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 22,
+        "height": 1
+      }
+    },
+    {
+      "key": "hasp_stock",
+      "body": "BOD-0103",
+      "feature_kind": "STOCK",
+      "geometry": "Main plate of the hasp.",
+      "placement": {
+        "datum": {
+          "kind": "ENVELOPE",
+          "ref": "ENV-0103"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 16,
+        "dy": 4,
+        "dz": 16
+      }
+    },
+    {
+      "key": "hasp_pivot_pin",
+      "body": "BOD-0103",
+      "feature_kind": "PIN",
+      "geometry": "Integral pin on the hasp, axis along X, fits into lid bore.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 4,
+        "height": 20
+      }
+    },
+    {
+      "key": "hasp_hook",
+      "body": "BOD-0103",
+      "feature_kind": "KEEPER",
+      "geometry": "Hook at the end of the hasp that engages base catch.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0101"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 5,
+        "height": 10
+      }
+    },
+    {
+      "key": "hasp_stop_rx",
+      "body": "BOD-0103",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the hasp that contacts base stop to limit RX at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X",
+        "offset": [0, 20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "hasp_stop_ry",
+      "body": "BOD-0103",
+      "feature_kind": "STOP",
+      "geometry": "Stop face on the hasp that contacts lid stop to limit RY at 0 deg.",
+      "placement": {
+        "datum": {
+          "kind": "JOINT",
+          "ref": "JNT-0102"
+        },
+        "axis": "+X",
+        "offset": [0, -20, 0]
+      },
+      "solid": {
+        "shape": "BLOCK",
+        "dx": 5,
+        "dy": 5,
+        "dz": 5
+      }
+    },
+    {
+      "key": "hasp_access_clearance",
+      "body": "BOD-0103",
+      "feature_kind": "CLEARANCE_POCKET",
+      "geometry": "Pocket in the hasp to keep FRG-0101 free for finger access.",
+      "placement": {
+        "datum": {
+          "kind": "FUNCTIONAL_REGION",
+          "ref": "FRG-0101"
+        },
+        "axis": "+Z"
+      },
+      "solid": {
+        "shape": "CYLINDER",
+        "radius": 5,
+        "height": 5
+      }
+    }
+  ],
+  "constraints": [
+    {
+      "kind": "DESIGN_CHOICE",
+      "basis": "DESIGN_CHOICE",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "s",
+        "unit": "mm",
+        "role": "SCALE"
+      },
+      "rhs": {
+        "kind": "number",
+        "value": 1,
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {
+        "kind": "param",
+        "param": "r_pin_hinge",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_bore_hinge",
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "CLEARANCE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {
+        "kind": "param",
+        "param": "r_pin_hasp",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_bore_hasp",
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {
+        "kind": "sum",
+        "terms": [
+          {
+            "kind": "param",
+            "param": "r_pin_hinge",
+            "unit": "mm"
+          },
+          {
+            "kind": "param",
+            "param": "wall_hinge",
+            "unit": "mm"
+          }
+        ]
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_boss_hinge",
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "ENVELOPE",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "<=",
+      "lhs": {
+        "kind": "sum",
+        "terms": [
+          {
+            "kind": "param",
+            "param": "r_pin_hasp",
+            "unit": "mm"
+          },
+          {
+            "kind": "param",
+            "param": "wall_hasp",
+            "unit": "mm"
+          }
+        ]
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "r_boss_hasp",
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "len_hinge_pin",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "len_bore_hinge",
+        "unit": "mm"
+      }
+    },
+    {
+      "kind": "DIMENSIONAL",
+      "basis": "GEOMETRIC_RELATION",
+      "relation": "==",
+      "lhs": {
+        "kind": "param",
+        "param": "len_hasp_pin",
+        "unit": "mm"
+      },
+      "rhs": {
+        "kind": "param",
+        "param": "len_bore_hasp",
+        "unit": "mm"
+      }
+    }
+  ],
+  "realization_assignments": {
+    "JNT-0101": {
+      "BOD-0101": [
+        "hinge_bore",
+        "hinge_axial_face"
+      ],
+      "BOD-0102": [
+        "hinge_pin",
+        "hinge_thrust_collar"
+      ]
+    },
+    "JNT-0102": {
+      "BOD-0102": [
+        "hasp_pivot_bore",
+        "hasp_pivot_boss"
+      ],
+      "BOD-0103": [
+        "hasp_pivot_pin"
+      ]
+    },
+    "CRL-0201": {
+      "BOD-0102": [
+        "hinge_pin",
+        "hinge_thrust_collar"
+      ],
+      "BOD-0101": [
+        "hinge_bore",
+        "hinge_axial_face"
+      ]
+    },
+    "CRL-0202": {
+      "BOD-0103": [
+        "hasp_pivot_pin"
+      ],
+      "BOD-0102": [
+        "hasp_pivot_bore",
+        "hasp_pivot_boss"
+      ]
+    },
+    "CRL-0203": {
+      "BOD-0102": [
+        "hasp_stop_ry"
+      ],
+      "BOD-0103": [
+        "hasp_stop_ry"
+      ]
+    },
+    "CRL-0204": {
+      "BOD-0103": [
+        "hasp_stop_rx"
+      ],
+      "BOD-0101": [
+        "base_hasp_stop_rx"
+      ]
+    }
+  },
+  "interface_assignments": {
+    "IFC-0101": {
+      "sides": {
+        "BOD-0101": [
+          "hinge_bore"
+        ],
+        "BOD-0102": [
+          "hinge_pin"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {
+          "kind": "param",
+          "param": "r_pin_hinge",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "param",
+          "param": "r_bore_hinge",
+          "unit": "mm"
+        }
+      }
+    },
+    "IFC-0102": {
+      "sides": {
+        "BOD-0102": [
+          "hasp_pivot_bore"
+        ],
+        "BOD-0103": [
+          "hasp_pivot_pin"
+        ]
+      },
+      "governing_constraint": {
+        "kind": "CLEARANCE",
+        "basis": "GEOMETRIC_RELATION",
+        "relation": "<=",
+        "lhs": {
+          "kind": "param",
+          "param": "r_pin_hasp",
+          "unit": "mm"
+        },
+        "rhs": {
+          "kind": "param",
+          "param": "r_bore_hasp",
+          "unit": "mm"
+        }
+      }
+    },
+    "IFC-0103": {
+      "sides": {
+        "BOD-0101": [
+          "base_hasp_catch"
+        ],
+        "BOD-0103": [
+          "hasp_hook"
+        ]
+      }
+    },
+    "IFC-0104": {
+      "sides": {
+        "BOD-0101": [
+          "base_stock"
+        ],
+        "BOD-0102": [
+          "lid_stock"
+        ]
+      }
+    },
+    "IFC-0105": {
+      "sides": {
+        "BOD-0101": [
+          "hinge_axial_face"
+        ],
+        "BOD-0102": [
+          "hinge_thrust_collar"
+        ]
+      }
+    }
+  },
+  "region_assignments": {
+    "FRG-0101": {
+      "BOD-0103": [
+        "hasp_access_clearance"
+      ]
+    },
+    "FRG-0102": {
+      "BOD-0101": [
+        "base_hasp_catch"
+      ],
+      "BOD-0102": [
+        "hasp_access_pocket"
+      ]
+    },
+    "FRG-0103": {
+      "BOD-0101": [
+        "base_hasp_catch"
+      ],
+      "BOD-0102": [
+        "hasp_aperture_pocket"
+      ]
+    }
+  },
+  "realizations": [],
+  "unresolved": []
+}

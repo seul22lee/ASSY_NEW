@@ -1,0 +1,39 @@
+{
+ "kind": "reference repair (disclosed)",
+ "what": "The design declares the dimension 'wall_thickness' and then refers to it as 'wall' in geometry expressions. There is exactly one declared dimension with that prefix, so the reference is unambiguous.",
+ "changed": "identifier spelling only, in geometry-expression positions",
+ "not_changed": "no number, no shape, no position, no relationship, no design intent; prose fields (action/summary/touching) left untouched",
+ "authored_by": "this is a DeepSeek authoring inconsistency, not a translator limitation",
+ "sites": [
+  {
+   "path": "bodies[0].elements[1].size[0]",
+   "before": "base_width-2*wall",
+   "after": "base_width-2*wall_thickness"
+  },
+  {
+   "path": "bodies[0].elements[1].size[1]",
+   "before": "base_depth-2*wall",
+   "after": "base_depth-2*wall_thickness"
+  },
+  {
+   "path": "bodies[0].elements[1].size[2]",
+   "before": "base_height-2*wall",
+   "after": "base_height-2*wall_thickness"
+  },
+  {
+   "path": "bodies[0].elements[2].size[2]",
+   "before": "wall",
+   "after": "wall_thickness"
+  },
+  {
+   "path": "bodies[0].elements[6].at[0]",
+   "before": "base_width/2-wall/2",
+   "after": "base_width/2-wall_thickness/2"
+  },
+  {
+   "path": "bodies[0].elements[6].size[0]",
+   "before": "2*wall",
+   "after": "2*wall_thickness"
+  }
+ ]
+}

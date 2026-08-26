@@ -1935,12 +1935,16 @@ stages:
       justified_by_question: What actual geometry on which body makes each declared relation
         real?
       why: >-
-        S05-C3 asks whether a feature pair can PRODUCE a travel limit that a
-        MobilityExpectation dispositions as BLOCKED_BY. Without this premise the
-        stage could not see the disposition, the check read a family the view
-        never granted, and the empty read passed as compliance - the check could
-        not fail, on any input. A stage cannot be asked to satisfy a demand it
-        was never shown.
+        The stage must see which degrees of freedom are dispositioned BLOCKED_BY,
+        and by which ConstraintRelation, because that relation is what its
+        KinematicRealization embodies. Without this premise the stage could not
+        see the disposition, a check read a family the view never granted, and
+        the empty read passed as compliance - the check could not fail, on any
+        input. A stage cannot be asked to satisfy a demand it was never shown.
+        S05-C3 asked this of a feature NAME (STOP, SHOULDER, KEEPER) and is
+        retired; the demand it stood for is now S05-C2 over the declared
+        realization, and the premise stays because the disposition is still what
+        makes the relation worth embodying.
       requires_semantics:
       - mobility_disposition
     - class: occupancy_to_avoid

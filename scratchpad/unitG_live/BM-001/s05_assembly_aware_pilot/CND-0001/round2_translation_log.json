@@ -1,0 +1,146 @@
+{
+ "accepted": true,
+ "assembly_sequence": [
+  {
+   "access": "Free space above",
+   "action": "Place base on flat surface with open top up.",
+   "component": "BOD-0001",
+   "final_retention": "Gravity holds it.",
+   "insertion_direction": [
+    0,
+    0,
+    1
+   ],
+   "step": 1
+  },
+  {
+   "access": "Open end of +Y knuckle",
+   "action": "Insert pin into base knuckles from +Y side until head contacts the outer face of the +Y knuckle.",
+   "component": "BOD-0003",
+   "final_retention": "Pin is held by friction in base knuckles (interference fit) and later captured by lid knuckle.",
+   "insertion_direction": [
+    0,
+    -1,
+    0
+   ],
+   "step": 2
+  },
+  {
+   "access": "Open end of +Y knuckle and top opening",
+   "action": "Slide lid knuckle onto pin from +Y side, aligning bore with pin, and push lid downward until it sits over the base opening. The snap tab will deflect outward as it passes the front wall, then engage the latch recess.",
+   "component": "BOD-0002",
+   "final_retention": "Lid is retained by pin through knuckles and snap tab engagement.",
+   "insertion_direction": [
+    0,
+    -1,
+    0
+   ],
+   "step": 3
+  }
+ ],
+ "choices": [
+  "the SCALE parameter takes the model's own scale_mm_per_unit = 1.0",
+  "vector-valued dimensions read as triples: none",
+  "KRL for JNT-0002 includes BOD-0001/bore_base because the design's mating set names it",
+  "KRL for JNT-0002 includes BOD-0001/bore_base2 because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0001/latch_recess because the design's mating set names it",
+  "KRL for JNT-0002 includes BOD-0002/bore_lid because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0002/snap_beam because the design's mating set names it",
+  "KRL for JNT-0003 includes BOD-0002/snap_hook because the design's mating set names it",
+  "KRL for JNT-0002 includes BOD-0003/pin_shaft because the design's mating set names it",
+  "KRL for CRL-0001 (external reaction site RSR-0001) uses the retained body's own material; upstream names no interface for it",
+  "KRL for CRL-0002 from its own provider_site IFC-0001",
+  "KRL for CRL-0003 from its own provider_site IFC-0002",
+  "KRL for CRL-0005 from its own provider_site IFC-0004",
+  "KRL for CRL-0006 (external reaction site RSR-0002) uses the retained body's own material; upstream names no interface for it",
+  "KRL for JNT-0001 from PERMIT_MOTION at IFC-0002"
+ ],
+ "counts": {
+  "constraints": 21,
+  "features": 18,
+  "fixed_by_choice": 20,
+  "fixed_by_relation": 0,
+  "kinematic_realizations": 8,
+  "parameters": 21
+ },
+ "mating_sets": [
+  {
+   "fit": "pin_diameter + 0.1 clearance",
+   "name": "Hinge Joint",
+   "participants": [
+    {
+     "body": "BOD-0003",
+     "element": "pin_shaft",
+     "role": "Pin shaft"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "bore_base",
+     "role": "Base knuckle bore"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "bore_base2",
+     "role": "Base knuckle bore"
+    },
+    {
+     "body": "BOD-0002",
+     "element": "bore_lid",
+     "role": "Lid knuckle bore"
+    }
+   ],
+   "upstream": [
+    "IFC-0001",
+    "IFC-0002",
+    "JNT-0002",
+    "PHI-0001"
+   ]
+  },
+  {
+   "fit": "latch_recess_depth = snap_hook_height",
+   "name": "Snap Latch",
+   "participants": [
+    {
+     "body": "BOD-0002",
+     "element": "snap_beam",
+     "role": "Cantilever beam"
+    },
+    {
+     "body": "BOD-0002",
+     "element": "snap_hook",
+     "role": "Hook"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "latch_recess",
+     "role": "Recess"
+    }
+   ],
+   "upstream": [
+    "IFC-0004",
+    "JNT-0003",
+    "PHI-0002"
+   ]
+  },
+  {
+   "fit": "Contact when open",
+   "name": "Hinge Stop",
+   "participants": [
+    {
+     "body": "BOD-0002",
+     "element": "lid_main",
+     "role": "Lid surface"
+    },
+    {
+     "body": "BOD-0001",
+     "element": "hinge_stop",
+     "role": "Stop ledge"
+    }
+   ],
+   "upstream": [
+    "IFC-0003"
+   ]
+  }
+ ],
+ "write_boundary_problems": []
+}

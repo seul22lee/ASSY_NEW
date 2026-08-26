@@ -80,10 +80,11 @@ class TestC1InterfaceFeatures(unittest.TestCase):
                         problems)
 
 
-class TestC2BlockingPairs(unittest.TestCase):
-    """S05-C2: every blocking relation has a feature pair.
+class TestC2BlockingRealization(unittest.TestCase):
+    """S05-C2: a blocking relation is embodied by a DECLARED realization.
 
-    The two sides are `provider_body` and the body owning `retained_group`.
+    The two sides are `provider_body` and the body owning `retained_group`, and
+    what covers them is read from the participating features' own bodies.
     """
 
     V = view(
@@ -91,14 +92,41 @@ class TestC2BlockingPairs(unittest.TestCase):
                              "provider_body": "BOD-2", "blocked_dofs": ["TZ"]}],
         RigidGroup=[{"entity_id": "RGP-1", "body": "BOD-1"}])
 
-    def test_both_sides_carrying_geometry_passes(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")]}
+    def parsed(self, features, realizations):
+        return {"features": features, "kinematic_realizations": realizations}
+
+    def test_a_realization_covering_both_sides_passes(self):
+        parsed = self.parsed(
+            [feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")],
+            [{"id": "KRL-1", "realizes": "CRL-1",
+              "participating_features": ["FEA-1", "FEA-2"]}])
         self.assertEqual([], s05.check_c2_blocking_pairs(parsed, self.V))
 
-    def test_a_block_realized_on_one_side_only_is_reported(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1")]}
+    def test_geometry_on_both_sides_that_claims_nothing_is_reported(self):
+        """The gap C3 was invented to close, closed by the claim instead: the
+        features exist and nobody says they restrain anything."""
+        parsed = self.parsed([feature("FEA-1", "BOD-1"), feature("FEA-2", "BOD-2")], [])
+        problems = s05.check_c2_blocking_pairs(parsed, self.V)
+        self.assertTrue(any("CRL-1" in p for p in problems), problems)
+
+    def test_a_realization_covering_one_side_only_is_reported(self):
+        parsed = self.parsed(
+            [feature("FEA-1", "BOD-1")],
+            [{"id": "KRL-1", "realizes": "CRL-1", "participating_features": ["FEA-1"]}])
         problems = s05.check_c2_blocking_pairs(parsed, self.V)
         self.assertTrue(any("BOD-2" in p for p in problems), problems)
+
+    def test_no_feature_kind_is_consulted(self):
+        """A restraint realized by a rib, a wall or a pocket floor is a
+        restraint. The retired C3 asked whether a feature was SPELLED
+        STOP/SHOULDER/KEEPER, which refused these and accepted a label."""
+        for kind in ("CLEARANCE_POCKET", "RIB", "FACE"):
+            with self.subTest(kind=kind):
+                parsed = self.parsed(
+                    [feature("FEA-1", "BOD-1", kind), feature("FEA-2", "BOD-2", kind)],
+                    [{"id": "KRL-1", "realizes": "CRL-1",
+                      "participating_features": ["FEA-1", "FEA-2"]}])
+                self.assertEqual([], s05.check_c2_blocking_pairs(parsed, self.V))
 
     def test_a_relation_blocking_nothing_is_not_a_block(self):
         """`blocked_dofs` is what makes it a constraint geometry must produce."""
@@ -106,43 +134,6 @@ class TestC2BlockingPairs(unittest.TestCase):
                                       "provider_body": "BOD-2", "blocked_dofs": []}],
                  RigidGroup=[{"entity_id": "RGP-1", "body": "BOD-1"}])
         self.assertEqual([], s05.check_c2_blocking_pairs({"features": []}, v))
-
-
-class TestC3LimitPairs(unittest.TestCase):
-    """S05-C3: a declared limit needs a PRODUCING pair, not merely a pair.
-
-    C2 asks whether both sides carry geometry. This asks whether that geometry
-    can stop anything - a clearance pocket on both sides satisfies C2 and stops
-    nothing.
-    """
-
-    V = view(
-        MobilityExpectation=[{"entity_id": "MEX-1", "configuration": "CFG-1",
-                              "dispositions": [{"disposition": "BLOCKED_BY",
-                                                "dof": "TZ",
-                                                "constraint_relation": "CRL-1"}]}],
-        ConstraintRelation=[{"entity_id": "CRL-1", "retained_group": "RGP-1",
-                             "provider_body": "BOD-2", "blocked_dofs": ["TZ"]}],
-        RigidGroup=[{"entity_id": "RGP-1", "body": "BOD-1"}])
-
-    def test_a_stop_pair_produces_the_limit(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1", "STOP"),
-                               feature("FEA-2", "BOD-2", "SHOULDER")]}
-        self.assertEqual([], s05.check_c3_limit_pairs(parsed, self.V))
-
-    def test_geometry_that_cannot_stop_anything_is_reported(self):
-        parsed = {"features": [feature("FEA-1", "BOD-1", "CLEARANCE_POCKET"),
-                               feature("FEA-2", "BOD-2", "CLEARANCE_POCKET")]}
-        problems = s05.check_c3_limit_pairs(parsed, self.V)
-        self.assertTrue(any("CRL-1" in p for p in problems), problems)
-
-    def test_an_intended_disposition_demands_no_stop(self):
-        """Only BLOCKED_BY is a limit. INTENDED motion is meant to happen."""
-        v = view(MobilityExpectation=[{"entity_id": "MEX-2", "configuration": "CFG-1",
-                                       "dispositions": [{"disposition": "INTENDED",
-                                                         "dof": "RZ",
-                                                         "by_joint": "JNT-1"}]}])
-        self.assertEqual([], s05.check_c3_limit_pairs({"features": []}, v))
 
 
 class TestC4ObligationsRealized(unittest.TestCase):
@@ -486,67 +477,14 @@ class TestC10SolverEvidence(unittest.TestCase):
                              "value": 6.0, "solved_by": "SLV-1"}]}))
 
 
-class TestS05ProducesCanonicalNames(unittest.TestCase):
-    """The retired draft spellings must not come back through the producer."""
-
-    def test_operations_use_canonical_fields(self):
-        parsed = {
-            "features": [feature("FEA-1", "BOD-1")],
-            "realizations": [realization("RLZ-1", ["OBL-1"], ["FEA-1"])],
-            "parameters": [{"id": "PRM-1", "symbol": "r", "unit": "mm"}],
-            "constraints": [{"id": "CON-1", "kind": "ENVELOPE",
-                             "expression": {"relation": "==", "lhs": {"ref": "PRM-1"},
-                                            "rhs": MM}, "parameters": ["PRM-1"]}],
-        }
-        ops = S05Embodiment().to_operations(parsed)
-        by_family = {o.entity_type: o for o in ops}
-        self.assertIn("body", by_family["Feature"].fields)
-        self.assertNotIn("rigid_group", by_family["Feature"].fields)
-        self.assertIn("addresses_obligations", by_family["Realization"].fields)
-        self.assertNotIn("discharges_obligations", by_family["Realization"].fields)
-        self.assertNotIn("ROI", by_family)
-
-    def test_a_parameter_is_always_authored_as_declared(self):
-        """s05 may not claim a settled status it has no solver evidence for."""
-        ops = S05Embodiment().to_operations(
-            {"parameters": [{"id": "PRM-1", "symbol": "r", "unit": "mm",
-                             "status": ir.SOLVED, "value": 9.0}]})
-        self.assertEqual(ir.DECLARED, ops[0].fields["status"])
-        self.assertNotIn("value", ops[0].fields)
-
-    def test_every_created_family_is_one_the_contract_permits(self):
-        from . import _paths
-        resp = _paths.contract("STAGE_RESPONSIBILITY_CONTRACT.yaml")
-        permitted = set(resp["stages"]["s05"]["permitted_output_semantics"])
-        parsed = {"features": [feature("FEA-1", "BOD-1")],
-                  "realizations": [realization("RLZ-1", [], [])],
-                  "parameters": [{"id": "PRM-1", "symbol": "r", "unit": "mm"}],
-                  "constraints": [{"id": "CON-1", "kind": "ENVELOPE",
-                                   "expression": {}, "parameters": []}],
-                  "unresolved": [{"id": "S5U-1", "decision": "d", "why_open": "w",
-                                  "alternatives_kind": "FREE_TEXT"}]}
-        ops = S05Embodiment().to_operations(parsed)
-        self.assertTrue(ops, "no operation was produced, so nothing is checked")
-        for op in ops:
-            with self.subTest(family=op.entity_type):
-                self.assertIn(op.entity_type, permitted)
-
-
-class TestS05SchemaDoesNotAnchorOnOccupiedIds(unittest.TestCase):
-
-    def test_no_schema_example_is_an_instantiable_id(self):
-        import re
-        schema = S05Embodiment.render_response_schema()
-        self.assertEqual([], re.findall(r'id "[A-Z][A-Z0-9]*-\d+"', schema))
-
-    def test_the_prompt_teaches_the_typed_constraint_shape(self):
-        prompt = S05Embodiment().prompt({"consumer_view": {}})
-        self.assertIn('"relation"', prompt)
-        self.assertIn("AREA", prompt)          # a length times a length
-
-
-if __name__ == "__main__":                                       # pragma: no cover
-    unittest.main()
+# THE PRODUCER'S OWN TESTS MOVED. `TestS05ProducesCanonicalNames` and
+# `TestS05SchemaDoesNotAnchorOnOccupiedIds` exercised the retired authoring
+# format - canonical ids for records the response was creating, construction
+# steps, a raw expression AST. Their subjects are now properties of the
+# semantic boundary and are asserted where that boundary lives, in
+# `test_s05_authoring_boundary`: production allocates every id, the schema
+# shows no instantiable canonical id, and every created family is one the
+# responsibility contract permits.
 
 
 class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
@@ -630,9 +568,10 @@ class TestNoCheckReadsAFamilyTheViewNeverGrants(unittest.TestCase):
                         "check cannot fail. Declare the premise class that "
                         "grants it, or drop the check." % (name, family))
 
-    def test_c3_specifically_can_now_see_the_dispositions(self):
-        """The instance that was broken, pinned so it cannot silently return."""
-        self.assertIn("MobilityExpectation", self._families_of("check_c3_limit_pairs"))
+    def test_the_disposition_premise_is_still_granted(self):
+        """C3 is retired; the premise it needed is not. A MobilityExpectation
+        naming a BLOCKED_BY relation is why that relation is worth embodying,
+        and the view must still carry it."""
         self.assertIn("MobilityExpectation", self.granted)
 
 
@@ -654,16 +593,15 @@ class TestTheStageIsJudgedOnWhatItWasAsked(unittest.TestCase):
     #: check -> a term whose absence means the prompt never raised the subject.
     SUBJECTS = {
         "check_c1_interface_features": ("interaction", "feature"),
-        "check_c2_blocking_pairs": ("feature",),
-        "check_c3_limit_pairs": ("blocked_by", "limit"),
+        "check_c2_blocking_pairs": ("blocks", "realization"),
         "check_c4_obligations_realized": ("obligation", "realization"),
-        "check_c5_program_totality": ("parameter", "construction program"),
+        "check_c5_program_totality": ("parameter", "solid"),
         "check_c6_units": ("unit",),
         "check_c7_no_parameter_cycle": ("parameter",),
-        "check_c9_clearance_constraints": ("clearance", "governs_interface"),
+        "check_c9_clearance_constraints": ("clearance", "governing constraint"),
         "check_c10_no_unsolved_values": ("value",),
         # Unit G: CAD-constructibility
-        "check_c11_joints_realized": ("joint", "placement"),
+        "check_c11_joints_realized": ("joint", "realization"),
         "check_c12_bodies_built": ("every body", "stock"),
         "check_c14_mating_kinds": ("mating",),
     }

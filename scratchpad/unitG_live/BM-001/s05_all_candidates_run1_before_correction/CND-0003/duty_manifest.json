@@ -1,0 +1,188 @@
+{
+ "axisless_datums": [],
+ "bodies": [
+  "BOD-0008",
+  "BOD-0009",
+  "BOD-0010",
+  "BOD-0011"
+ ],
+ "branch": "CND-0003",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0009"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0010",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0011"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0011",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0009",
+    "BOD-0010"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0012",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0010",
+    "BOD-0011"
+   ],
+   "interaction_kind": "CLEARANCE",
+   "interface": "IFC-0013",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0010"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0014",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0009"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0015",
+   "mating": {},
+   "needs_governing_constraint": false
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0009"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0009"
+  },
+  {
+   "bodies": [
+    "BOD-0009",
+    "BOD-0010"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0010"
+  },
+  {
+   "bodies": [
+    "BOD-0010",
+    "BOD-0011"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0011"
+  },
+  {
+   "bodies": [
+    "BOD-0008",
+    "BOD-0011"
+   ],
+   "descriptor": "REVOLUTE (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0012"
+  },
+  {
+   "bodies": [
+    "BOD-0008"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0001",
+   "family": "ConstraintRelation",
+   "target": "CRL-0101"
+  },
+  {
+   "bodies": [
+    "BOD-0008"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0002",
+   "family": "ConstraintRelation",
+   "target": "CRL-0102"
+  },
+  {
+   "bodies": [
+    "BOD-0009",
+    "BOD-0008"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0103"
+  },
+  {
+   "bodies": [
+    "BOD-0010",
+    "BOD-0009"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0104"
+  },
+  {
+   "bodies": [
+    "BOD-0011",
+    "BOD-0010"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0105"
+  },
+  {
+   "bodies": [
+    "BOD-0011",
+    "BOD-0008"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0106"
+  },
+  {
+   "bodies": [
+    "BOD-0010",
+    "BOD-0008"
+   ],
+   "descriptor": "blocks RY",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0107"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0003",
+  "required": true
+ }
+}

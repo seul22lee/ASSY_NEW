@@ -1,0 +1,210 @@
+{
+ "axisless_datums": [
+  "JNT-0006 (FIXED, axis_direction NONE)",
+  "JNT-0007 (FIXED, axis_direction NONE)",
+  "JNT-0008 (FIXED, axis_direction NONE)"
+ ],
+ "bodies": [
+  "BOD-0004",
+  "BOD-0005",
+  "BOD-0006",
+  "BOD-0007"
+ ],
+ "branch": "CND-0002",
+ "interfaces": [
+  {
+   "bodies": [
+    "BOD-0004",
+    "BOD-0005"
+   ],
+   "interaction_kind": "CONTACT",
+   "interface": "IFC-0005",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0004",
+    "BOD-0006"
+   ],
+   "interaction_kind": "INTERFERENCE_FIT",
+   "interface": "IFC-0006",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0006"
+   ],
+   "interaction_kind": "INTERFERENCE_FIT",
+   "interface": "IFC-0007",
+   "mating": {},
+   "needs_governing_constraint": true
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0007"
+   ],
+   "interaction_kind": "COMPLIANT_INTERACTION",
+   "interface": "IFC-0008",
+   "mating": {},
+   "needs_governing_constraint": false
+  },
+  {
+   "bodies": [
+    "BOD-0004",
+    "BOD-0007"
+   ],
+   "interaction_kind": "COMPLIANT_INTERACTION",
+   "interface": "IFC-0009",
+   "mating": {},
+   "needs_governing_constraint": false
+  }
+ ],
+ "obligations_to_discharge": [],
+ "realizations": [
+  {
+   "bodies": [
+    "BOD-0006"
+   ],
+   "descriptor": "COMPLIANT (dof RY, axis +Y)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0004"
+  },
+  {
+   "bodies": [
+    "BOD-0007"
+   ],
+   "descriptor": "COMPLIANT (dof RZ, axis +Z)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0005"
+  },
+  {
+   "bodies": [
+    "BOD-0004",
+    "BOD-0006"
+   ],
+   "descriptor": "FIXED (dof none, axis NONE)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0006"
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0006"
+   ],
+   "descriptor": "FIXED (dof none, axis NONE)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0007"
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0007"
+   ],
+   "descriptor": "FIXED (dof none, axis NONE)",
+   "external_provider": null,
+   "family": "Joint",
+   "target": "JNT-0008"
+  },
+  {
+   "bodies": [
+    "BOD-0004"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0001",
+   "family": "ConstraintRelation",
+   "target": "CRL-0010"
+  },
+  {
+   "bodies": [
+    "BOD-0004"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": "RSR-0002",
+   "family": "ConstraintRelation",
+   "target": "CRL-0011"
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0006"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0012"
+  },
+  {
+   "bodies": [
+    "BOD-0005",
+    "BOD-0007"
+   ],
+   "descriptor": "blocks RY",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0013"
+  },
+  {
+   "bodies": [
+    "BOD-0006",
+    "BOD-0004"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0014"
+  },
+  {
+   "bodies": [
+    "BOD-0006",
+    "BOD-0005"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0015"
+  },
+  {
+   "bodies": [
+    "BOD-0007",
+    "BOD-0005"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY, RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0016"
+  },
+  {
+   "bodies": [
+    "BOD-0007",
+    "BOD-0007"
+   ],
+   "descriptor": "blocks TX, TY, TZ, RX, RY",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0017"
+  },
+  {
+   "bodies": [
+    "BOD-0007",
+    "BOD-0004"
+   ],
+   "descriptor": "blocks RZ",
+   "external_provider": null,
+   "family": "ConstraintRelation",
+   "target": "CRL-0018"
+  }
+ ],
+ "scale": {
+  "basis": "RELATIVE",
+  "reference_scale": "SCL-CND-0002",
+  "required": true
+ }
+}

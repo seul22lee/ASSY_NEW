@@ -1,0 +1,59 @@
+{
+  "design_summary": "This is a hinged box with a snap latch. The base (BOD-0001) is a box with an internal storage volume, a hinge barrel at one end, and a latch recess at the opposite end. The lid (BOD-0002) is a plate that covers the base, with a hinge knuckle at one end and a cantilever snap tab at the other. The hinge pin (BOD-0003) is a cylindrical pin that passes through the base's barrel and the lid's knuckle, retained by interference fit in the base's barrel, allowing the lid to rotate about the pin. A snap tab on the lid engages with a recess in the base to latch the lid closed, and can be manually deflected to open.",
+  "scale_mm_per_unit": 5,
+  "dimensions": [
+    {"name": "base_length", "value": 100, "unit": "mm", "why": "Based on envelope ENV-0001 half-extent x=50, so full length 100 mm."},
+    {"name": "base_width", "value": 60, "unit": "mm", "why": "Based on envelope ENV-0001 half-extent y=30, so full width 60 mm."},
+    {"name": "base_height", "value": 40, "unit": "mm", "why": "Based on envelope ENV-0001 half-extent z=20, so full height 40 mm."},
+    {"name": "lid_thickness", "value": 5, "unit": "mm", "why": "Based on envelope ENV-0002 half-extent z=5, so lid thickness 10 mm? Actually envelope indicates half-extent 5, so full thickness 10 mm, but lid is a plate; we choose 6 mm."},
+    {"name": "pin_diameter", "value": 4, "unit": "mm", "why": "Given in interface IFC-0002 inner_diameter = 4 mm."},
+    {"name": "pin_length", "value": 60, "unit": "mm", "why": "Given in interface IFC-0002 engagement_length = 60 mm, so pin length at least 60 mm."},
+    {"name": "bore_diameter", "relation": "pin_diameter + 0.2", "unit": "mm", "why": "Clearance fit for hinge pin."},
+    {"name": "wall_thickness", "value": 3, "unit": "mm", "why": "Typical plastic wall thickness."},
+    {"name": "snap_tab_thickness", "value": 2, "unit": "mm", "why": "Cantilever snap tab thickness for flexibility."},
+    {"name": "snap_tab_length", "value": 12, "unit": "mm", "why": "Length to provide adequate deflection and clearance."},
+    {"name": "snap_engagement", "value": 1.5, "unit": "mm", "why": "Interference depth for snap latch."}
+  ],
+  "bodies": [
+    {
+      "upstream_body": "BOD-0001",
+      "summary": "Stationary base: a box with a hollow interior for storage, an opening on top, a hinge barrel at one end, and a latch recess at the opposite end.",
+      "elements": [
+        {"op": "add", "shape": "box", "name": "base_shell", "size": ["base_length", "base_width", "base_height"], "at": [0, 0, 0]},
+        {"op": "subtract", "shape": "box", "name": "base_cavity", "size": ["base_length - 2*wall_thickness", "base_width - 2*wall_thickness", "base_height - 2*wall_thickness"], "at": [0, 0, 0], "clears": "FRG-0004"},
+        {"op": "subtract", "shape": "box", "name": "top_opening", "size": ["base_length - 2*wall_thickness", "base_width - 2*wall_thickness", 10], "at": [0, 0, "base_height/2 + 5"], "clears": "FRG-0003"},
+        {"op": "add", "shape": "cylinder", "name": "hinge_barrel", "radius": "pin_diameter/2 + 2*wall_thickness", "height": "base_width", "at": ["-base_length/2 - pin_diameter/2", 0, "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "hinge_bore", "radius": "bore_diameter/2", "height": "base_width + 2", "at": ["-base_length/2 - pin_diameter/2", 0, "base_height/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "box", "name": "latch_recess", "size": [6, 20, 8], "at": ["base_length/2 - 5", 0, "base_height - 3"]}
+      ]
+    },
+    {
+      "upstream_body": "BOD-0002",
+      "summary": "Lid: a flat plate with a hinge knuckle at one end and a cantilever snap tab at the other, shaped to fit over the base opening.",
+      "elements": [
+        {"op": "add", "shape": "box", "name": "lid_plate", "size": ["base_length", "base_width", "lid_thickness"], "at": [0, 0, "base_height + lid_thickness/2"]},
+        {"op": "add", "shape": "cylinder", "name": "hinge_knuckle", "radius": "pin_diameter/2 + 2*wall_thickness", "height": "base_width - 4*wall_thickness", "at": ["-base_length/2 - pin_diameter/2", 0, "base_height + lid_thickness/2"], "axis": "+Y"},
+        {"op": "subtract", "shape": "cylinder", "name": "knuckle_bore", "radius": "bore_diameter/2", "height": "base_width - 4*wall_thickness + 2", "at": ["-base_length/2 - pin_diameter/2", 0, "base_height + lid_thickness/2"], "axis": "+Y"},
+        {"op": "add", "shape": "box", "name": "snap_tab", "size": ["snap_tab_thickness", 12, "snap_tab_length"], "at": ["base_length/2 - snap_tab_thickness/2", 0, "base_height + lid_thickness/2 + snap_tab_length/2"]},
+        {"op": "add", "shape": "box", "name": "tab_hook", "size": ["snap_tab_thickness", 12, "snap_engagement"], "at": ["base_length/2 - snap_tab_thickness/2", 0, "base_height + lid_thickness/2 + snap_tab_length + snap_engagement/2"]}
+      ]
+    },
+    {
+      "upstream_body": "BOD-0003",
+      "summary": "Hinge pin: a cylindrical rod that fits in the base barrel and lid knuckle, holding them together and allowing rotation.",
+      "elements": [
+        {"op": "add", "shape": "cylinder", "name": "pin", "radius": "pin_diameter/2", "height": "pin_length", "at": ["-base_length/2 - pin_diameter/2", 0, "base_height + lid_thickness/2"], "axis": "+Y"}
+      ]
+    }
+  ],
+  "intended_physical_relationships": [
+    {"upstream": "IFC-0001", "a": "BOD-0001/hinge_bore", "b": "BOD-0003/pin", "purpose": "Interference fit axially retains pin in base barrel", "clearance": "interference_fit"},
+    {"upstream": "IFC-0002", "a": "BOD-0002/knuckle_bore", "b": "BOD-0003/pin", "purpose": "Clearance fit allows lid to rotate on pin", "clearance": "bore_diameter - pin_diameter"},
+    {"upstream": "IFC-0003", "a": "BOD-0001/base_shell", "b": "BOD-0002/lid_plate", "purpose": "Lid rests on base rim in closed position", "clearance": "0"},
+    {"upstream": "IFC-0004", "a": "BOD-0001/latch_recess", "b": "BOD-0002/tab_hook", "purpose": "Snap tab hook engages recess to latch lid closed", "clearance": "snap_engagement"}
+  ],
+  "state_expectations": [
+    {"state": "STA-CFG-0001", "expect": "Lid closed: hinge pin engaged in base and lid, lid rests on base rim, snap tab hook is engaged in latch recess."},
+    {"state": "STA-CFG-0002", "expect": "Lid open: hinge pin still engaged, snap tab deflected out of recess, lid rotated about hinge axis by 90 degrees."}
+  ]
+}

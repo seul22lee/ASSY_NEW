@@ -2,9 +2,19 @@
 canonical rows.
 
 What must be embodied is DERIVED FROM UPSTREAM: every body needs material
-(at least one additive feature); every axis-bearing joint is realized on each
-body it relates by a feature placed AT that joint; a mating side s04 stated
-is realized by a feature of the stated kind. Nothing names a mechanism class.
+(at least one additive feature); every kinematic relation s03 declared - a
+Joint, and a ConstraintRelation that blocks something - is embodied by a
+KinematicRealization whose features cover the sides it relates; a mating side
+s04 stated is realized by a feature of the stated kind. Nothing names a
+mechanism class, a feature kind or a joint class.
+
+REALIZATION IS DECLARED, NOT INFERRED. Three inferences stood here and all
+three were coincidences a design could satisfy without embodying anything: a
+feature PLACED AT a joint, then one also ORIENTED ALONG it, and for a restraint
+a body merely carrying a feature whose KIND was spelled STOP, SHOULDER or
+KEEPER. A keeper on a hinge axis permits no rotation; a feature named STOP
+restrains nothing by being named. What embodies a relation is now said, once,
+by a record whose only content is the target and the material.
 
 ONE IMPLEMENTATION, TWO SURFACES: s05 asks these of its response before it
 writes (the findings carry the check's name), and s06's entry gate asks them
@@ -16,14 +26,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from . import findings, ir
+from . import duty_manifest, findings, ir
 
 #: Whose decision an unmet prerequisite is, unless the record at fault is
 #: another stage's: the embodiment is s05's to author.
 OWNER = "s05"
 
-AXIS_REALIZING_JOINTS = ("REVOLUTE", "PRISMATIC", "HELICAL", "CYLINDRICAL", "SPHERICAL",
-                         "PLANAR")
+#: Family names, so the two surfaces read the same rows by the same keys.
+REALIZATION = "KinematicRealization"
 
 
 def polarity_table() -> Dict[str, str]:
@@ -33,12 +43,23 @@ def polarity_table() -> Dict[str, str]:
     return {str(kind).upper(): pol for pol, kinds in table.items() for kind in (kinds or [])}
 
 
+#: The s04 families the SPATIAL duties are derived from. Carried by every row
+#: reader, so a manifest built from state and one built from the recorded view
+#: see the same commitments.
+SPATIAL_FAMILIES = ("FunctionalRegion", "State", "Configuration", "Transition",
+                    "TransitionRequirement", "SweptVolume", "AssemblyStep",
+                    "ReferenceScale", "Envelope")
+
+
 def rows_from_response(parsed: Dict[str, Any], view: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
     """The response as canonical rows: what the design decided (from the view)
     and what this response proposes (features and the constraints that govern
     them). Both surfaces below read exactly these keys."""
-    rows = {fam: list(view.get(fam) or []) for fam in ("Body", "RigidGroup", "Joint", "Interface")}
-    for family, key in (("Feature", "features"), ("Constraint", "constraints")):
+    rows = {fam: list(view.get(fam) or []) for fam in
+            ("Body", "RigidGroup", "Joint", "Interface", "ConstraintRelation")
+            + SPATIAL_FAMILIES}
+    for family, key in (("Feature", "features"), ("Constraint", "constraints"),
+                        (REALIZATION, "kinematic_realizations")):
         rows[family] = []
         for item in parsed.get(key) or []:
             if isinstance(item, dict):
@@ -52,7 +73,8 @@ def rows_from_state(state, branch: Optional[str]) -> Dict[str, List[Dict[str, An
     from .canonical_io import _in_branch
 
     rows: Dict[str, List[Dict[str, Any]]] = {}
-    for fam in ("Body", "RigidGroup", "Joint", "Interface", "Feature", "Constraint"):
+    for fam in ("Body", "RigidGroup", "Joint", "Interface", "Feature", "Constraint",
+                "ConstraintRelation", REALIZATION) + SPATIAL_FAMILIES:
         rows[fam] = [r for r in sorted(state.standing(fam), key=lambda r: r["entity_id"])
                      if not branch or _in_branch(r, branch)]
     return rows
@@ -66,58 +88,206 @@ def _finding(kind, subjects, detail, owner=OWNER):
     return findings.Finding(kind=kind, owner=owner, subjects=tuple(subjects), detail=detail)
 
 
+def _realized_by(rows) -> Dict[str, List[Dict[str, Any]]]:
+    """target id -> the KinematicRealizations naming it. One reading of the
+    claims, shared by every duty below."""
+    out: Dict[str, List[Dict[str, Any]]] = {}
+    for rec in rows.get(REALIZATION) or []:
+        target = rec.get("realizes")
+        if target:
+            out.setdefault(target, []).append(rec)
+    return out
+
+
+def _covered_by(realization, features: Dict[str, str]) -> set:
+    """The bodies ONE realization's participating features are on. Coverage is
+    READ from the features' own `body`; a realization never restates it."""
+    return {features.get(fid) for fid in (realization.get("participating_features") or [])
+            if features.get(fid)}
+
+
+def _single_claim(target: str, claims) -> Optional[Dict[str, Any]]:
+    """THE realization of a target, or None when there is none or several.
+
+    A KinematicRealization is a COMPLETE realization record, not a fragment: one
+    per target in one committed branch, listing every participating feature. Two
+    records each carrying one side of a relation are not a realization between
+    them - each states an embodiment that does not embody, and reading them as a
+    union means nothing in state ever has to be true on its own. Several rows
+    are reported by `realization_claim_findings` and coverage is not judged for
+    that target until it is one record again.
+    """
+    here = claims.get(target) or []
+    return here[0] if len(here) == 1 else None
+
+
+def _named_interfaces(feature: Dict[str, Any]) -> List[str]:
+    """The interactions a feature says it realizes a side of.
+
+    ONE READING, and it is a list. `Feature.interfaces` is a multi-reference
+    because one physical feature can bear on several declared interactions;
+    every reader goes through here so none of them re-decides that.
+    """
+    named = feature.get("interfaces")
+    if isinstance(named, list):
+        return [i for i in named if isinstance(i, str) and i]
+    return [named] if isinstance(named, str) and named else []
+
+
+def _feature_bodies(rows) -> Dict[str, str]:
+    return {f.get("entity_id"): f.get("body") for f in rows.get("Feature") or []}
+
+
 def joint_realization_findings(rows) -> List[findings.Finding]:
-    """Every axis-bearing joint is realized, on each body it relates, by at
-    least one feature placed AT it AND LYING ON ITS AXIS.
+    """Every Joint is embodied by a KinematicRealization naming it, whose
+    features cover each body the joint relates.
 
-    Realization is read from the placement; nothing restates it. A slide may be
-    carried by rails, guides and stops - several features at one joint on one
-    body are several realizations, not a contradiction.
+    WHAT IS ASKED IS COVERAGE, NOT SHAPE. No feature's axis is compared with the
+    joint's and no joint class is named here: the geometry that embodies a
+    relation need not be aligned with it. Three transverse pads on three recess
+    walls guide a slide; two rails and two carriages embody one guided relation
+    between them; a rod in a plain bore may leave axial rotation deliberately
+    free. Every one of those is refused by an axis rule and is ordinary
+    mechanical design.
 
-    ON ITS AXIS is the whole of the second half. A joint datum locates a feature
-    and does not orient it: a feature may be placed at the joint and state an
-    axis of its own, meaning "located here, oriented otherwise" - a face whose
-    normal crosses the hinge line, a keeper that retains along it. Such a
-    feature is positioned by the joint and does NOT embody it, and counting it
-    as a realization would let a branch satisfy this duty with geometry that
-    cannot turn: the bore that makes the hinge a hinge would still be missing
-    while the check reported the joint realized. A feature that states no axis
-    takes the joint's, and does realize it.
+    Several realizations of one joint are not a contradiction - they are how a
+    relation carried by several elements is stated.
     """
     out: List[findings.Finding] = []
-    groups = _body_of_group(rows)
-    at_joint: Dict[tuple, List[tuple]] = {}
-    for f in rows.get("Feature") or []:
-        placement = f.get("placement") if isinstance(f.get("placement"), dict) else {}
-        datum = placement.get("datum")
-        if datum:
-            at_joint.setdefault((datum, f.get("body")), []).append(
-                (f.get("entity_id"), placement.get("axis")))
-    for j in sorted(rows.get("Joint") or [], key=lambda x: x.get("entity_id") or ""):
-        kind = str(j.get("joint_type", "")).upper()
-        if kind not in AXIS_REALIZING_JOINTS:
+    features = _feature_bodies(rows)
+    claims = _realized_by(rows)
+    for duty in duty_manifest.from_rows(rows).joint_duties():
+        jid, kind, sides = duty.target, duty.kind, list(duty.bodies)
+        here = claims.get(jid) or []
+        if not here:
+            out.append(_finding(
+                findings.JOINT_UNREALIZED, (jid,),
+                "joint %s (%s) relates %s and no KinematicRealization names it; a joint_type "
+                "label alone is inert and no placement stands in for the claim"
+                % (jid, kind, ", ".join(sides))))
             continue
-        jid = j.get("entity_id")
-        axis = str(j.get("axis_direction") or "").strip().upper()
-        for body in sorted({groups.get(j.get("parent_group")), groups.get(j.get("child_group"))} - {None}):
-            here = at_joint.get((jid, body)) or []
-            # an omitted axis IS the joint's; a stated one must be it
-            on_axis = [fid for fid, stated in here
-                       if stated is None or str(stated).strip().upper() == axis]
-            if on_axis:
-                continue
-            if here:
+        claim = _single_claim(jid, claims)
+        if claim is None:
+            continue                    # fragmented; reported as its own defect
+        covered = _covered_by(claim, features)
+        missing = [side for side in sides if side not in covered]
+        if missing:
+            out.append(_finding(
+                findings.REALIZATION_UNCOVERED, tuple([jid] + missing),
+                "joint %s (%s) is claimed by %s, whose participating features are on %s and "
+                "none on %s; ONE realization carries every side the relation relates"
+                % (jid, kind, claim.get("entity_id"),
+                   ", ".join(sorted(b for b in covered)) or "no body of the branch",
+                   ", ".join(missing))))
+    return out
+
+
+def restraint_realization_findings(rows) -> List[findings.Finding]:
+    """Every ConstraintRelation that blocks something is embodied by a
+    KinematicRealization naming it, covering the sides it acts between.
+
+    `blocked_dofs` is what makes a relation a block; one that blocks nothing is
+    a recorded relationship, not something geometry has to produce. WHICH DOFs
+    are blocked, in which configurations, and how a test would defeat it stay
+    the relation's own - this asks only that the material exists.
+
+    WHICH SIDES, BY THE RELATION'S OWN PROVIDER MODEL:
+
+      the RETAINED side always. The product material that is held is this
+      design's, whatever holds it, so the body owning `retained_group` must be
+      represented.
+
+      the PROVIDER BODY when there is one - a body of this design provides the
+      restraint, and material on it is what does the providing.
+
+      NOTHING for an external provider. `provider_reaction_site` names a
+      ReactionSiteRequirement: the thing bearing the load is outside this
+      design's body set, and demanding a Feature for it would force s05 to
+      invent a body that is not the product. That relation is upstream's and
+      stays authoritative for its side.
+
+    NO FEATURE KIND IS CONSULTED. The predecessor of this check asked whether a
+    side carried a feature whose kind was spelled STOP, SHOULDER or KEEPER,
+    which is a claim about a word: a face named STOP restrains nothing by being
+    named, and a restraint realized by a rib, a wall or a pocket floor was
+    refused for being spelled otherwise. A MobilityExpectation already names the
+    authoritative relation; this is its embodiment.
+    """
+    out: List[findings.Finding] = []
+    features = _feature_bodies(rows)
+    claims = _realized_by(rows)
+    for duty in duty_manifest.from_rows(rows).restraint_duties():
+        rid, sides = duty.target, list(duty.bodies)
+        here = claims.get(rid) or []
+        if not here:
+            out.append(_finding(
+                findings.RESTRAINT_UNREALIZED, (rid,),
+                "constraint relation %s blocks %s and no KinematicRealization names it; the "
+                "restraint is stated and nothing embodies it%s"
+                % (rid, ", ".join(duty.blocked_dofs),
+                   " (its provider is the external reaction site %s, so only the retained side "
+                   "is owed material here)" % duty.external_provider
+                   if duty.external_provider else "")))
+            continue
+        claim = _single_claim(rid, claims)
+        if claim is None:
+            continue                    # fragmented; reported as its own defect
+        covered = _covered_by(claim, features)
+        missing = [side for side in sides if side not in covered]
+        if missing:
+            out.append(_finding(
+                findings.REALIZATION_UNCOVERED, tuple([rid] + missing),
+                "constraint relation %s is claimed by %s, whose participating features are on "
+                "%s and none on %s; a surface blocks nothing it is not touching"
+                % (rid, claim.get("entity_id"),
+                   ", ".join(sorted(b for b in covered)) or "no body of the branch",
+                   ", ".join(missing))))
+    return out
+
+
+def realization_findings(rows) -> List[findings.Finding]:
+    """Both kinematic duties, and the claims' own coherence."""
+    return (realization_claim_findings(rows) + joint_realization_findings(rows)
+            + restraint_realization_findings(rows))
+
+
+def realization_claim_findings(rows) -> List[findings.Finding]:
+    """A claim names a relation this branch carries and material that exists."""
+    out: List[findings.Finding] = []
+    targets = {r.get("entity_id") for r in (rows.get("Joint") or [])}
+    targets |= {r.get("entity_id") for r in (rows.get("ConstraintRelation") or [])}
+    features = _feature_bodies(rows)
+    claims = _realized_by(rows)
+    for rec in sorted(rows.get(REALIZATION) or [], key=lambda x: x.get("entity_id") or ""):
+        rid = rec.get("entity_id")
+        target = rec.get("realizes")
+        if target not in targets:
+            out.append(_finding(
+                findings.JOINT_UNREALIZED, (rid, str(target)),
+                "realization %s names %s, which is no Joint or ConstraintRelation of this "
+                "branch; what is embodied is s03's to declare" % (rid, target)))
+        participating = rec.get("participating_features") or []
+        if not participating:
+            out.append(_finding(
+                findings.REALIZATION_UNCOVERED, (rid,),
+                "realization %s names no participating feature; a relation embodied by no "
+                "material is a label" % rid))
+        for fid in participating:
+            if fid not in features:
                 out.append(_finding(
-                    findings.JOINT_UNREALIZED, (jid, body),
-                    "joint %s (%s) is along %s and the feature(s) placed at it on %s lie on "
-                    "another axis (%s); one of them must lie on the joint's axis to realize it"
-                    % (jid, kind, axis, body,
-                       ", ".join(sorted("%s(%s)" % (fid, stated) for fid, stated in here)))))
-            else:
-                out.append(_finding(
-                    findings.JOINT_UNREALIZED, (jid, body),
-                    "joint %s (%s) has no feature on %s placed at it (a feature whose placement "
-                    "datum is %s)" % (jid, kind, body, jid)))
+                    findings.FEATURE_OFF_BRANCH, (rid, str(fid)),
+                    "realization %s names feature %s, which is no feature of this branch"
+                    % (rid, fid)))
+    for target, here in sorted(claims.items()):
+        if len(here) > 1:
+            out.append(_finding(
+                findings.REALIZATION_FRAGMENTED, tuple([target] + sorted(
+                    str(r.get("entity_id")) for r in here)),
+                "%s is claimed by %s; a KinematicRealization is a COMPLETE realization record, "
+                "not a fragment - one per relation in a branch, listing every participating "
+                "feature. Two records each carrying one side embody nothing on their own, and "
+                "reading them as a union means no record in state has to be true by itself"
+                % (target, ", ".join(sorted(str(r.get("entity_id")) for r in here)))))
     return out
 
 
@@ -126,7 +296,8 @@ def body_material_findings(rows) -> List[findings.Finding]:
     feature is on a body of the branch."""
     out: List[findings.Finding] = []
     polarity = polarity_table()
-    bodies = {b.get("entity_id") for b in rows.get("Body") or []}
+    manifest = duty_manifest.from_rows(rows)
+    bodies = set(manifest.bodies)
     additive: Dict[str, int] = {}
     for f in rows.get("Feature") or []:
         body = f.get("body")
@@ -137,7 +308,7 @@ def body_material_findings(rows) -> List[findings.Finding]:
             continue
         if polarity.get(str(f.get("feature_kind", "")).upper()) == "ADDITIVE":
             additive[body] = additive.get(body, 0) + 1
-    for bid in sorted(bodies):
+    for bid in manifest.bodies:
         if not additive.get(bid):
             out.append(_finding(
                 findings.BODY_WITHOUT_MATERIAL, (bid,),
@@ -150,23 +321,19 @@ def mating_kind_findings(rows) -> List[findings.Finding]:
     """A mating side s04 stated is realized by a feature of the stated kind."""
     out: List[findings.Finding] = []
     features = rows.get("Feature") or []
-    for i in sorted(rows.get("Interface") or [], key=lambda x: x.get("entity_id") or ""):
-        mg = i.get("mating_geometry")
-        if not isinstance(mg, dict):
-            continue
-        iid = i.get("entity_id")
-        for side in ("inner", "outer"):
-            body, kind = mg.get(side + "_body"), str(mg.get(side + "_feature") or "").upper()
-            if not body or not kind:
-                continue
-            here = [f for f in features if f.get("interface") == iid and f.get("body") == body]
+    for duty in duty_manifest.from_rows(rows).interfaces:
+        iid = duty.interface
+        for body, kind in duty.mating:
+            here = [f for f in features
+                    if iid in _named_interfaces(f) and f.get("body") == body]
             if not here:
                 continue        # interface_realization_findings reports the missing side
             if not any(str(f.get("feature_kind", "")).upper() == kind for f in here):
                 out.append(_finding(
                     findings.MATING_KIND_UNREALIZED, (iid, body),
-                    "interface %s states a %s %s on %s; the feature(s) realizing that side are %s"
-                    % (iid, kind, side, body,
+                    "interface %s states a %s side on %s; the feature(s) realizing that side "
+                    "are %s"
+                    % (iid, kind, body,
                        ", ".join(sorted("%s(%s)" % (f["entity_id"], f.get("feature_kind"))
                                         for f in here)))))
     return out
@@ -219,33 +386,32 @@ def interface_realization_findings(rows) -> List[findings.Finding]:
                 % (joint.get("entity_id"), parent, child),
                 owner="s03"))
 
+    manifest = duty_manifest.from_rows(rows)
     interfaces = {i.get("entity_id"): i for i in rows.get("Interface") or []}
     realized: Dict[str, set] = {}
     for f in rows.get("Feature") or []:
-        named = f.get("interface")
-        if not named:
-            continue
-        iface = interfaces.get(named)
-        if iface is None:
+        for named in _named_interfaces(f):
+            iface = interfaces.get(named)
+            if iface is None:
+                out.append(_finding(
+                    findings.INTERFACE_NOT_CARRIED, (f.get("entity_id"), named),
+                    "feature %s names interface %s, which the selected branch does not carry; "
+                    "an interaction is s03's to declare and none may be invented here"
+                    % (f.get("entity_id"), named)))
+                continue
+            if f.get("body") not in (iface.get("bodies") or []):
+                out.append(_finding(
+                    findings.INTERFACE_BODY_MISMATCH, (f.get("entity_id"), f.get("body"), named),
+                    "feature %s on %s names interface %s, which does not involve that body"
+                    % (f.get("entity_id"), f.get("body"), named)))
+                continue
+            realized.setdefault(named, set()).add(f.get("body"))
+    for duty in manifest.interfaces:
+        for body in [b for b in duty.bodies if b not in realized.get(duty.interface, set())]:
             out.append(_finding(
-                findings.INTERFACE_NOT_CARRIED, (f.get("entity_id"), named),
-                "feature %s names interface %s, which the selected branch does not carry; an "
-                "interaction is s03's to declare and none may be invented here"
-                % (f.get("entity_id"), named)))
-            continue
-        if f.get("body") not in (iface.get("bodies") or []):
-            out.append(_finding(
-                findings.INTERFACE_BODY_MISMATCH, (f.get("entity_id"), f.get("body"), named),
-                "feature %s on %s names interface %s, which does not involve that body"
-                % (f.get("entity_id"), f.get("body"), named)))
-            continue
-        realized.setdefault(named, set()).add(f.get("body"))
-    for iid, iface in sorted(interfaces.items()):
-        for body in [b for b in (iface.get("bodies") or []) if b and b not in realized.get(iid, set())]:
-            out.append(_finding(
-                findings.INTERFACE_SIDE_UNREALIZED, (iid, body),
+                findings.INTERFACE_SIDE_UNREALIZED, (duty.interface, body),
                 "interface %s involves body %s and no feature naming that interface realizes "
-                "that side" % (iid, body)))
+                "that side" % (duty.interface, body)))
     return out
 
 
@@ -269,14 +435,14 @@ def clearance_governance_findings(rows) -> List[findings.Finding]:
                 if str(c.get("kind", "")).upper() in ("CLEARANCE", "INTERFERENCE_FREE")
                 and c.get("governs_interface")}
     out: List[findings.Finding] = []
-    for iface in sorted(rows.get("Interface") or [], key=lambda x: x.get("entity_id") or ""):
-        if str(iface.get("interaction_kind", "")).upper() not in CLEARANCE_KINDS:
+    for duty in duty_manifest.from_rows(rows).interfaces:
+        if not duty.needs_governing_constraint:
             continue
-        if iface.get("entity_id") not in governed:
+        if duty.interface not in governed:
             out.append(_finding(
-                findings.CLEARANCE_UNGOVERNED, (iface.get("entity_id"),),
+                findings.CLEARANCE_UNGOVERNED, (duty.interface,),
                 "interface %s declares %s and no Constraint governs it"
-                % (iface.get("entity_id"), iface.get("interaction_kind"))))
+                % (duty.interface, duty.interaction_kind)))
     return out
 
 
@@ -304,9 +470,39 @@ def prerequisite_findings(rows: Dict[str, List[Dict[str, Any]]]) -> List[finding
     exists to repair, and refusing entry for it would deny the loop the report
     it repairs from.
     """
-    return (joint_realization_findings(rows) + body_material_findings(rows)
+    return (realization_findings(rows) + body_material_findings(rows)
             + mating_kind_findings(rows) + interface_realization_findings(rows)
-            + clearance_governance_findings(rows))
+            + clearance_governance_findings(rows) + free_space_findings(rows))
+
+
+def free_space_findings(rows) -> List[findings.Finding]:
+    """A region whose declared role means FREE SPACE is cleared by material
+    that removes material, at that region.
+
+    THE STRUCTURAL HALF of the spatial duty, asked of what stands - the same
+    question s05 asks of its response. Whether the volume is ACTUALLY clear is
+    settled geometry's to answer (`FEATURE_OUTSIDE_REGION`, over the compiled
+    solid); this asks only whether the embodiment contains a route to it, which
+    is the difference between a design that might work and one that cannot.
+
+    NO ROLE IS NAMED HERE. `excludes_occupancy` is the contract's own table.
+    """
+    out: List[findings.Finding] = []
+    polarity = polarity_table()
+    for duty in duty_manifest.from_rows(rows).free_space_regions():
+        for body in duty.owning_bodies:
+            clearing = [f for f in rows.get("Feature") or []
+                        if f.get("body") == body
+                        and (f.get("placement") or {}).get("datum") == duty.region
+                        and polarity.get(str(f.get("feature_kind", "")).upper()) == "SUBTRACTIVE"]
+            if not clearing:
+                out.append(_finding(
+                    findings.EMBODIMENT_INCOMPLETE, (duty.region, body),
+                    "region %s is a %s of %s, so that volume must be FREE of its material, and "
+                    "no feature of %s removes material at it; an envelope is a bounding extent "
+                    "and a region inside it is not cleared by being unmentioned"
+                    % (duty.region, duty.role, body, body)))
+    return out
 
 
 def structural_problems(rows: Dict[str, List[Dict[str, Any]]]) -> List[str]:
